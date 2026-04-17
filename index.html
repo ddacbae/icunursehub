@@ -1,0 +1,2489 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ICU Nurse Hub</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Black+Han+Sans&display=swap" rel="stylesheet">
+<style>
+/* ─── CSS Variables ─── */
+#screen-sicu-quick-rounding {
+  --surface:#fff; --surface2:#f8fafc; --border:#e2e8f0;
+  --navy:#2563eb; --navy-light:#3b82f6; --red:#e02020; --gold:#f59e0b;
+  --accent-day:#d97706; --accent-eve:#16a34a; --accent-night:#2563eb;
+  --text:#1e293b; --text-muted:#94a3b8; --check-bg:#16a34a; --rs-radius:10px;
+  background:#f0f4f8; font-family:'Noto Sans KR',sans-serif;
+}
+#screen-cn-rounding {
+  --surface:#fff; --surface2:#f8fafc; --border:#e2e8f0;
+  --navy:#2563eb; --accent-day:#d97706; --accent-eve:#16a34a; --accent-night:#2563eb;
+  --text:#1e293b; --text-muted:#94a3b8; --check-bg:#16a34a; --rs-radius:10px;
+  background:#f0f4f8; font-family:'Noto Sans KR',sans-serif;
+}
+
+/* ─── View tab switcher ─── */
+#screen-sicu-quick-rounding .view-tabs,
+#screen-cn-rounding .view-tabs { display:flex; background:var(--surface); border-bottom:1px solid var(--border); }
+#screen-sicu-quick-rounding .view-tab-btn,
+#screen-cn-rounding .view-tab-btn { flex:1; padding:9px 6px; border:none; border-bottom:2px solid transparent; background:transparent; color:var(--text-muted); font-size:12px; font-weight:600; cursor:pointer; font-family:'Noto Sans KR',sans-serif; }
+#screen-sicu-quick-rounding .view-tab-btn.active,
+#screen-cn-rounding .view-tab-btn.active { color:var(--navy); border-bottom-color:var(--navy); }
+
+/* ─── SICU Header ─── */
+#screen-sicu-quick-rounding .sqr-header { background:var(--surface); border-bottom:2px solid var(--border); box-shadow:0 1px 4px rgba(0,0,0,.08); }
+#screen-sicu-quick-rounding .header-banner { display:flex; align-items:center; gap:10px; padding:10px 14px 6px; }
+#screen-sicu-quick-rounding .sqr-back-btn { background:transparent; border:none; color:var(--text-muted); font-size:22px; line-height:1; cursor:pointer; padding:0 4px; flex-shrink:0; display:flex; align-items:center; }
+#screen-sicu-quick-rounding .sqr-back-btn:active { color:var(--text); }
+#screen-sicu-quick-rounding .quick-badge { background:var(--red); color:#fff; font-family:'Black Han Sans',sans-serif; font-size:20px; font-style:italic; padding:3px 10px 3px 8px; border-radius:4px; transform:rotate(-4deg); display:inline-block; flex-shrink:0; box-shadow:2px 2px 6px rgba(0,0,0,.4); letter-spacing:-.5px; }
+#screen-sicu-quick-rounding .header-titles { flex:1; }
+#screen-sicu-quick-rounding .header-sicu { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:var(--navy); font-weight:600; }
+#screen-sicu-quick-rounding .header-main { font-size:16px; font-weight:900; color:var(--text); line-height:1.2; letter-spacing:-.3px; }
+#screen-sicu-quick-rounding .header-sub { font-size:10px; color:var(--text-muted); margin-top:1px; }
+#screen-sicu-quick-rounding .star-icon { font-size:22px; color:var(--gold); flex-shrink:0; }
+#screen-sicu-quick-rounding .header-date { background:var(--surface2); padding:8px 14px; display:flex; align-items:center; gap:10px; border-top:1px solid var(--border); }
+#screen-sicu-quick-rounding .date-label { font-size:10px; letter-spacing:.1em; color:var(--text-muted); text-transform:uppercase; flex-shrink:0; }
+#screen-sicu-quick-rounding .sqr-date-input { background:var(--surface); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:13px; padding:5px 10px; flex:1; }
+#screen-sicu-quick-rounding .sqr-date-input:focus { outline:none; border-color:var(--navy); }
+#screen-sicu-quick-rounding .nurse-panel { background:var(--surface2); border-top:1px solid var(--border); padding:8px 14px 10px; display:flex; gap:8px; }
+#screen-sicu-quick-rounding .nurse-block { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; overflow:hidden; transition:border-color .2s; }
+#screen-sicu-quick-rounding .nurse-block:focus-within { border-color:var(--navy); }
+#screen-sicu-quick-rounding .nurse-role { display:flex; align-items:center; gap:5px; padding:5px 9px 4px; border-bottom:1px solid var(--border); }
+#screen-sicu-quick-rounding .nurse-role-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+#screen-sicu-quick-rounding .nurse-role-label { font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+#screen-sicu-quick-rounding .nurse-input { width:100%; background:transparent; border:none; color:var(--text); font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:500; padding:6px 9px; outline:none; }
+#screen-sicu-quick-rounding .nurse-input::placeholder { color:var(--text-muted); font-size:12px; }
+
+/* ─── CN Header ─── */
+#screen-cn-rounding .cn-header { background:var(--surface); border-bottom:1px solid var(--border); padding:14px 16px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+#screen-cn-rounding .cn-header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+#screen-cn-rounding .cn-header h1 { font-family:'JetBrains Mono',monospace; font-size:14px; letter-spacing:.08em; color:var(--text-muted); }
+#screen-cn-rounding .cn-header h1 span { color:var(--text); }
+#screen-cn-rounding .cn-back-btn { background:transparent; border:none; color:var(--text-muted); font-size:22px; line-height:1; cursor:pointer; padding:0 4px; flex-shrink:0; display:flex; align-items:center; }
+#screen-cn-rounding .cn-back-btn:active { color:var(--text); }
+#screen-cn-rounding .date-picker-wrap { display:flex; align-items:center; gap:8px; background:var(--surface2); border:1px solid var(--border); border-radius:var(--rs-radius); padding:10px 14px; cursor:pointer; position:relative; }
+#screen-cn-rounding .date-picker-wrap:active { border-color:var(--accent-night); }
+#screen-cn-rounding .date-picker-icon { font-size:16px; flex-shrink:0; }
+#screen-cn-rounding .date-picker-text { flex:1; font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--text); }
+#screen-cn-rounding .date-picker-text.placeholder { color:var(--text-muted); }
+#screen-cn-rounding .date-picker-arrow { color:var(--text-muted); font-size:18px; flex-shrink:0; }
+#screen-cn-rounding .cn-date-input-hidden { position:absolute; opacity:0; width:1px; height:1px; pointer-events:none; }
+
+/* ─── Shared: Shift tabs ─── */
+#screen-sicu-quick-rounding .shift-tabs,
+#screen-cn-rounding .shift-tabs { display:flex; gap:6px; padding:10px 14px; background:var(--surface); border-bottom:1px solid var(--border); }
+#screen-sicu-quick-rounding .shift-tab,
+#screen-cn-rounding .shift-tab { flex:1; padding:9px 6px; border:1.5px solid var(--border); border-radius:var(--rs-radius); background:transparent; color:var(--text-muted); font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; letter-spacing:.05em; cursor:pointer; transition:all .18s; position:relative; }
+#screen-sicu-quick-rounding .shift-tab.day.active,
+#screen-cn-rounding .shift-tab.day.active { background:#fffbeb; border-color:var(--accent-day); color:var(--accent-day); }
+#screen-sicu-quick-rounding .shift-tab.eve.active,
+#screen-cn-rounding .shift-tab.eve.active { background:#f0fdf4; border-color:var(--accent-eve); color:var(--accent-eve); }
+#screen-sicu-quick-rounding .shift-tab.night.active,
+#screen-cn-rounding .shift-tab.night.active { background:#eff6ff; border-color:var(--accent-night); color:var(--accent-night); }
+#screen-sicu-quick-rounding .rs-tab-badge,
+#screen-cn-rounding .rs-tab-badge { position:absolute; top:-6px; right:-4px; color:#fff; font-size:9px; font-weight:700; border-radius:20px; padding:1px 5px; display:none; }
+#screen-sicu-quick-rounding .shift-tab.day .rs-tab-badge,
+#screen-cn-rounding .shift-tab.day .rs-tab-badge { background:var(--accent-day); }
+#screen-sicu-quick-rounding .shift-tab.eve .rs-tab-badge,
+#screen-cn-rounding .shift-tab.eve .rs-tab-badge { background:var(--accent-eve); }
+#screen-sicu-quick-rounding .shift-tab.night .rs-tab-badge,
+#screen-cn-rounding .shift-tab.night .rs-tab-badge { background:var(--accent-night); }
+#screen-sicu-quick-rounding .rs-tab-badge.show,
+#screen-cn-rounding .rs-tab-badge.show { display:block; }
+
+/* ─── Shared: Section ─── */
+#screen-sicu-quick-rounding .rs-section,
+#screen-cn-rounding .rs-section { padding:12px 14px; }
+#screen-sicu-quick-rounding .rs-section-label,
+#screen-cn-rounding .rs-section-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px; }
+
+/* ─── Shared: Bed Grid ─── */
+#screen-sicu-quick-rounding .rs-bed-grid,
+#screen-cn-rounding .rs-bed-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:6px; }
+#screen-sicu-quick-rounding .rs-bed-btn,
+#screen-cn-rounding .rs-bed-btn { aspect-ratio:1; border-radius:8px; border:1.5px solid var(--border); background:var(--surface2); color:var(--text-muted); font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center; position:relative; }
+#screen-sicu-quick-rounding .rs-bed-btn.active-view,
+#screen-cn-rounding .rs-bed-btn.active-view { outline:2px solid var(--text); outline-offset:1px; }
+#screen-sicu-quick-rounding .rs-bed-btn.selected.day,
+#screen-cn-rounding .rs-bed-btn.selected.day { color:var(--accent-day); background:#fffbeb; border-color:var(--accent-day); }
+#screen-sicu-quick-rounding .rs-bed-btn.selected.eve,
+#screen-cn-rounding .rs-bed-btn.selected.eve { color:var(--accent-eve); background:#f0fdf4; border-color:var(--accent-eve); }
+#screen-sicu-quick-rounding .rs-bed-btn.selected.night,
+#screen-cn-rounding .rs-bed-btn.selected.night { color:var(--accent-night); background:#eff6ff; border-color:var(--accent-night); }
+#screen-sicu-quick-rounding .rs-bed-dot,
+#screen-cn-rounding .rs-bed-dot { position:absolute; bottom:3px; right:3px; width:5px; height:5px; border-radius:50%; background:var(--check-bg); display:none; }
+#screen-sicu-quick-rounding .rs-bed-btn.completed .rs-bed-dot,
+#screen-cn-rounding .rs-bed-btn.completed .rs-bed-dot { display:block; }
+
+/* ─── Shared: Progress ─── */
+#screen-sicu-quick-rounding .rs-progress-wrap,
+#screen-cn-rounding .rs-progress-wrap { margin-top:10px; }
+#screen-sicu-quick-rounding .rs-progress-info,
+#screen-cn-rounding .rs-progress-info { display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-bottom:5px; }
+#screen-sicu-quick-rounding .rs-progress-bar,
+#screen-cn-rounding .rs-progress-bar { height:4px; background:var(--border); border-radius:99px; overflow:hidden; }
+#screen-sicu-quick-rounding .rs-progress-fill,
+#screen-cn-rounding .rs-progress-fill { height:100%; border-radius:99px; transition:width .35s ease; }
+#screen-sicu-quick-rounding .rs-divider,
+#screen-cn-rounding .rs-divider { height:1px; background:var(--border); margin:0 14px 10px; }
+
+/* ─── Shared: Checklist ─── */
+#screen-sicu-quick-rounding .rs-check-section,
+#screen-cn-rounding .rs-check-section { margin:0 14px 14px; }
+#screen-sicu-quick-rounding .rs-check-bed-header,
+#screen-cn-rounding .rs-check-bed-header { border:1px solid var(--border); border-radius:var(--rs-radius) var(--rs-radius) 0 0; padding:10px 14px; display:flex; align-items:center; gap:8px; }
+#screen-sicu-quick-rounding .rs-check-bed-header { background:var(--navy); border-color:var(--navy-light); }
+#screen-cn-rounding .rs-check-bed-header { background:var(--surface2); font-size:13px; font-weight:600; color:var(--text); }
+#screen-sicu-quick-rounding .rs-check-bed-title { font-size:13px; font-weight:700; color:#fff; }
+#screen-sicu-quick-rounding .rs-bed-tag,
+#screen-cn-rounding .rs-bed-tag { display:inline-block; padding:2px 9px; border-radius:99px; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; border:1px solid currentColor; }
+#screen-sicu-quick-rounding .rs-tag-day,#screen-cn-rounding .rs-tag-day { color:var(--accent-day); background:#fffbeb; }
+#screen-sicu-quick-rounding .rs-tag-eve,#screen-cn-rounding .rs-tag-eve { color:var(--accent-eve); background:#f0fdf4; }
+#screen-sicu-quick-rounding .rs-tag-night,#screen-cn-rounding .rs-tag-night { color:var(--accent-night); background:#eff6ff; }
+#screen-sicu-quick-rounding .rs-check-card,
+#screen-cn-rounding .rs-check-card { background:var(--surface); border:1px solid var(--border); border-top:none; border-radius:0 0 var(--rs-radius) var(--rs-radius); overflow:hidden; }
+#screen-sicu-quick-rounding .rs-check-group-header,
+#screen-cn-rounding .rs-check-group-header { padding:8px 14px; display:flex; align-items:center; gap:8px; background:var(--surface); border-bottom:1px solid var(--border); border-top:1px solid var(--border); }
+#screen-sicu-quick-rounding .rs-cat-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+#screen-sicu-quick-rounding .rs-check-group-label { font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+#screen-sicu-quick-rounding .rs-group-count { margin-left:auto; font-size:10px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; }
+#screen-cn-rounding .rs-check-group-header { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); }
+#screen-sicu-quick-rounding .rs-check-item,
+#screen-cn-rounding .rs-check-item { display:flex; align-items:flex-start; padding:13px 14px; border-bottom:1px solid var(--border); gap:10px; cursor:pointer; transition:background .12s; }
+#screen-sicu-quick-rounding .rs-check-item:last-child,
+#screen-cn-rounding .rs-check-item:last-child { border-bottom:none; }
+#screen-sicu-quick-rounding .rs-check-item:active,
+#screen-cn-rounding .rs-check-item:active { background:rgba(0,0,0,.04); }
+#screen-sicu-quick-rounding .rs-note-item { background:#fffbeb; cursor:default; padding:10px 14px; }
+#screen-sicu-quick-rounding .rs-check-item-text,
+#screen-cn-rounding .rs-check-item-text { font-size:13px; line-height:1.55; color:var(--text); flex:1; }
+#screen-sicu-quick-rounding .rs-check-item.checked .rs-check-item-text,
+#screen-cn-rounding .rs-check-item.checked .rs-check-item-text { color:var(--text-muted); text-decoration:line-through; }
+#screen-sicu-quick-rounding .rs-note-text { font-size:11.5px; color:var(--gold); line-height:1.5; flex:1; font-weight:600; }
+#screen-sicu-quick-rounding .rs-checkbox,
+#screen-cn-rounding .rs-checkbox { width:24px; height:24px; border-radius:6px; border:2px solid var(--border); background:transparent; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s; font-size:14px; margin-top:1px; }
+#screen-sicu-quick-rounding .rs-check-item.checked .rs-checkbox,
+#screen-cn-rounding .rs-check-item.checked .rs-checkbox { background:var(--check-bg); border-color:var(--check-bg); color:#fff; }
+
+/* ─── CN: Ventilator card ─── */
+#screen-cn-rounding .rs-vent-card { margin:0 14px 12px; background:var(--surface); border:1px solid var(--border); border-radius:var(--rs-radius); overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+#screen-cn-rounding .rs-vent-label { padding:9px 14px; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:6px; background:var(--surface2); }
+#screen-cn-rounding .rs-vent-row { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; gap:10px; }
+#screen-cn-rounding .rs-vent-text { font-size:13px; color:var(--text); line-height:1.4; flex:1; }
+#screen-cn-rounding .rs-toggle { appearance:none; -webkit-appearance:none; width:44px; height:26px; background:#cbd5e1; border-radius:99px; cursor:pointer; position:relative; transition:background .2s; flex-shrink:0; }
+#screen-cn-rounding .rs-toggle::after { content:''; position:absolute; width:20px; height:20px; background:#fff; border-radius:50%; top:3px; left:3px; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+#screen-cn-rounding .rs-toggle:checked { background:var(--check-bg); }
+#screen-cn-rounding .rs-toggle:checked::after { left:21px; }
+
+/* ─── Shared: Empty state ─── */
+#screen-sicu-quick-rounding .rs-empty,
+#screen-cn-rounding .rs-empty { text-align:center; padding:40px 20px; color:var(--text-muted); }
+#screen-sicu-quick-rounding .rs-empty .rs-icon,
+#screen-cn-rounding .rs-empty .rs-icon { font-size:40px; margin-bottom:12px; }
+#screen-sicu-quick-rounding .rs-empty p,
+#screen-cn-rounding .rs-empty p { font-size:13px; line-height:1.7; }
+
+/* ─── Shared: FAB ─── */
+#screen-sicu-quick-rounding .rs-fab,
+#screen-cn-rounding .rs-fab { position:fixed; bottom:72px; right:max(16px,calc(50% - 215px + 16px)); background:var(--check-bg); color:#fff; border:none; border-radius:99px; padding:13px 20px; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:7px; box-shadow:0 4px 20px rgba(22,163,74,.3); z-index:200; transition:transform .15s; }
+#screen-sicu-quick-rounding .rs-fab:active,
+#screen-cn-rounding .rs-fab:active { transform:scale(.96); }
+
+/* ─── Shared: Toast ─── */
+#screen-sicu-quick-rounding .rs-toast,
+#screen-cn-rounding .rs-toast { position:fixed; bottom:150px; left:50%; transform:translateX(-50%) translateY(16px); background:#1e293b; border-radius:var(--rs-radius); padding:10px 18px; font-size:13px; color:#fff; opacity:0; transition:opacity .22s,transform .22s; z-index:300; white-space:nowrap; pointer-events:none; }
+#screen-sicu-quick-rounding .rs-toast.show,
+#screen-cn-rounding .rs-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ─── Shared: Saved list ─── */
+#screen-sicu-quick-rounding .rs-saved-section,
+#screen-cn-rounding .rs-saved-section { padding:0 14px 20px; }
+#screen-sicu-quick-rounding .rs-saved-item,
+#screen-cn-rounding .rs-saved-item { background:var(--surface); border:1px solid var(--border); box-shadow:0 1px 3px rgba(0,0,0,.05); border-radius:var(--rs-radius); padding:12px 14px; margin-bottom:8px; display:flex; align-items:center; gap:10px; }
+#screen-sicu-quick-rounding .rs-saved-info,
+#screen-cn-rounding .rs-saved-info { flex:1; cursor:pointer; }
+#screen-sicu-quick-rounding .rs-saved-title,
+#screen-cn-rounding .rs-saved-title { font-size:14px; font-weight:600; }
+#screen-sicu-quick-rounding .rs-saved-meta,
+#screen-cn-rounding .rs-saved-meta { font-size:12px; color:var(--text-muted); margin-top:3px; }
+#screen-sicu-quick-rounding .rs-saved-delete,
+#screen-cn-rounding .rs-saved-delete { background:transparent; border:1px solid var(--border); color:var(--text-muted); border-radius:6px; padding:5px 10px; font-size:12px; cursor:pointer; flex-shrink:0; }
+
+/* ─── Shared: Inner views ─── */
+#screen-sicu-quick-rounding .rs-view,
+#screen-cn-rounding .rs-view { display:none; }
+#screen-sicu-quick-rounding .rs-view.active,
+#screen-cn-rounding .rs-view.active { display:block; }
+</style>
+</head>
+<body>
+
+<!-- ===== HOME SCREEN ===== -->
+<div id="screen-home" class="screen active">
+  <div class="app-header">
+    <div class="app-logo">
+      <span class="logo-icon">🏥</span>
+      <div>
+        <div class="app-title">ICU Nurse Hub</div>
+        <div class="app-subtitle">보라매병원 외과계중환자실</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-content">
+    <div class="home-menu">
+      <div class="home-menu-item" onclick="showScreen('screen-edu')">
+        <div class="home-menu-icon">📚</div>
+        <div class="home-menu-text">
+          <div class="home-menu-label">교육자료</div>
+          <div class="home-menu-desc">초기 사정 · 질환 요약 · 장비 · 약물 · Lab · 프로토콜</div>
+        </div>
+        <div class="home-menu-arrow">›</div>
+      </div>
+      <div class="home-menu-item" onclick="showScreen('screen-work')">
+        <div class="home-menu-icon">🔧</div>
+        <div class="home-menu-text">
+          <div class="home-menu-label">업무지원</div>
+          <div class="home-menu-desc">계산기 · 대응 가이드 · 인계 · 메모</div>
+        </div>
+        <div class="home-menu-arrow">›</div>
+      </div>
+      <div class="home-menu-item" onclick="showScreen('screen-icu-rounding')">
+        <div class="home-menu-icon">🩺</div>
+        <div class="home-menu-text">
+          <div class="home-menu-label">중환자실 라운딩</div>
+          <div class="home-menu-desc">퀵라운딩 · QM 체크리스트 · 유치도뇨관 모니터링 · CN 라운딩</div>
+        </div>
+        <div class="home-menu-arrow">›</div>
+      </div>
+    </div>
+
+    <!-- 즐겨찾기 섹션 -->
+    <div class="home-fav-section">
+      <div class="home-fav-header">
+        <span class="home-fav-title">⭐ 즐겨찾기</span>
+        <span class="home-fav-manage" onclick="showScreen('screen-favorites')">관리</span>
+      </div>
+      <div id="home-fav-list"></div>
+    </div>
+
+    <div style="height: 80px;"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="showScreen('screen-home')">
+      <span class="nav-icon">🏠</span><span class="nav-label">홈</span>
+    </div>
+    <div class="nav-item" onclick="showScreen('screen-edu')">
+      <span class="nav-icon">📚</span><span class="nav-label">교육자료</span>
+    </div>
+    <div class="nav-item" onclick="showScreen('screen-work')">
+      <span class="nav-icon">🔧</span><span class="nav-label">업무지원</span>
+    </div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== 교육자료 SCREEN ===== -->
+<div id="screen-edu" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="showScreen('screen-home')">←</span>
+    <span class="sub-title">교육자료</span>
+  </div>
+
+  <div class="scroll-content">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="검색 (질환, 장비, 약물...)" class="search-input">
+    </div>
+
+    <div class="edu-grid">
+      <div class="edu-card" onclick="showScreen('screen-initial-assessment')">
+        <div class="edu-card-icon purple">📋</div>
+        <div class="edu-card-label">초기 사정<br>메뉴얼</div>
+        <div class="edu-card-sub">진료과별 환자 사정</div>
+      </div>
+      <div class="edu-card" onclick="showScreen('screen-sicu-manual')">
+        <div class="edu-card-icon teal">📘</div>
+        <div class="edu-card-label">외과계중환자실<br>업무메뉴얼</div>
+        <div class="edu-card-sub">12개 챕터</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-card-icon orange">🫁</div>
+        <div class="edu-card-label">질환별<br>핵심 요약</div>
+        <div class="edu-card-sub">업데이트 예정</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-card-icon blue">📺</div>
+        <div class="edu-card-label">장비 가이드</div>
+        <div class="edu-card-sub">업데이트 예정</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-card-icon red">💊</div>
+        <div class="edu-card-label">약물 가이드</div>
+        <div class="edu-card-sub">업데이트 예정</div>
+      </div>
+      <div class="edu-card urgent-card">
+        <div class="edu-card-icon red-bg">🚨</div>
+        <div class="edu-card-label">응급<br>프로토콜</div>
+        <div class="edu-card-sub">업데이트 예정</div>
+      </div>
+    </div>
+
+    <div style="height: 80px;"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')">
+      <span class="nav-icon">🏠</span><span class="nav-label">홈</span>
+    </div>
+    <div class="nav-item active" onclick="showScreen('screen-edu')">
+      <span class="nav-icon">📚</span><span class="nav-label">교육자료</span>
+    </div>
+    <div class="nav-item" onclick="showScreen('screen-work')">
+      <span class="nav-icon">🔧</span><span class="nav-label">업무지원</span>
+    </div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== 업무지원 SCREEN ===== -->
+<div id="screen-work" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="showScreen('screen-home')">←</span>
+    <span class="sub-title">업무지원</span>
+  </div>
+
+  <div class="scroll-content">
+    <div class="work-menu-list">
+<div class="work-menu-item" onclick="showScreen('screen-drugcalc')">
+        <div class="work-menu-icon blue">🧮</div>
+        <div class="work-menu-content">
+          <div class="work-menu-title">계산기</div>
+          <div class="work-menu-desc">약물 주입 속도 · 용량 계산</div>
+        </div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="work-menu-item" style="opacity:0.5; pointer-events:none;">
+        <div class="work-menu-icon orange">📋</div>
+        <div class="work-menu-content">
+          <div class="work-menu-title">인계 도우미</div>
+          <div class="work-menu-desc">업데이트 예정</div>
+        </div>
+        <span class="chevron" style="font-size:11px; color:#9ca3af;">준비중</span>
+      </div>
+    </div>
+
+    <div style="height: 80px;"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')">
+      <span class="nav-icon">🏠</span><span class="nav-label">홈</span>
+    </div>
+    <div class="nav-item" onclick="showScreen('screen-edu')">
+      <span class="nav-icon">📚</span><span class="nav-label">교육자료</span>
+    </div>
+    <div class="nav-item active" onclick="showScreen('screen-work')">
+      <span class="nav-icon">🔧</span><span class="nav-label">업무지원</span>
+    </div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== ASSIGN SCREEN ===== -->
+<div id="screen-assign" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">오늘의 Assign</span>
+  </div>
+
+  <div class="scroll-content">
+    <div class="tab-row">
+      <span class="tab-pill active">ICU A (12)</span>
+      <span class="tab-pill">ICU B (8)</span>
+    </div>
+    <div class="filter-row">
+      <span class="filter-chip active">전체</span>
+      <span class="filter-chip">Vent</span>
+      <span class="filter-chip">CRRT</span>
+      <span class="filter-chip">High</span>
+    </div>
+
+    <div class="patient-list" style="padding: 0 12px;">
+      <div class="patient-card-full" onclick="showScreen('screen-patient')">
+        <div class="pcf-bed">Bed 1</div>
+        <div class="pcf-info">
+          <div class="pcf-name">김OO (M/68)</div>
+          <div class="pcf-tags">
+            <span class="tag tag-blue">Vent</span>
+            <span class="pcf-drug">Norepi 0.08</span>
+          </div>
+        </div>
+        <div class="pcf-map">MAP 65</div>
+      </div>
+      <div class="patient-card-full" onclick="showScreen('screen-patient')">
+        <div class="pcf-bed">Bed 3</div>
+        <div class="pcf-info">
+          <div class="pcf-name">이OO (F/54)</div>
+          <div class="pcf-tags">
+            <span class="tag tag-green">CRRT</span>
+            <span class="pcf-drug">Post-op</span>
+          </div>
+        </div>
+        <div class="pcf-status-ok">V/S 안정</div>
+      </div>
+      <div class="patient-card-full urgent" onclick="showScreen('screen-patient')">
+        <div class="pcf-bed">Bed 7</div>
+        <div class="pcf-info">
+          <div class="pcf-name">박OO (M/72)</div>
+          <div class="pcf-tags">
+            <span class="tag tag-red">High</span>
+            <span class="pcf-drug">Dobu 5</span>
+          </div>
+        </div>
+        <div class="pcf-caution">주의</div>
+      </div>
+      <div class="patient-card-full" onclick="showScreen('screen-patient')">
+        <div class="pcf-bed">Bed 10</div>
+        <div class="pcf-info">
+          <div class="pcf-name">최OO (F/81)</div>
+          <div class="pcf-tags">
+            <span class="pcf-drug">Nasal O₂ 2L</span>
+          </div>
+        </div>
+        <div class="pcf-status-ok">안정</div>
+      </div>
+    </div>
+
+    <button class="btn-primary" style="margin: 16px;" onclick="showScreen('screen-patient')">+ 환자 정보 입력</button>
+
+    <div class="view-toggle">
+      <button class="view-btn active">리스트</button>
+      <button class="view-btn">칸반</button>
+    </div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== PATIENT DETAIL SCREEN ===== -->
+<div id="screen-patient" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title"></span>
+  </div>
+
+  <div class="scroll-content">
+    <div class="patient-header-card">
+      <div class="bed-label-big">Bed 1</div>
+      <div class="patient-name-big">김OO (M/68)</div>
+      <div class="patient-tags-big">
+        <span class="tag tag-blue">Vent</span>
+        <span class="tag tag-outline">Norepi</span>
+      </div>
+    </div>
+
+    <div class="detail-tabs">
+      <div class="dtab active" onclick="showDetailTab('info')">기본정보</div>
+      <div class="dtab" onclick="showDetailTab('drug')">투약</div>
+      <div class="dtab" onclick="showDetailTab('lab')">Lab</div>
+      <div class="dtab" onclick="showDetailTab('memo')">메모</div>
+    </div>
+
+    <div id="detail-info" class="detail-content">
+      <div class="vitals-row">
+        <div class="vital-item">
+          <div class="vital-label">현재 상태</div>
+          <div class="vital-date">04.24 09:30</div>
+        </div>
+      </div>
+      <div class="vitals-grid">
+        <div class="vital-box">
+          <div class="vital-icon red-text">🩸</div>
+          <div class="vital-key">BP</div>
+          <div class="vital-val red-text">96/58 <span class="vital-sub">(65)</span></div>
+        </div>
+        <div class="vital-box">
+          <div class="vital-icon red-text">❤️</div>
+          <div class="vital-key">HR</div>
+          <div class="vital-val red-text">102</div>
+        </div>
+        <div class="vital-box">
+          <div class="vital-key">SpO₂ (Vent)</div>
+          <div class="vital-val">—</div>
+        </div>
+        <div class="vital-box">
+          <div class="vital-key">BT</div>
+          <div class="vital-val">37.2°C</div>
+        </div>
+      </div>
+      <div class="vent-settings">
+        <span class="vent-tag">AC/PC</span>
+        <span class="vent-tag">FiO₂ 0.5</span>
+        <span class="vent-tag">PEEP 8</span>
+      </div>
+
+      <div class="info-section">
+        <div class="info-label">진단명</div>
+        <div class="info-value">Septic shock, Pneumonia</div>
+      </div>
+      <div class="info-section">
+        <div class="info-label">주요 장비</div>
+        <div class="device-list">
+          <div class="device-item">📺 Ventilator (Day 3)</div>
+          <div class="device-item">💉 Central line (Rt. IJ)</div>
+          <div class="device-item">🔵 Foley catheter</div>
+        </div>
+      </div>
+      <div class="info-section">
+        <div class="info-label">투약 (4)</div>
+        <div class="drug-list">
+          <div class="drug-item red-drug">🔴 Norepinephrine 0.08 μg/kg/min</div>
+          <div class="drug-item">💊 Meropenem 1g q8h</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="detail-drug" class="detail-content" style="display:none;">
+      <div class="drug-detail-card">
+        <div class="drug-detail-name">Norepinephrine</div>
+        <div class="drug-detail-dose">0.08 μg/kg/min</div>
+        <div class="drug-detail-info">4mg/250mL · 8.2 mL/hr</div>
+        <button class="btn-outline-small" onclick="showScreen('screen-drugcalc')">계산기로 확인</button>
+      </div>
+      <div class="drug-detail-card">
+        <div class="drug-detail-name">Meropenem</div>
+        <div class="drug-detail-dose">1g q8h</div>
+        <div class="drug-detail-info">IV drip · 다음 투약 17:00</div>
+      </div>
+    </div>
+
+    <div id="detail-lab" class="detail-content" style="display:none;">
+      <div class="lab-card">
+        <div class="lab-row"><span class="lab-key">WBC</span><span class="lab-val high">18.2</span><span class="lab-unit">×10³/μL ↑</span></div>
+        <div class="lab-row"><span class="lab-key">Hgb</span><span class="lab-val">9.1</span><span class="lab-unit">g/dL</span></div>
+        <div class="lab-row"><span class="lab-key">Plt</span><span class="lab-val low">82</span><span class="lab-unit">×10³/μL ↓</span></div>
+        <div class="lab-row"><span class="lab-key">Cr</span><span class="lab-val high">2.4</span><span class="lab-unit">mg/dL ↑</span></div>
+        <div class="lab-row"><span class="lab-key">Lactate</span><span class="lab-val high">3.8</span><span class="lab-unit">mmol/L ↑</span></div>
+        <div class="lab-row"><span class="lab-key">pH</span><span class="lab-val low">7.28</span><span class="lab-unit">↓</span></div>
+      </div>
+    </div>
+
+    <div id="detail-memo" class="detail-content" style="display:none;">
+      <textarea class="memo-textarea" placeholder="메모를 입력하세요...">09:30 - 혈압 저하로 Norepi 0.06→0.08 증량. 의사 notify 완료.</textarea>
+      <button class="btn-primary" style="margin-top:8px;">저장</button>
+    </div>
+
+    <div class="action-row">
+      <button class="btn-secondary" onclick="showScreen('screen-handover')">SBAR 작성</button>
+      <button class="btn-primary" onclick="showScreen('screen-checklist')">간호기록</button>
+    </div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== CODE BLUE PROTOCOL ===== -->
+<div id="screen-protocol" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">프로토콜</span>
+    <span class="bookmark-btn" id="bm-screen-protocol" onclick="toggleBookmark('screen-protocol','프로토콜','🚨')">⭐</span>
+  </div>
+
+  <div class="scroll-content">
+    <div class="protocol-list">
+      <div class="protocol-item red-proto" onclick="showScreen('screen-codeblue')">
+        <span class="proto-icon">🚨</span>
+        <div class="proto-info">
+          <div class="proto-title">Code Blue (심정지)</div>
+          <div class="proto-desc">성인 · 소아 CPR 프로토콜</div>
+        </div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="protocol-item">
+        <span class="proto-icon">💛</span>
+        <div class="proto-info">
+          <div class="proto-title">Sepsis Bundle</div>
+          <div class="proto-desc">1h · 3h · 6h 번들 체크</div>
+        </div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="protocol-item">
+        <span class="proto-icon">🩸</span>
+        <div class="proto-info">
+          <div class="proto-title">수혈 프로토콜</div>
+          <div class="proto-desc">pRBC · FFP · PLT</div>
+        </div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="protocol-item">
+        <span class="proto-icon">💉</span>
+        <div class="proto-info">
+          <div class="proto-title">중심정맥관 삽입 후 관리</div>
+          <div class="proto-desc">감염관리 · 드레싱 프로토콜</div>
+        </div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="protocol-item">
+        <span class="proto-icon">🫁</span>
+        <div class="proto-info">
+          <div class="proto-title">Ventilator Weaning</div>
+          <div class="proto-desc">이탈 프로토콜 · SBT</div>
+        </div>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== CODE BLUE DETAIL ===== -->
+<div id="screen-codeblue" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">Code Blue (심정지)</span>
+    <span class="bookmark-btn" id="bm-screen-codeblue" onclick="toggleBookmark('screen-codeblue','Code Blue','🚨')">⭐</span>
+  </div>
+
+  <div class="scroll-content">
+    <div class="emergency-banner">🚨 긴급 상황</div>
+
+    <div class="adult-child-tab">
+      <button class="ac-tab active">성인</button>
+      <button class="ac-tab">소아</button>
+    </div>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">반응 확인 & 도움 요청</div>
+          <div class="step-desc">코드 블루 호출 (2222)</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">CPR 시작</div>
+          <div class="step-desc">가슴압박 100-120회/분</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">AED 부착</div>
+          <div class="step-desc">리듬 분석</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">에피네프린 1mg IV</div>
+          <div class="step-desc">3-5분마다 반복</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-title">기도 확보 & 산소 100%</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <div class="step-title">ROSC 후 처치</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="timer-btn" onclick="startTimer()">⏱ 타이머 시작</button>
+    <div id="timer-display" style="display:none; text-align:center; font-size:2rem; font-weight:bold; color:#1a56db; margin:8px 0;"></div>
+
+    <div class="equipment-check">
+      <div class="equip-title">필요 장비</div>
+      <div class="equip-item"><span class="check-icon">✓</span> AED</div>
+      <div class="equip-item"><span class="check-icon">✓</span> Ambu bag</div>
+      <div class="equip-item"><span class="check-icon">✓</span> 약물 카트</div>
+    </div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== VENTILATOR GUIDE ===== -->
+<div id="screen-ventilator" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">Ventilator</span>
+    <span class="bookmark-btn" id="bm-screen-ventilator" onclick="toggleBookmark('screen-ventilator','Ventilator 가이드','🫁')">⭐</span>
+  </div>
+
+  <div class="scroll-content">
+    <div class="vent-tab-row">
+      <button class="vent-tab" onclick="switchVentTab('mode')">Mode</button>
+      <button class="vent-tab active" onclick="switchVentTab('alarm')">Alarm</button>
+      <button class="vent-tab" onclick="switchVentTab('weaning')">Weaning</button>
+    </div>
+
+    <div id="vent-alarm" class="vent-content">
+      <div class="alarm-card high-alarm">
+        <div class="alarm-title">🔴 High Pressure Alarm</div>
+        <div class="alarm-section">
+          <div class="alarm-section-title">가능한 원인</div>
+          <ul class="alarm-list">
+            <li>기도 폐쇄</li>
+            <li>Circuit 꼬임</li>
+            <li>과도한 분비물</li>
+            <li>폐부종</li>
+          </ul>
+        </div>
+        <div class="alarm-section">
+          <div class="alarm-section-title">즉시 확인</div>
+          <div class="check-steps">
+            <div class="check-step"><span class="step-badge">01</span> 환자 상태 확인 (SpO₂, V/S)</div>
+            <div class="check-step"><span class="step-badge">02</span> Circuit & E-tube 확인</div>
+            <div class="check-step"><span class="step-badge">03</span> 흡인 시행</div>
+            <div class="check-step"><span class="step-badge">04</span> 필요시 Ambu bagging</div>
+          </div>
+        </div>
+        <div class="alarm-resolve">문제 해결됨 ✓</div>
+        <div class="alarm-persist">
+          <div class="persist-title">지속 시</div>
+          <div>→ 의사 Notify</div>
+          <div>→ Ventilator 교체</div>
+        </div>
+        <div class="related-modes">관련 모드 보기: PCV / AC / SIMV</div>
+      </div>
+
+      <div class="alarm-card">
+        <div class="alarm-title">🟡 Low Minute Volume</div>
+        <div class="alarm-section">
+          <div class="alarm-section-title">가능한 원인</div>
+          <ul class="alarm-list">
+            <li>Circuit leak</li>
+            <li>환자 호흡 감소</li>
+            <li>Tidal volume 감소</li>
+          </ul>
+        </div>
+        <div class="alarm-resolve">문제 해결됨 ✓</div>
+      </div>
+    </div>
+
+    <div id="vent-mode" class="vent-content" style="display:none;">
+      <div class="mode-card">
+        <div class="mode-title">AC (Assist Control)</div>
+        <div class="mode-desc">모든 호흡에 기계 보조. 자발호흡 시 full support 제공</div>
+        <div class="mode-settings">설정: TV, RR, PEEP, FiO₂</div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-title">SIMV</div>
+        <div class="mode-desc">설정된 RR 외 자발호흡 허용. Weaning에 사용</div>
+        <div class="mode-settings">설정: TV, RR, PEEP, FiO₂, PS</div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-title">PSV (Pressure Support)</div>
+        <div class="mode-desc">자발호흡에 압력 지원. Weaning 단계에 활용</div>
+        <div class="mode-settings">설정: PS, PEEP, FiO₂</div>
+      </div>
+    </div>
+
+    <div id="vent-weaning" class="vent-content" style="display:none;">
+      <div class="weaning-step">
+        <div class="weaning-num">1단계</div>
+        <div class="weaning-info">
+          <div class="weaning-title">이탈 준비 평가</div>
+          <div class="weaning-desc">FiO₂ ≤ 0.4, PEEP ≤ 5, 의식 명료</div>
+        </div>
+      </div>
+      <div class="weaning-step">
+        <div class="weaning-num">2단계</div>
+        <div class="weaning-info">
+          <div class="weaning-title">SBT (자발호흡 시험)</div>
+          <div class="weaning-desc">30분-2시간 T-piece 또는 PSV 5cmH₂O</div>
+        </div>
+      </div>
+      <div class="weaning-step">
+        <div class="weaning-num">3단계</div>
+        <div class="weaning-info">
+          <div class="weaning-title">발관 (Extubation)</div>
+          <div class="weaning-desc">SBT 성공 후 의사 처방에 따라 발관</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== DRUG CALCULATOR ===== -->
+<div id="screen-drugcalc" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">약물 계산기</span>
+    <span class="bookmark-btn" id="bm-screen-drugcalc" onclick="toggleBookmark('screen-drugcalc','약물 계산기','🧮')">⭐</span>
+  </div>
+
+  <div style="position:relative; height:calc(100vh - 57px - 60px); overflow:hidden;">
+    <iframe src="외과계_약물계산기.html"
+      style="width:100%; height:100%; border:none; display:block;"
+      scrolling="yes"></iframe>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== CHECKLIST ===== -->
+<div id="screen-checklist" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">체크리스트</span>
+  </div>
+
+  <div class="scroll-content">
+    <div class="checklist-menu">
+      <div class="checklist-menu-item" onclick="showScreen('screen-checklist-admission')">
+        <div class="checklist-menu-icon">📝</div>
+        <div class="home-menu-text">
+          <div class="checklist-menu-label">입실 체크리스트</div>
+          <div class="checklist-menu-desc">환자 입실 시 초기 확인 사항</div>
+        </div>
+        <div class="home-menu-arrow">›</div>
+      </div>
+      <div class="checklist-menu-item" onclick="showScreen('screen-checklist-daily')">
+        <div class="checklist-menu-icon">📅</div>
+        <div class="home-menu-text">
+          <div class="checklist-menu-label">데일리 체크리스트</div>
+          <div class="checklist-menu-desc">매일 반복되는 점검 항목</div>
+        </div>
+        <div class="home-menu-arrow">›</div>
+      </div>
+      <div class="checklist-menu-item" onclick="showScreen('screen-checklist-discharge')">
+        <div class="checklist-menu-icon">🚪</div>
+        <div class="home-menu-text">
+          <div class="checklist-menu-label">퇴원 체크리스트</div>
+          <div class="checklist-menu-desc">환자 퇴원 시 확인 사항</div>
+        </div>
+        <div class="home-menu-arrow">›</div>
+      </div>
+    </div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== 입실 체크리스트 SCREEN ===== -->
+<div id="screen-checklist-admission" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">입실 체크리스트</span>
+  </div>
+
+  <div class="scroll-content">
+    <div class="checklist-header">
+      <div class="cl-progress">
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        <div class="progress-label">0 / 12</div>
+      </div>
+    </div>
+
+    <div class="checklist-group">
+      <div class="cl-group-title green-group">A. 기도/호흡</div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> ETT 위치 확인
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> Ventilator 연결
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> SpO₂ monitoring
+      </div>
+    </div>
+
+    <div class="checklist-group">
+      <div class="cl-group-title blue-group">B. 순환/라인</div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> Central line
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> Arterial line
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> Foley catheter
+      </div>
+    </div>
+
+    <div class="checklist-group">
+      <div class="cl-group-title orange-group">C. 기타</div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> 욕창 위험도 평가
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> 낙상 위험도 평가
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> 보호자 교육
+      </div>
+    </div>
+
+    <div class="cl-action-row">
+      <button class="btn-secondary">임시저장</button>
+      <button class="btn-primary">완료하기</button>
+    </div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== 데일리 체크리스트 SCREEN ===== -->
+<div id="screen-checklist-daily" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">데일리 체크리스트</span>
+  </div>
+
+  <div class="scroll-content">
+    <div class="checklist-header">
+      <div class="cl-progress">
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        <div class="progress-label">0 / 12</div>
+      </div>
+    </div>
+
+    <div class="checklist-group">
+      <div class="cl-group-title green-group">A. 기도/호흡</div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> ETT 위치 확인
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> Ventilator 설정 확인
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> 비장자 관리
+      </div>
+    </div>
+
+    <div class="checklist-group">
+      <div class="cl-group-title blue-group">B. 순환/라인</div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> Central line 보수
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> Arterial line 확인
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> 카테터 배액 확인
+      </div>
+    </div>
+
+    <div class="checklist-group">
+      <div class="cl-group-title orange-group">C. 기타</div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> 욕창 관리
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> 환자 체위 변경
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> 보호자 요구사항 확인
+      </div>
+    </div>
+
+    <div class="cl-action-row">
+      <button class="btn-secondary">임시저장</button>
+      <button class="btn-primary">완료하기</button>
+    </div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== 퇴원 체크리스트 SCREEN ===== -->
+<div id="screen-checklist-discharge" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">퇴원 체크리스트</span>
+  </div>
+
+  <div class="scroll-content">
+    <div class="checklist-header">
+      <div class="cl-progress">
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        <div class="progress-label">0 / 12</div>
+      </div>
+    </div>
+
+    <div class="checklist-group">
+      <div class="cl-group-title green-group">A. 의료기기 제거</div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> ETT 제거
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> Central line 제거
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> Arterial line 제거
+      </div>
+    </div>
+
+    <div class="checklist-group">
+      <div class="cl-group-title blue-group">B. 의료기록</div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> 최종 간호기록 작성
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> 퇴원 방문 기록 작성
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> 의료기록 완성도 확인
+      </div>
+    </div>
+
+    <div class="checklist-group">
+      <div class="cl-group-title orange-group">C. 보호자 교육</div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> 퇴원 교육 제공
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> 약물 복용법 설명
+      </div>
+      <div class="cl-item">
+        <input type="checkbox" onchange="updateProgress()"> 다음 진료 예약 확인
+      </div>
+    </div>
+
+    <div class="cl-action-row">
+      <button class="btn-secondary">임시저장</button>
+      <button class="btn-primary">완료하기</button>
+    </div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<div id="screen-abga" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">Lab & ABGA 해석</span>
+    <span class="bookmark-btn" id="bm-screen-abga" onclick="toggleBookmark('screen-abga','ABGA 해석기','🩸')">⭐</span>
+  </div>
+  <div class="scroll-content">
+    <div class="abga-tabs">
+      <button class="abga-tab active">ABGA 해석기</button>
+      <button class="abga-tab">정상 참고치</button>
+    </div>
+    <div class="abga-card">
+      <div class="abga-input-grid">
+        <div class="abga-field">
+          <label>pH</label>
+          <input type="number" id="ph" value="7.28" step="0.01" class="abga-input" oninput="interpretABGA()">
+          <span class="ref-range">7.35-7.45</span>
+        </div>
+        <div class="abga-field">
+          <label>PaCO₂</label>
+          <input type="number" id="paco2" value="52" class="abga-input" oninput="interpretABGA()">
+          <span class="ref-range">35-45 mmHg</span>
+        </div>
+        <div class="abga-field">
+          <label>HCO₃⁻</label>
+          <input type="number" id="hco3" value="24" class="abga-input" oninput="interpretABGA()">
+          <span class="ref-range">22-26 mEq/L</span>
+        </div>
+        <div class="abga-field">
+          <label>PaO₂</label>
+          <input type="number" id="pao2" value="68" class="abga-input" oninput="interpretABGA()">
+          <span class="ref-range">80-100 mmHg</span>
+        </div>
+        <div class="abga-field">
+          <label>SpO₂</label>
+          <input type="number" id="spo2" value="94" class="abga-input" oninput="interpretABGA()">
+          <span class="ref-range">&gt;95%</span>
+        </div>
+        <div class="abga-field">
+          <label>FiO₂</label>
+          <input type="number" id="fio2" value="0.5" step="0.1" class="abga-input" oninput="interpretABGA()">
+          <span class="ref-range">0.21-1.0</span>
+        </div>
+      </div>
+      <div class="abga-result" id="abga-result">
+        <div class="result-tag red-tag">호흡성 산증</div>
+        <div class="result-detail">pH↓, PaCO₂↑ → 호흡성 산증 (부분 보상됨)</div>
+        <div class="result-detail">P/F ratio: 136 → 중등도 저산소증</div>
+      </div>
+      <button class="btn-primary" style="width:100%; margin-top:12px;" onclick="interpretABGA()">해석하기</button>
+    </div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== HANDOVER SCREEN ===== -->
+<div id="screen-handover" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">인계 도우미 (SBAR)</span>
+    <span class="bookmark-btn" id="bm-screen-handover" onclick="toggleBookmark('screen-handover','SBAR 인계','📋')">⭐</span>
+  </div>
+  <div class="scroll-content">
+    <div class="sbar-card">
+      <div class="sbar-section">
+        <div class="sbar-label s-label">S — Situation (상황)</div>
+        <textarea class="sbar-input" placeholder="환자 이름, 나이, 진단명, 현재 주요 문제">Bed 1 김OO (M/68), Septic shock + Pneumonia. 금일 오전 혈압 저하로 Norepi 증량함.</textarea>
+      </div>
+      <div class="sbar-section">
+        <div class="sbar-label b-label">B — Background (배경)</div>
+        <textarea class="sbar-input" placeholder="입원 경위, 과거력, 주요 검사 결과">3일 전 응급실 통해 입원. DM, HTN 기저질환. 입원 시 WBC 18, Lactate 3.8.</textarea>
+      </div>
+      <div class="sbar-section">
+        <div class="sbar-label a-label">A — Assessment (평가)</div>
+        <textarea class="sbar-input" placeholder="현재 상태 평가, V/S, 관련 데이터">현재 BP 96/58 (MAP 65), HR 102, SpO₂ 94% (Vent AC/PC FiO₂ 0.5 PEEP 8). 패혈성 쇼크 지속중.</textarea>
+      </div>
+      <div class="sbar-section">
+        <div class="sbar-label r-label">R — Recommendation (요청)</div>
+        <textarea class="sbar-input" placeholder="필요한 조치, 의사에게 요청사항">혈압 목표 MAP ≥65 유지. Norepi 0.08 이상 필요 시 즉시 notify. Repeat ABGA 시행 예정.</textarea>
+      </div>
+      <div class="sbar-actions">
+        <button class="btn-secondary">초기화</button>
+        <button class="btn-primary">인계 저장</button>
+      </div>
+    </div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== MEMO/BOOKMARK SCREEN ===== -->
+<div id="screen-memo" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">메모 / 북마크</span>
+  </div>
+  <div class="scroll-content">
+    <div class="memo-tabs">
+      <button class="memo-tab active">즐겨찾기</button>
+      <button class="memo-tab">내 메모</button>
+    </div>
+    <div class="bookmark-list">
+      <div class="bookmark-item" onclick="showScreen('screen-ventilator')">
+        <span class="bm-icon">📺</span>
+        <div class="bm-info">
+          <div class="bm-title">Ventilator - Alarm 대응</div>
+          <div class="bm-date">장비 가이드 · 2025.04.20</div>
+        </div>
+        <span class="bm-star">⭐</span>
+      </div>
+      <div class="bookmark-item" onclick="showScreen('screen-codeblue')">
+        <span class="bm-icon">🚨</span>
+        <div class="bm-info">
+          <div class="bm-title">Code Blue 프로토콜</div>
+          <div class="bm-date">응급 프로토콜 · 2025.04.18</div>
+        </div>
+        <span class="bm-star">⭐</span>
+      </div>
+      <div class="bookmark-item" onclick="showScreen('screen-drugcalc')">
+        <span class="bm-icon">💊</span>
+        <div class="bm-info">
+          <div class="bm-title">Norepinephrine 계산</div>
+          <div class="bm-date">약물 계산기 · 2025.04.24</div>
+        </div>
+        <span class="bm-star">⭐</span>
+      </div>
+    </div>
+    <button class="btn-primary" style="margin: 16px;">+ 새 메모 작성</button>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== NOTICE SCREEN ===== -->
+<div id="screen-notice" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">공지사항</span>
+  </div>
+  <div class="scroll-content">
+    <div class="notice-full-list">
+      <div class="notice-full-item urgent-notice">
+        <div class="nfi-header">
+          <span class="notice-tag red-tag">긴급</span>
+          <span class="nfi-time">오늘 08:30</span>
+        </div>
+        <div class="nfi-title">CRRT 카테터 재고 부족 안내</div>
+        <div class="nfi-body">현재 CRRT 카테터 재고가 부족한 상태입니다. 사용 전 반드시 수간호사에게 확인 바랍니다.</div>
+      </div>
+      <div class="notice-full-item">
+        <div class="nfi-header">
+          <span class="notice-tag blue-tag">교육</span>
+          <span class="nfi-time">어제</span>
+        </div>
+        <div class="nfi-title">3월 IV 사용법 교육 등록</div>
+        <div class="nfi-body">IV 관련 신규 교육이 등록되었습니다. 기한 내 이수 부탁드립니다.</div>
+      </div>
+      <div class="notice-full-item">
+        <div class="nfi-header">
+          <span class="notice-tag green-tag">일반</span>
+          <span class="nfi-time">2025.04.20</span>
+        </div>
+        <div class="nfi-title">4월 근무표 수정 안내</div>
+        <div class="nfi-body">4월 27일 근무표가 변경되었습니다. 확인 바랍니다.</div>
+      </div>
+    </div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== MYPAGE SCREEN ===== -->
+<div id="screen-mypage" class="screen">
+
+  <div class="sub-header">
+    <span class="sub-title">내 정보</span>
+  </div>
+  <div class="scroll-content">
+    <div class="profile-card">
+      <div class="profile-avatar">👩‍⚕️</div>
+      <div class="profile-name">김간호 RN</div>
+      <div class="profile-dept">서울대학교병원 중환자실 · ICU A</div>
+      <div class="profile-grade">경력 5년 · 책임간호사</div>
+    </div>
+    <div class="mypage-menu">
+      <div class="mypage-item"><span>📋</span> 나의 체크리스트 기록</div>
+      <div class="mypage-item"><span>🧮</span> 계산 기록</div>
+      <div class="mypage-item"><span>🔖</span> 즐겨찾기 관리</div>
+      <div class="mypage-item"><span>📝</span> 내 메모</div>
+      <div class="mypage-item"><span>🎓</span> 교육 이수 현황</div>
+      <div class="mypage-item"><span>⚙️</span> 설정</div>
+    </div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== DRUG GUIDE SCREEN ===== -->
+<div id="screen-drugguide" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">약물 가이드</span>
+  </div>
+  <div class="scroll-content">
+    <div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="약물명 검색..." class="search-input"></div>
+    <div class="drug-category-list">
+      <div class="drug-cat-header">승압제 (Vasopressors)</div>
+      <div class="drug-list-item" onclick="showScreen('screen-drug-detail')">
+        <div class="dli-name">Norepinephrine</div>
+        <div class="dli-info">α1, β1 · 0.01-3 μg/kg/min</div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="drug-list-item">
+        <div class="dli-name">Dopamine</div>
+        <div class="dli-info">α, β, DA · 1-20 μg/kg/min</div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="drug-list-item">
+        <div class="dli-name">Vasopressin</div>
+        <div class="dli-info">V1 · 0.01-0.04 units/min</div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="drug-cat-header">진정제 (Sedatives)</div>
+      <div class="drug-list-item">
+        <div class="dli-name">Propofol</div>
+        <div class="dli-info">GABA · 5-50 μg/kg/min</div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="drug-list-item">
+        <div class="dli-name">Midazolam</div>
+        <div class="dli-info">BZD · 0.02-0.1 mg/kg/hr</div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="drug-cat-header">항생제 (Antibiotics)</div>
+      <div class="drug-list-item">
+        <div class="dli-name">Meropenem</div>
+        <div class="dli-info">Carbapenem · 0.5-2g q8h</div>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== DRUG DETAIL ===== -->
+<div id="screen-drug-detail" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">Norepinephrine</span>
+    <span class="bookmark-btn" id="bm-screen-drug-detail" onclick="toggleBookmark('screen-drug-detail','Norepinephrine','💊')">⭐</span>
+  </div>
+  <div class="scroll-content">
+    <div class="drug-detail-page">
+      <div class="dd-class-badge">승압제 · α1, β1 agonist</div>
+      <div class="dd-section">
+        <div class="dd-title">적응증</div>
+        <ul class="dd-list"><li>패혈성 쇼크 (1차 선택)</li><li>혈관확장성 쇼크</li><li>저혈압 교정</li></ul>
+      </div>
+      <div class="dd-section">
+        <div class="dd-title">용량</div>
+        <div class="dd-dose-box">
+          <div class="dd-dose-row"><span>시작</span><span class="dose-num">0.01-0.1 μg/kg/min</span></div>
+          <div class="dd-dose-row"><span>최대</span><span class="dose-num high">3 μg/kg/min</span></div>
+        </div>
+      </div>
+      <div class="dd-section">
+        <div class="dd-title">희석</div>
+        <div class="dd-list-item">4mg + 250mL NS → 16 μg/mL</div>
+        <div class="dd-list-item">8mg + 250mL NS → 32 μg/mL</div>
+      </div>
+      <div class="dd-section">
+        <div class="dd-title">주의사항</div>
+        <div class="warn-item">⚠️ 반드시 중심정맥관으로 투여</div>
+        <div class="warn-item">⚠️ 말초혈관 수축 → 사지 혈류 모니터링</div>
+        <div class="warn-item">⚠️ 빠른 감량/중단 금지 (혈압 급락)</div>
+      </div>
+      <button class="btn-primary" style="width:100%; margin-top:12px;" onclick="showScreen('screen-drugcalc')">🧮 계산기로 이동</button>
+    </div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== INITIAL ASSESSMENT ===== -->
+<!-- ===== INITIAL ASSESSMENT - DEPT SELECT ===== -->
+<div id="screen-initial-assessment" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">수술별 초기 간호 사정</span>
+  </div>
+  <div class="scroll-content">
+    <div id="proto-dept-list"></div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== INITIAL ASSESSMENT - DEPT OPS LIST ===== -->
+<div id="screen-dept-ops" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title" id="dept-ops-title">수술 목록</span>
+  </div>
+  <div class="scroll-content">
+    <div id="dept-ops-list"></div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== INITIAL ASSESSMENT - PROTOCOL DETAIL ===== -->
+<div id="screen-proto-detail" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title" id="proto-detail-title">프로토콜</span>
+  </div>
+  <div class="scroll-content">
+    <div id="proto-detail-content"></div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== DISEASE SUMMARY ===== -->
+<div id="screen-disease-summary" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">질환별 핵심 요약</span>
+  </div>
+  <div class="scroll-content">
+    <div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="질환명 검색..." class="search-input"></div>
+    <div class="disease-list">
+      <div class="disease-item red-dis"><span>🚨</span><div><div class="dis-name">Sepsis / Septic Shock</div><div class="dis-key">1h bundle · 항생제 · 수액 · 승압제</div></div><span class="chevron">›</span></div>
+      <div class="disease-item"><span>❤️</span><div><div class="dis-name">ACS (급성관상동맥증후군)</div><div class="dis-key">MONA · 항혈소판 · PCI</div></div><span class="chevron">›</span></div>
+      <div class="disease-item"><span>🫁</span><div><div class="dis-name">ARDS</div><div class="dis-key">보호 환기 · prone positioning</div></div><span class="chevron">›</span></div>
+      <div class="disease-item"><span>🧠</span><div><div class="dis-name">뇌졸중 (Stroke)</div><div class="dis-key">tPA · 혈압 관리 · 신경학적 모니터링</div></div><span class="chevron">›</span></div>
+      <div class="disease-item"><span>💧</span><div><div class="dis-name">AKI (급성신손상)</div><div class="dis-key">RIFLE criteria · CRRT 적응증</div></div><span class="chevron">›</span></div>
+    </div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== EQUIPMENT GUIDE ===== -->
+<div id="screen-equipment" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">장비 가이드</span>
+  </div>
+  <div class="scroll-content">
+    <div class="equip-grid">
+      <div class="equip-card" onclick="showScreen('screen-ventilator')">
+        <div class="equip-card-icon">🌬️</div>
+        <div class="equip-card-name">인공호흡기</div>
+      </div>
+      <div class="equip-card">
+        <div class="equip-card-icon">💧</div>
+        <div class="equip-card-name">CRRT</div>
+      </div>
+      <div class="equip-card">
+        <div class="equip-card-icon">❤️</div>
+        <div class="equip-card-name">IABP</div>
+      </div>
+      <div class="equip-card">
+        <div class="equip-card-icon">🔌</div>
+        <div class="equip-card-name">ECMO</div>
+      </div>
+      <div class="equip-card">
+        <div class="equip-card-icon">📈</div>
+        <div class="equip-card-name">모니터링</div>
+      </div>
+      <div class="equip-card">
+        <div class="equip-card-icon">💉</div>
+        <div class="equip-card-name">주사 펌프</div>
+      </div>
+      <div class="equip-card">
+        <div class="equip-card-icon">🩺</div>
+        <div class="equip-card-name">SpO₂ 센서</div>
+      </div>
+      <div class="equip-card">
+        <div class="equip-card-icon">🌡️</div>
+        <div class="equip-card-name">체온 관리</div>
+      </div>
+    </div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== 중환자실 라운딩 메뉴 SCREEN ===== -->
+<div id="screen-icu-rounding" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="showScreen('screen-home')">←</span>
+    <span class="sub-title">중환자실 라운딩</span>
+  </div>
+
+  <div class="scroll-content">
+    <div class="work-menu-list">
+      <div class="work-menu-item" onclick="showScreen('screen-sicu-quick-rounding')"  >
+        <div class="work-menu-icon teal">🩺</div>
+        <div class="work-menu-content">
+          <div class="work-menu-title">퀵라운딩</div>
+          <div class="work-menu-desc">ABCDE 체크리스트 · 침상별 진행률 · 교대 기록</div>
+        </div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="work-menu-item" onclick="showScreen('screen-cn-rounding')"          >
+        <div class="work-menu-icon" style="background:#1e3a5f;">📋</div>
+        <div class="work-menu-content">
+          <div class="work-menu-title">책임간호사 라운딩</div>
+          <div class="work-menu-desc">CN 라운딩 시트 · 침상 체크리스트 · 근무별 기록</div>
+        </div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="work-menu-item" onclick="showScreen('screen-qm-checklist')">
+        <div class="work-menu-icon green">✅</div>
+        <div class="work-menu-content">
+          <div class="work-menu-title">QM 업무체크리스트</div>
+          <div class="work-menu-desc">질 관리 업무 항목 점검</div>
+        </div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="work-menu-item" onclick="showScreen('screen-foley-monitoring')">
+        <div class="work-menu-icon orange">🔍</div>
+        <div class="work-menu-content">
+          <div class="work-menu-title">유치도뇨관 유지관리 모니터링</div>
+          <div class="work-menu-desc">CAUTI 예방 · 삽관일수 · 관리 현황</div>
+        </div>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+
+    <div style="height: 80px;"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== QM 업무체크리스트 SCREEN ===== -->
+<div id="screen-qm-checklist" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" id="qm-back-btn" onclick="qmHandleBack()">←</span>
+    <span class="sub-title" id="qm-header-title">QM 업무체크리스트</span>
+    <span class="rounding-add-btn" id="qm-save-btn" onclick="qmSaveData()" title="완료저장" style="display:none;">💾</span>
+  </div>
+
+  <div class="scroll-content" style="padding:0;">
+
+    <!-- 상단 정보 (항상 표시) -->
+    <div style="padding:10px 14px 8px; background:#fff; border-bottom:1px solid #e2e8f0;">
+      <div style="display:flex; flex-wrap:wrap; gap:7px;">
+        <div class="qm-info-field">
+          <span class="qm-info-label">📅</span>
+          <input type="date" id="qm-work-date" class="qm-info-input" style="width:128px;">
+        </div>
+        <div class="qm-info-field">
+          <span class="qm-info-label">근무</span>
+          <select id="qm-shift" class="qm-shift-select">
+            <option value="D">D (Day)</option>
+            <option value="E">E (Evening)</option>
+            <option value="N">N (Night)</option>
+          </select>
+        </div>
+        <div class="qm-info-field">
+          <span class="qm-info-label">👤</span>
+          <input type="text" class="qm-info-input" placeholder="근무자" id="qm-worker">
+        </div>
+        <div class="qm-info-field">
+          <span class="qm-info-label">👩‍⚕️</span>
+          <input type="text" class="qm-info-input" placeholder="책임간호사" id="qm-charge-nurse">
+        </div>
+      </div>
+    </div>
+
+    <!-- 패널 A: 침상 선택 -->
+    <div id="qm-panel-beds" style="padding:14px 14px 90px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div style="font-size:13px; font-weight:700; color:#374151;">🛏 침상 선택</div>
+        <div style="display:flex; gap:10px; font-size:11px; color:#555;">
+          <span><span style="display:inline-block;width:12px;height:12px;background:#d1fae5;border:1px solid #38a169;border-radius:3px;vertical-align:middle;"></span> 완료</span>
+          <span><span style="display:inline-block;width:12px;height:12px;background:#fef9c3;border:1px solid #ca8a04;border-radius:3px;vertical-align:middle;"></span> 일부</span>
+          <span><span style="display:inline-block;width:12px;height:12px;background:#fff;border:1px solid #cbd5e1;border-radius:3px;vertical-align:middle;"></span> 미완료</span>
+        </div>
+      </div>
+      <div id="qm-bed-grid" style="display:grid; grid-template-columns:repeat(6,1fr); gap:8px;"></div>
+    </div>
+
+    <!-- 패널 B: 체크리스트 (침상 선택 후 표시) -->
+    <div id="qm-panel-checklist" style="display:none; padding:0 0 90px;">
+
+      <!-- 진행률 -->
+      <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; background:#f8f9fa; border-bottom:1px solid #e2e8f0;">
+        <div style="flex:1; height:8px; background:#dee2e6; border-radius:4px; overflow:hidden;">
+          <div id="qm-prog-fill" style="height:100%; width:0%; background:#e53e3e; border-radius:4px; transition:width 0.3s;"></div>
+        </div>
+        <span id="qm-prog-text" style="font-size:12px; color:#555; white-space:nowrap;">0 / 0</span>
+        <span id="qm-prog-pct" style="font-size:13px; font-weight:700; color:#1a56db; white-space:nowrap;">0%</span>
+      </div>
+
+      <div style="padding:0 10px 10px;">
+
+        <!-- 1. 감염 관리 -->
+        <div class="qm-category" style="margin-top:10px;">
+          <div class="qm-cat-header" style="background:#e53e3e;">🦠 감염 관리</div>
+          <div class="qm-subcat-header">VAP (Ventilator Associated Pneumonia)</div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">Ventilator 및 suction 구역 환경위생</span>
+          </div>
+          <div class="qm-subcat-header">UTI (Urinary Tract Infection)</div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-num">①</span>
+            <span class="qm-check-text">Foley lock 고정, 연결부의 이음새부 부착 및 확인</span>
+          </div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-num">②</span>
+            <span class="qm-check-text">소변백 바닥에 닿지 않게 위치 조정 및 확인</span>
+          </div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-num">③</span>
+            <span class="qm-check-text">소변배액검사 프로토콜 수행 확인</span>
+          </div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-num">④</span>
+            <span class="qm-check-text">Foley 삽입 일 2인 모니터링 체크</span>
+          </div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-num">⑤</span>
+            <span class="qm-check-text">무른변 확인 후 체위변경 시간 사이 기저귀 확인</span>
+          </div>
+        </div>
+
+        <!-- 2. 안전 관리 -->
+        <div class="qm-category">
+          <div class="qm-cat-header" style="background:#dd6b20;">⚠️ 안전 관리</div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">수혈 감내 후 24시간 이내인지 확인</span>
+          </div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">수혈라벨 더그라미 (아님 plus Action Plan), 약품 mix 기록 확인</span>
+          </div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">포켓팔일 다음라벨 QR코드 삭제 확인</span>
+          </div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">양쪽 하체피하 적용사부 확인</span>
+          </div>
+        </div>
+
+        <!-- 3. 욕창예방/상처관리 -->
+        <div class="qm-category">
+          <div class="qm-cat-header" style="background:#38a169;">🩹 욕창예방 / 상처관리</div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">8A 침상목욕, 요인변경 3회 참여</span>
+          </div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">의료기기 압박예방 패드 (E-tube, NP, FM, HF, L-tube, ECMO, CVVHDF, Arctic sun)</span>
+          </div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">다리 거상, 젤패드 (눈부위, 이마이, 발목) 적용 확인</span>
+          </div>
+        </div>
+
+        <!-- 4. 환경 관리 -->
+        <div class="qm-category">
+          <div class="qm-cat-header" style="background:#3182ce;">🧹 환경 관리</div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">침상의 포켓소독비드, 차회테이블 (위/4면)</span>
+          </div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">침대 (보조대가, 바퀴, 매트리스 하단 철 상 프레임), 침상벽면</span>
+          </div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">선반대 (위, 4면, 선반 내/외부), IV poles (기둥, 수액이, 바퀴)</span>
+          </div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">Infusion pump (분리하여 6면, 제정), IPC pump (기계, line)</span>
+          </div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">🌙 (N근무) 6A30 SICU 환경위생 알림 및 시행사부 확인</span>
+          </div>
+        </div>
+
+        <!-- 5. 업무 지원 -->
+        <div class="qm-category">
+          <div class="qm-cat-header" style="background:#805ad5;">🤝 업무 지원</div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">전임간호사 - 의사 간 보고 절차 및 의사소통 참여</span>
+          </div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">전임 간호사 업무 지원 (2시간마다 백라이딩)</span>
+          </div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">기본 및 숙련간호사, 이직상황 이 간호 업무 지원</span>
+          </div>
+        </div>
+
+        <!-- 6. 간호 기록 -->
+        <div class="qm-category">
+          <div class="qm-cat-header" style="background:#2b6cb0;">📝 간호 기록</div>
+          <div class="qm-check-item" onclick="qmToggle(this)">
+            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+            <span class="qm-check-text">리마인더 ①, ② 기록 분류 및 업데이트 확인</span>
+          </div>
+        </div>
+
+        <!-- 7. 기타 인계사항 -->
+        <div class="qm-category">
+          <div class="qm-cat-header" style="background:#718096;">📌 기타 인계사항</div>
+          <div style="padding:10px 14px;">
+            <textarea id="qm-handover-notes"
+              style="width:100%; border:1px solid #dee2e6; border-radius:8px; padding:8px 10px; font-size:13px; font-family:inherit; resize:vertical; min-height:60px; outline:none; color:#333;"
+              placeholder="특이사항, 인계 내용..."></textarea>
+          </div>
+        </div>
+
+        <!-- 하단 버튼 -->
+        <div style="display:flex; gap:10px; margin-top:12px;">
+          <button onclick="qmResetBed()"
+            style="flex:1; padding:12px; background:#f0f0f0; color:#333; border:none; border-radius:8px; font-size:14px; font-weight:500; cursor:pointer; font-family:inherit;">
+            🔄 초기화
+          </button>
+          <button onclick="qmSaveData()"
+            style="flex:2; padding:12px; background:#1a56db; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;">
+            💾 저장 후 침상 목록
+          </button>
+        </div>
+
+      </div>
+    </div><!-- /qm-panel-checklist -->
+
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== 유치도뇨관 유지관리 모니터링 SCREEN ===== -->
+<div id="screen-foley-monitoring" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="showScreen('screen-icu-rounding')">←</span>
+    <span class="sub-title">유치도뇨관 유지관리 모니터링</span>
+    <span class="rounding-add-btn" onclick="foleyPrint()" title="인쇄">🖨</span>
+  </div>
+
+  <div class="scroll-content" style="padding:0;">
+
+    <!-- 날짜 + 안내 -->
+    <div style="padding:10px 14px 8px; background:#fff; border-bottom:1px solid #e2e8f0;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <div style="font-size:13px; font-weight:700; color:#1a1a2e;">SICU 유치도뇨관 유지/관리 모니터링</div>
+        <div style="font-size:11px; color:#555; display:flex; align-items:center; gap:4px;">
+          시행일:
+          <input type="date" id="foleySheetDate"
+            style="font-size:11px; padding:2px 5px; border:1px solid #ccc; border-radius:4px;"
+            onchange="foleyOnDateChange()">
+        </div>
+      </div>
+    </div>
+
+    <!-- 확인자 이름 + 교대 선택 -->
+    <div style="padding:14px; background:#f8fafc; border-bottom:1px solid #e2e8f0;">
+      <!-- 확인자 이름 -->
+      <div style="margin-bottom:12px;">
+        <div style="font-size:12px; color:#555; font-weight:600; margin-bottom:5px;">👤 확인자 이름</div>
+        <input type="text" id="foley-confirmer" placeholder="이름을 입력하세요" maxlength="20"
+          style="width:100%; padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:15px; outline:none; font-family:inherit; background:#fff;"
+          onfocus="this.style.borderColor='#1565C0'" onblur="this.style.borderColor='#e2e8f0'"
+          oninput="foleyAutoSave()">
+      </div>
+      <!-- 교대 선택 -->
+      <div style="font-size:12px; color:#555; font-weight:600; margin-bottom:7px;">🔄 근무 선택</div>
+      <div style="display:flex; gap:8px;">
+        <button onclick="foleySelectShift('day')" id="foley-btn-day"
+          style="flex:1; padding:14px 0; border:2px solid #1565C0; border-radius:12px; background:#fff; cursor:pointer; font-family:inherit; transition:all 0.15s;">
+          <div style="font-size:24px; font-weight:900; color:#1565C0;">D</div>
+          <div style="font-size:10px; color:#1565C0; font-weight:600;">데이</div>
+          <div style="font-size:9px; color:#888;">07~15시</div>
+        </button>
+        <button onclick="foleySelectShift('eve')" id="foley-btn-eve"
+          style="flex:1; padding:14px 0; border:2px solid #2E7D32; border-radius:12px; background:#fff; cursor:pointer; font-family:inherit; transition:all 0.15s;">
+          <div style="font-size:24px; font-weight:900; color:#2E7D32;">E</div>
+          <div style="font-size:10px; color:#2E7D32; font-weight:600;">이브닝</div>
+          <div style="font-size:9px; color:#888;">15~23시</div>
+        </button>
+        <button onclick="foleySelectShift('night')" id="foley-btn-night"
+          style="flex:1; padding:14px 0; border:2px solid #4A148C; border-radius:12px; background:#fff; cursor:pointer; font-family:inherit; transition:all 0.15s;">
+          <div style="font-size:24px; font-weight:900; color:#4A148C;">N</div>
+          <div style="font-size:10px; color:#4A148C; font-weight:600;">나이트</div>
+          <div style="font-size:9px; color:#888;">23~07시</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- 선택된 교대 체크리스트 -->
+    <div id="foley-sections" style="padding:10px 10px 90px;"></div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== 퀵라운딩 SCREEN ===== -->
+<div id="screen-rounding" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="showScreen('screen-icu-rounding')">←</span>
+    <span class="sub-title">퀵라운딩</span>
+    <span class="rounding-add-btn" onclick="addRoundingPatient()">＋</span>
+  </div>
+
+  <div class="scroll-content">
+    <!-- 환자 탭 -->
+    <div id="rounding-tab-row" class="rounding-tab-row"></div>
+
+    <!-- 환자 라운딩 카드 -->
+    <div id="rounding-card-area" class="rounding-card-area"></div>
+
+    <div style="height: 80px;"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== 즐겨찾기 관리 SCREEN ===== -->
+<div id="screen-favorites" class="screen">
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">즐겨찾기 관리</span>
+  </div>
+  <div class="scroll-content">
+    <div class="fav-manage-desc">자주 쓰는 화면을 즐겨찾기에 추가하면 홈 화면에서 바로 접근할 수 있습니다.</div>
+    <div id="fav-manage-list"></div>
+    <div style="height: 80px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== 외과계중환자실 업무메뉴얼 SCREEN ===== -->
+<div id="screen-sicu-manual" class="screen">
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">외과계중환자실 업무메뉴얼</span>
+  </div>
+  <div class="scroll-content" style="padding:14px;">
+
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px 20px;">
+      <div style="font-size:64px;margin-bottom:20px;">🔧</div>
+      <div style="font-size:22px;font-weight:700;color:#2d3748;margin-bottom:12px;">업데이트 예정</div>
+      <div style="font-size:15px;color:#718096;line-height:1.7;">외과계중환자실 업무메뉴얼을<br>현재 업데이트 중입니다.<br>조금만 기다려 주세요.</div>
+    </div>
+
+    <div style="height:80px;"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== SICU Quick Rounding SCREEN ===== -->
+<div id="screen-sicu-quick-rounding" class="screen">
+
+  <!-- 고정 헤더 영역 -->
+  <div style="flex-shrink:0">
+    <div class="sqr-header">
+      <div class="header-banner">
+        <button class="sqr-back-btn" onclick="showScreen('screen-icu-rounding')" title="돌아가기">←</button>
+        <div class="quick-badge">Quick!</div>
+        <div class="header-titles">
+          <div class="header-sicu">SICU · 외과계중환자실</div>
+          <div class="header-main">Rounding Checklist</div>
+          <div class="header-sub">"환자의 돌봄 안전을 위해"</div>
+        </div>
+        <div class="star-icon">⭐</div>
+      </div>
+      <div class="header-date">
+        <span class="date-label">Date</span>
+        <input type="date" class="sqr-date-input" id="sqr-dateInput">
+      </div>
+      <div class="nurse-panel">
+        <div class="nurse-block">
+          <div class="nurse-role">
+            <span class="nurse-role-dot" style="background:#f97316"></span>
+            <span class="nurse-role-label" style="color:#f97316">교대 전 근무자</span>
+          </div>
+          <input class="nurse-input" id="sqr-nurseOut" type="text" placeholder="이름 입력" autocomplete="off">
+        </div>
+        <div class="nurse-block">
+          <div class="nurse-role">
+            <span class="nurse-role-dot" style="background:#3fb950"></span>
+            <span class="nurse-role-label" style="color:#3fb950">교대 후 근무자</span>
+          </div>
+          <input class="nurse-input" id="sqr-nurseIn" type="text" placeholder="이름 입력" autocomplete="off">
+        </div>
+      </div>
+    </div>
+    <div class="shift-tabs">
+      <button class="shift-tab day active" onclick="sqr_selectShift('DAY')">DAY <span class="rs-tab-badge" id="sqr-badge-DAY"></span></button>
+      <button class="shift-tab eve" onclick="sqr_selectShift('EVE')">EVE <span class="rs-tab-badge" id="sqr-badge-EVE"></span></button>
+      <button class="shift-tab night" onclick="sqr_selectShift('NIGHT')">NIGHT <span class="rs-tab-badge" id="sqr-badge-NIGHT"></span></button>
+    </div>
+    <div class="view-tabs">
+      <button class="view-tab-btn active" id="sqr-nav-check" onclick="sqr_showView('check')">체크리스트</button>
+      <button class="view-tab-btn" id="sqr-nav-saved" onclick="sqr_showView('saved')">저장된 기록</button>
+    </div>
+  </div>
+
+  <!-- 스크롤 영역 -->
+  <div class="scroll-content" style="background:#f0f4f8">
+
+    <div id="sqr-view-check" class="rs-view active">
+      <div class="rs-section">
+        <div class="rs-section-label">침상 선택</div>
+        <div class="rs-bed-grid" id="sqr-bedGrid"></div>
+        <div class="rs-progress-wrap">
+          <div class="rs-progress-info">
+            <span id="sqr-progressLabel">침상을 선택하세요</span>
+            <span id="sqr-progressPct">0%</span>
+          </div>
+          <div class="rs-progress-bar"><div class="rs-progress-fill" id="sqr-progressFill" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="rs-divider"></div>
+      <div class="rs-check-section" id="sqr-checkSection">
+        <div class="rs-empty"><div class="rs-icon">🏥</div><p>위에서 침상 번호를 선택하면<br>ABCDE 체크리스트가 표시됩니다.</p></div>
+      </div>
+    </div>
+
+    <div id="sqr-view-saved" class="rs-view">
+      <div class="rs-section"><div class="rs-section-label">저장된 기록</div></div>
+      <div class="rs-saved-section" id="sqr-savedList"></div>
+    </div>
+
+    <div style="height:80px"></div>
+  </div>
+
+  <button class="rs-fab" id="sqr-fabSave" onclick="sqr_saveRecord()">💾 저장</button>
+  <div class="rs-toast" id="sqr-toast"></div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== CN Rounding SCREEN ===== -->
+<div id="screen-cn-rounding" class="screen">
+
+  <!-- 고정 헤더 영역 -->
+  <div style="flex-shrink:0">
+    <div class="cn-header">
+      <div class="cn-header-top">
+        <button class="cn-back-btn" onclick="showScreen('screen-icu-rounding')" title="돌아가기">←</button>
+        <h1>CN <span>Rounding Sheet</span></h1>
+      </div>
+      <div class="date-picker-wrap" onclick="document.getElementById('cn-dateInput').showPicker?.() || document.getElementById('cn-dateInput').click()">
+        <span class="date-picker-icon">📅</span>
+        <span class="date-picker-text" id="cn-dateDisplay">날짜 선택</span>
+        <span class="date-picker-arrow">›</span>
+        <input type="date" class="cn-date-input-hidden" id="cn-dateInput">
+      </div>
+    </div>
+    <div class="shift-tabs">
+      <button class="shift-tab day active" onclick="cn_selectShift('DAY')">DAY <span class="rs-tab-badge" id="cn-badge-DAY"></span></button>
+      <button class="shift-tab eve" onclick="cn_selectShift('EVE')">EVE <span class="rs-tab-badge" id="cn-badge-EVE"></span></button>
+      <button class="shift-tab night" onclick="cn_selectShift('NIGHT')">NIGHT <span class="rs-tab-badge" id="cn-badge-NIGHT"></span></button>
+    </div>
+    <div class="view-tabs">
+      <button class="view-tab-btn active" id="cn-nav-check" onclick="cn_showView('check')">체크리스트</button>
+      <button class="view-tab-btn" id="cn-nav-saved" onclick="cn_showView('saved')">저장된 기록</button>
+    </div>
+  </div>
+
+  <!-- 스크롤 영역 -->
+  <div class="scroll-content" style="background:#f0f4f8">
+
+    <div id="cn-view-check" class="rs-view active">
+      <div class="rs-section">
+        <div class="rs-section-label">침상 선택</div>
+        <div class="rs-bed-grid" id="cn-bedGrid"></div>
+        <div class="rs-progress-wrap">
+          <div class="rs-progress-info">
+            <span id="cn-progressLabel">침상을 선택하세요</span>
+            <span id="cn-progressPct">0%</span>
+          </div>
+          <div class="rs-progress-bar"><div class="rs-progress-fill" id="cn-progressFill" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="rs-divider"></div>
+      <div class="rs-vent-card">
+        <div class="rs-vent-label">🫁 Ventilator Setting</div>
+        <div class="rs-vent-row">
+          <div class="rs-vent-text">여분의 Ventilator 1대 setting 완료</div>
+          <input type="checkbox" class="rs-toggle" id="cn-ventToggle">
+        </div>
+      </div>
+      <div class="rs-check-section" id="cn-checkSection">
+        <div class="rs-empty"><div class="rs-icon">🛏️</div><p>위에서 침상 번호를 선택하면<br>해당 침상의 체크리스트가 표시됩니다.</p></div>
+      </div>
+    </div>
+
+    <div id="cn-view-saved" class="rs-view">
+      <div class="rs-section"><div class="rs-section-label">저장된 기록</div></div>
+      <div class="rs-saved-section" id="cn-savedList"></div>
+    </div>
+
+    <div style="height:80px"></div>
+  </div>
+
+  <button class="rs-fab" id="cn-fabSave" onclick="cn_saveRecord()">💾 저장</button>
+  <div class="rs-toast" id="cn-toast"></div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════
+// SICU Quick Rounding (sqr_*)
+// ════════════════════════════════════════════════════════════════════════
+const sqr_CATEGORIES = [
+  { id:'A', label:'ALARM', color:'#e74c3c', emoji:'🔴',
+    items:['EKG 리듬이 이전과 같은지, 적정 범위인지 확인','환자의 상태에 맞게 알람 설정 (HR, BP, SpO₂)'], notes:[] },
+  { id:'B', label:'BREATHING + BEYOND', color:'#3498db', emoji:'🫁',
+    items:['산소 흡입량(L/min)과 적정 여부','Vent 및 High flow의 세팅 값','CRRT, ECMO, IABP, NO기계 등의 세팅 값'], notes:[] },
+  { id:'C', label:'CATHETER', color:'#9b59b6', emoji:'🔌',
+    items:['중심 정맥관의 위치, 드레싱 상태','IV 카테터 위치, 주사부위 상태 (redness, swelling, clotting, pain 등)'],
+    notes:['※ Vesicant, irritant 약물의 경우 주의 깊게 볼 것'] },
+  { id:'D', label:'DRUG', color:'#e67e22', emoji:'💊',
+    items:['의약과 라벨명 일치 여부','약물의 희석되는 (Peri/C-line용)','약물의 처방 용량, 설정 주입 속도'], notes:[] },
+  { id:'E', label:'EXAMINATION', color:'#27ae60', emoji:'🔍',
+    items:['상처 부위 확인','배액관의 위치와 드레싱 상태 (oozing, 고정 여부)','배액관 적용 압력','배액량과 배액 양상의 변화'], notes:[] },
+];
+const sqr_TOTAL = sqr_CATEGORIES.reduce((s,c) => s + c.items.length, 0);
+const sqr_SHIFTS = ['DAY','EVE','NIGHT'];
+let sqr_shift = 'DAY', sqr_bed = null;
+let sqr_selBeds = { DAY:new Set(), EVE:new Set(), NIGHT:new Set() };
+let sqr_checks = {};
+sqr_SHIFTS.forEach(s => {
+  sqr_checks[s] = {};
+  for (let b = 1; b <= 18; b++) {
+    sqr_checks[s][b] = {};
+    sqr_CATEGORIES.forEach(c => { sqr_checks[s][b][c.id] = c.items.map(() => false); });
+  }
+});
+document.getElementById('sqr-dateInput').value = new Date().toISOString().slice(0,10);
+
+function sqr_selectShift(s) {
+  sqr_shift = s; sqr_bed = [...sqr_selBeds[s]][0] ?? null;
+  document.querySelectorAll('#screen-sicu-quick-rounding .shift-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('#screen-sicu-quick-rounding .shift-tab.'+s.toLowerCase()).classList.add('active');
+  sqr_buildGrid(); sqr_renderList(); sqr_updateProg();
+}
+function sqr_buildGrid() {
+  const g = document.getElementById('sqr-bedGrid'); g.innerHTML = '';
+  const cls = sqr_shift.toLowerCase();
+  for (let i = 1; i <= 18; i++) {
+    const sel = sqr_selBeds[sqr_shift].has(i);
+    const done = sel && sqr_isBedDone(sqr_shift, i);
+    const btn = document.createElement('button');
+    btn.className = 'rs-bed-btn'+(sel?' selected '+cls:'')+(i===sqr_bed?' active-view':'')+(done?' completed':'');
+    btn.innerHTML = i+'<span class="rs-bed-dot"></span>';
+    btn.onclick = () => sqr_clickBed(i);
+    g.appendChild(btn);
+  }
+}
+function sqr_clickBed(n) {
+  if (sqr_bed===n) { sqr_selBeds[sqr_shift].clear(); sqr_bed=null; }
+  else { sqr_selBeds[sqr_shift].clear(); sqr_selBeds[sqr_shift].add(n); sqr_bed=n; }
+  sqr_buildGrid(); sqr_renderList(); sqr_updateProg(); sqr_updateBadges();
+}
+function sqr_isBedDone(s, b) {
+  return sqr_CATEGORIES.every(c => c.items.every((_,i) => sqr_checks[s][b][c.id][i]));
+}
+function sqr_renderList() {
+  const sec = document.getElementById('sqr-checkSection');
+  if (!sqr_bed || !sqr_selBeds[sqr_shift].has(sqr_bed)) {
+    sec.innerHTML = '<div class="rs-empty"><div class="rs-icon">🏥</div><p>위에서 침상 번호를 선택하면<br>ABCDE 체크리스트가 표시됩니다.</p></div>'; return;
+  }
+  const tag = 'rs-tag-'+sqr_shift.toLowerCase();
+  const dc = sqr_bedDone(sqr_shift, sqr_bed);
+  let h = '<div class="rs-check-bed-header"><span class="rs-check-bed-title">침상</span><span class="rs-bed-tag '+tag+'">'+sqr_bed+'번</span><span style="margin-left:auto;font-size:11px;color:#94a3b8;font-family:\'JetBrains Mono\',monospace">'+dc+'/'+sqr_TOTAL+'</span></div><div class="rs-check-card">';
+  sqr_CATEGORIES.forEach(cat => {
+    const d = cat.items.filter((_,i) => sqr_checks[sqr_shift][sqr_bed][cat.id][i]).length;
+    h += '<div class="rs-check-group-header"><span class="rs-cat-dot" style="background:'+cat.color+'"></span><span class="rs-check-group-label" style="color:'+cat.color+'">'+cat.emoji+' '+cat.id+' · '+cat.label+'</span><span class="rs-group-count">'+d+'/'+cat.items.length+'</span></div>';
+    cat.items.forEach((item,idx) => {
+      const ck = sqr_checks[sqr_shift][sqr_bed][cat.id][idx];
+      h += '<div class="rs-check-item'+(ck?' checked':'')+'" onclick="sqr_toggle(\''+cat.id+'\','+idx+',this)"><div class="rs-check-item-text">'+item+'</div><div class="rs-checkbox">'+(ck?'✓':'')+'</div></div>';
+    });
+    cat.notes.forEach(n => { h += '<div class="rs-check-item rs-note-item"><div class="rs-note-text">'+n+'</div></div>'; });
+  });
+  h += '</div>'; sec.innerHTML = h;
+}
+function sqr_toggle(catId, idx, el) {
+  if (!sqr_bed) return;
+  const cur = sqr_checks[sqr_shift][sqr_bed][catId][idx];
+  sqr_checks[sqr_shift][sqr_bed][catId][idx] = !cur;
+  el.classList.toggle('checked'); el.querySelector('.rs-checkbox').textContent = !cur?'✓':'';
+  const cat = sqr_CATEGORIES.find(c=>c.id===catId);
+  const d = cat.items.filter((_,i)=>sqr_checks[sqr_shift][sqr_bed][catId][i]).length;
+  document.querySelectorAll('#sqr-checkSection .rs-check-group-header').forEach(h=>{
+    if(h.querySelector('.rs-check-group-label').textContent.includes(catId+' ·'))
+      h.querySelector('.rs-group-count').textContent=d+'/'+cat.items.length;
+  });
+  const bh = document.querySelector('#sqr-checkSection .rs-check-bed-header span:last-child');
+  if(bh) bh.textContent=sqr_bedDone(sqr_shift,sqr_bed)+'/'+sqr_TOTAL;
+  sqr_buildGrid(); sqr_updateProg();
+}
+function sqr_bedDone(s,b) {
+  let d=0; sqr_CATEGORIES.forEach(c=>c.items.forEach((_,i)=>{ if(sqr_checks[s][b][c.id][i]) d++; })); return d;
+}
+function sqr_updateProg() {
+  const beds=[...sqr_selBeds[sqr_shift]];
+  const fill=document.getElementById('sqr-progressFill'), lbl=document.getElementById('sqr-progressLabel'), pct=document.getElementById('sqr-progressPct');
+  const cols={DAY:'#d97706',EVE:'#16a34a',NIGHT:'#2563eb'};
+  fill.style.background=cols[sqr_shift];
+  if(!beds.length){fill.style.width='0%';lbl.textContent='침상을 선택하세요';pct.textContent='0%';return;}
+  let t=0,d=0; beds.forEach(b=>{t+=sqr_TOTAL;d+=sqr_bedDone(sqr_shift,b);});
+  const p=t?Math.round(d/t*100):0;
+  fill.style.width=p+'%'; lbl.textContent=beds.length+'개 침상 · '+d+'/'+t+' 항목'; pct.textContent=p+'%';
+}
+function sqr_updateBadges() {
+  sqr_SHIFTS.forEach(s=>{ const n=sqr_selBeds[s].size, b=document.getElementById('sqr-badge-'+s); b.textContent=n; b.classList.toggle('show',n>0); });
+}
+function sqr_saveRecord() {
+  const date=document.getElementById('sqr-dateInput').value;
+  if(!date){sqr_toast('날짜를 선택해주세요.');return;}
+  if(!sqr_selBeds[sqr_shift].size){sqr_toast('침상을 하나 이상 선택해주세요.');return;}
+  const beds=[...sqr_selBeds[sqr_shift]].sort((a,b)=>a-b);
+  const done=beds.reduce((s,b)=>s+sqr_bedDone(sqr_shift,b),0);
+  const rec={id:Date.now(),date,shift:sqr_shift,beds,
+    nurseOut:document.getElementById('sqr-nurseOut').value.trim(),
+    nurseIn:document.getElementById('sqr-nurseIn').value.trim(),
+    checks:JSON.parse(JSON.stringify(Object.fromEntries(beds.map(b=>[b,sqr_checks[sqr_shift][b]])))),
+    done,total:beds.length*sqr_TOTAL,savedAt:new Date().toLocaleString('ko-KR')};
+  const recs=JSON.parse(localStorage.getItem('sicu_quick_records')||'[]');
+  recs.unshift(rec); localStorage.setItem('sicu_quick_records',JSON.stringify(recs));
+  sqr_toast('✅ 저장되었습니다!');
+}
+function sqr_loadSaved() {
+  const recs=JSON.parse(localStorage.getItem('sicu_quick_records')||'[]');
+  const c=document.getElementById('sqr-savedList');
+  if(!recs.length){c.innerHTML='<div class="rs-empty"><div class="rs-icon">📭</div><p>저장된 기록이 없습니다.</p></div>';return;}
+  const sc={DAY:'#d97706',EVE:'#16a34a',NIGHT:'#2563eb'};
+  c.innerHTML=recs.map(r=>{
+    const p=r.total?Math.round(r.done/r.total*100):0;
+    return '<div class="rs-saved-item"><div class="rs-saved-info" onclick="sqr_loadRecord('+r.id+')"><div class="rs-saved-title">'+r.date+' · <span style="color:'+sc[r.shift]+'">'+r.shift+'</span></div><div class="rs-saved-meta">침상 '+r.beds.join(', ')+'번 · 체크 '+p+'%</div>'+(r.nurseOut||r.nurseIn?'<div class="rs-saved-meta" style="margin-top:3px">'+(r.nurseOut?'<span style="color:#f97316">⬅ '+r.nurseOut+'</span>':'')+(r.nurseOut&&r.nurseIn?' &nbsp;→&nbsp; ':' ')+(r.nurseIn?'<span style="color:#3fb950">'+r.nurseIn+' ➡</span>':'')+'</div>':'')+'<div class="rs-saved-meta">'+r.savedAt+'</div></div><button class="rs-saved-delete" onclick="sqr_delRecord('+r.id+',event)">삭제</button></div>';
+  }).join('');
+}
+function sqr_loadRecord(id) {
+  const r=JSON.parse(localStorage.getItem('sicu_quick_records')||'[]').find(x=>x.id===id);
+  if(!r) return;
+  document.getElementById('sqr-dateInput').value=r.date;
+  document.getElementById('sqr-nurseOut').value=r.nurseOut||'';
+  document.getElementById('sqr-nurseIn').value=r.nurseIn||'';
+  r.beds.forEach(b=>{sqr_selBeds[r.shift].add(b);sqr_checks[r.shift][b]=r.checks[b]||sqr_checks[r.shift][b];});
+  sqr_bed=r.beds[0]??null; sqr_showView('check'); sqr_selectShift(r.shift); sqr_toast('기록을 불러왔습니다.');
+}
+function sqr_delRecord(id,e) {
+  e.stopPropagation();
+  let recs=JSON.parse(localStorage.getItem('sicu_quick_records')||'[]').filter(x=>x.id!==id);
+  localStorage.setItem('sicu_quick_records',JSON.stringify(recs)); sqr_loadSaved();
+}
+function sqr_showView(name) {
+  document.querySelectorAll('#screen-sicu-quick-rounding .rs-view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('sqr-view-'+name).classList.add('active');
+  document.querySelectorAll('#screen-sicu-quick-rounding .view-tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sqr-nav-'+name).classList.add('active');
+  document.getElementById('sqr-fabSave').style.display=name==='check'?'flex':'none';
+  if(name==='saved') sqr_loadSaved();
+}
+function sqr_toast(msg) {
+  const t=document.getElementById('sqr-toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+sqr_selectShift('DAY');
+
+// ════════════════════════════════════════════════════════════════════════
+// CN Rounding (cn_*)
+// ════════════════════════════════════════════════════════════════════════
+const cn_COMMON = {
+  '중심정맥관':['삽입부위 발적이나 농이 없고 드레싱 밀착, 날짜 확인','3-way hub에 blood 흔적(clot 등)이 없다'],
+  'IV':['삽입부위 발적이나 농이 없고 드레싱 밀착, 날짜 확인'],
+  '간호일지':['Assess / EVENT / 정규 별도 작성'],
+  '수혈':['수혈오더 환자의 수혈 경로 확인'],
+};
+const cn_NIGHT_ONLY = { '기록모니터링':['비대면인계 – 4일 이상 재원환자 reminder 정리 확인'] };
+function cn_getGroups(s) { return s==='NIGHT'?{...cn_NIGHT_ONLY,...cn_COMMON}:{...cn_COMMON}; }
+
+const cn_SHIFTS = ['DAY','EVE','NIGHT'];
+let cn_shift='DAY', cn_bed=null;
+let cn_checks={}, cn_ventState={}, cn_selBeds={};
+cn_SHIFTS.forEach(s=>{
+  cn_checks[s]={}; cn_ventState[s]=false; cn_selBeds[s]=new Set();
+  for(let b=1;b<=18;b++){ cn_checks[s][b]={}; Object.entries(cn_getGroups(s)).forEach(([g,items])=>{cn_checks[s][b][g]=items.map(()=>false);}); }
+});
+(function(){
+  const t=new Date().toISOString().slice(0,10);
+  document.getElementById('cn-dateInput').value=t; cn_setDate(t);
+})();
+document.getElementById('cn-dateInput').addEventListener('change',function(){cn_setDate(this.value);});
+document.getElementById('cn-ventToggle').addEventListener('change',function(){cn_ventState[cn_shift]=this.checked;});
+
+function cn_setDate(v) {
+  const el=document.getElementById('cn-dateDisplay');
+  if(!v){el.textContent='날짜 선택';el.classList.add('placeholder');return;}
+  const [y,m,d]=v.split('-');
+  const dow=['일','월','화','수','목','금','토'][new Date(v).getDay()];
+  el.textContent=y+'.'+m+'.'+d+' ('+dow+')'; el.classList.remove('placeholder');
+}
+function cn_selectShift(s) {
+  cn_shift=s; cn_bed=[...cn_selBeds[s]][0]??null;
+  document.querySelectorAll('#screen-cn-rounding .shift-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector('#screen-cn-rounding .shift-tab.'+s.toLowerCase()).classList.add('active');
+  document.getElementById('cn-ventToggle').checked=cn_ventState[s];
+  cn_buildGrid(); cn_renderList(); cn_updateProg();
+}
+function cn_buildGrid() {
+  const g=document.getElementById('cn-bedGrid'); g.innerHTML='';
+  const cls=cn_shift.toLowerCase();
+  for(let i=1;i<=18;i++){
+    const sel=cn_selBeds[cn_shift].has(i), done=sel&&cn_isBedDone(cn_shift,i);
+    const btn=document.createElement('button');
+    btn.className='rs-bed-btn'+(sel?' selected '+cls:'')+(i===cn_bed?' active-view':'')+(done?' completed':'');
+    btn.innerHTML=i+'<span class="rs-bed-dot"></span>'; btn.onclick=()=>cn_clickBed(i); g.appendChild(btn);
+  }
+}
+function cn_clickBed(n) {
+  if(cn_bed===n){cn_selBeds[cn_shift].clear();cn_bed=null;}
+  else{
+    cn_selBeds[cn_shift].clear(); cn_selBeds[cn_shift].add(n); cn_bed=n;
+    if(!cn_checks[cn_shift][n]){cn_checks[cn_shift][n]={};Object.entries(cn_getGroups(cn_shift)).forEach(([g,items])=>{cn_checks[cn_shift][n][g]=items.map(()=>false);});}
+  }
+  cn_buildGrid(); cn_renderList(); cn_updateProg(); cn_updateBadges();
+}
+function cn_isBedDone(s,b) {
+  return Object.entries(cn_getGroups(s)).every(([g,items])=>items.every((_,i)=>cn_checks[s][b]?.[g]?.[i]===true));
+}
+function cn_renderList() {
+  const sec=document.getElementById('cn-checkSection');
+  if(!cn_bed||!cn_selBeds[cn_shift].has(cn_bed)){
+    sec.innerHTML='<div class="rs-empty"><div class="rs-icon">🛏️</div><p>위에서 침상 번호를 선택하면<br>해당 침상의 체크리스트가 표시됩니다.</p></div>'; return;
+  }
+  const tag='rs-tag-'+cn_shift.toLowerCase();
+  let h='<div class="rs-check-bed-header">침상 <span class="rs-bed-tag '+tag+'">'+cn_bed+'번</span></div><div class="rs-check-card">';
+  Object.entries(cn_getGroups(cn_shift)).forEach(([grp,items])=>{
+    h+='<div class="rs-check-group-header">'+grp+'</div>';
+    items.forEach((item,idx)=>{
+      const ck=cn_checks[cn_shift][cn_bed]?.[grp]?.[idx]||false;
+      h+='<div class="rs-check-item'+(ck?' checked':'')+'" onclick="cn_toggle(\''+grp.replace(/'/g,"\\'")+'\',' +idx+',this)"><div class="rs-check-item-text">'+item+'</div><div class="rs-checkbox">'+(ck?'✓':'')+'</div></div>';
+    });
+  });
+  h+='</div>'; sec.innerHTML=h;
+}
+function cn_toggle(grp,idx,el) {
+  if(!cn_bed) return;
+  const cur=cn_checks[cn_shift][cn_bed][grp][idx];
+  cn_checks[cn_shift][cn_bed][grp][idx]=!cur;
+  el.classList.toggle('checked'); el.querySelector('.rs-checkbox').textContent=!cur?'✓':'';
+  cn_buildGrid(); cn_updateProg();
+}
+function cn_updateProg() {
+  const beds=[...cn_selBeds[cn_shift]];
+  const fill=document.getElementById('cn-progressFill'), lbl=document.getElementById('cn-progressLabel'), pct=document.getElementById('cn-progressPct');
+  const cols={DAY:'#d97706',EVE:'#16a34a',NIGHT:'#2563eb'};
+  fill.style.background=cols[cn_shift];
+  if(!beds.length){fill.style.width='0%';lbl.textContent='침상을 선택하세요';pct.textContent='0%';return;}
+  const groups=cn_getGroups(cn_shift); let t=0,d=0;
+  beds.forEach(b=>Object.entries(groups).forEach(([g,items])=>items.forEach((_,i)=>{t++;if(cn_checks[cn_shift][b]?.[g]?.[i])d++;})));
+  const p=t?Math.round(d/t*100):0;
+  fill.style.width=p+'%'; lbl.textContent=beds.length+'개 침상 · '+d+'/'+t+' 항목'; pct.textContent=p+'%';
+}
+function cn_updateBadges() {
+  cn_SHIFTS.forEach(s=>{const n=cn_selBeds[s].size,b=document.getElementById('cn-badge-'+s);b.textContent=n;b.classList.toggle('show',n>0);});
+}
+function cn_saveRecord() {
+  const date=document.getElementById('cn-dateInput').value;
+  if(!date){cn_toast('날짜를 선택해주세요.');return;}
+  if(!cn_bed){cn_toast('침상을 선택해주세요.');return;}
+  const rec={id:Date.now(),date,shift:cn_shift,bed:cn_bed,vent:cn_ventState[cn_shift],
+    checks:JSON.parse(JSON.stringify(cn_checks[cn_shift][cn_bed])),savedAt:new Date().toLocaleString('ko-KR')};
+  const recs=JSON.parse(localStorage.getItem('cn_records')||'[]');
+  recs.unshift(rec); localStorage.setItem('cn_records',JSON.stringify(recs));
+  cn_selBeds[cn_shift].clear(); cn_bed=null;
+  cn_buildGrid(); cn_renderList(); cn_updateProg(); cn_updateBadges();
+  cn_toast('✅ 저장되었습니다! 다음 침상을 선택하세요.');
+}
+function cn_loadSaved() {
+  const recs=JSON.parse(localStorage.getItem('cn_records')||'[]');
+  const c=document.getElementById('cn-savedList');
+  if(!recs.length){c.innerHTML='<div class="rs-empty"><div class="rs-icon">📭</div><p>저장된 기록이 없습니다.</p></div>';return;}
+  c.innerHTML=recs.map(r=>{
+    const groups=cn_getGroups(r.shift);
+    const bc=r.checks&&!r.bed?r.checks[r.beds?.[0]]:r.checks, bn=r.bed??r.beds?.[0];
+    let t=0,d=0; Object.entries(groups).forEach(([g,items])=>items.forEach((_,i)=>{t++;if(bc?.[g]?.[i])d++;}));
+    const p=t?Math.round(d/t*100):0;
+    const sc={DAY:'#d97706',EVE:'#16a34a',NIGHT:'#2563eb'}[r.shift];
+    return '<div class="rs-saved-item"><div class="rs-saved-info" onclick="cn_loadRecord('+r.id+')"><div class="rs-saved-title">'+r.date+' · <span style="color:'+sc+'">'+r.shift+'</span></div><div class="rs-saved-meta">침상 '+bn+'번 | 체크 '+p+'% | '+r.savedAt+'</div></div><button class="rs-saved-delete" onclick="cn_delRecord('+r.id+',event)">삭제</button></div>';
+  }).join('');
+}
+function cn_loadRecord(id) {
+  const r=JSON.parse(localStorage.getItem('cn_records')||'[]').find(x=>x.id===id);
+  if(!r) return;
+  const bn=r.bed??r.beds?.[0], bc=r.checks&&!r.bed?r.checks[bn]:r.checks;
+  document.getElementById('cn-dateInput').value=r.date; cn_setDate(r.date);
+  cn_checks[r.shift][bn]=bc; cn_ventState[r.shift]=r.vent;
+  cn_selBeds[r.shift].clear(); cn_selBeds[r.shift].add(bn); cn_bed=bn;
+  cn_showView('check'); cn_selectShift(r.shift); cn_toast('기록을 불러왔습니다.');
+}
+function cn_delRecord(id,e) {
+  e.stopPropagation();
+  localStorage.setItem('cn_records',JSON.stringify(JSON.parse(localStorage.getItem('cn_records')||'[]').filter(x=>x.id!==id)));
+  cn_loadSaved();
+}
+function cn_showView(name) {
+  document.querySelectorAll('#screen-cn-rounding .rs-view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('cn-view-'+name).classList.add('active');
+  document.querySelectorAll('#screen-cn-rounding .view-tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('cn-nav-'+name).classList.add('active');
+  document.getElementById('cn-fabSave').style.display=name==='check'?'flex':'none';
+  if(name==='saved') cn_loadSaved();
+}
+function cn_toast(msg) {
+  const t=document.getElementById('cn-toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+cn_selectShift('DAY');
+</script>
+
+<script src="app.js"></script>
+</body>
+</html>
