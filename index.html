@@ -27,13 +27,6 @@
   background:#f0f4f8; font-family:'Noto Sans KR',sans-serif;
 }
 
-/* ─── View tab switcher ─── */
-#screen-sicu-quick-rounding .view-tabs,
-#screen-cn-rounding .view-tabs { display:flex; background:var(--surface); border-bottom:1px solid var(--border); }
-#screen-sicu-quick-rounding .view-tab-btn,
-#screen-cn-rounding .view-tab-btn { flex:1; padding:9px 6px; border:none; border-bottom:2px solid transparent; background:transparent; color:var(--text-muted); font-size:12px; font-weight:600; cursor:pointer; font-family:'Noto Sans KR',sans-serif; }
-#screen-sicu-quick-rounding .view-tab-btn.active,
-#screen-cn-rounding .view-tab-btn.active { color:var(--navy); border-bottom-color:var(--navy); }
 
 /* ─── SICU Header ─── */
 #screen-sicu-quick-rounding .sqr-header { background:var(--surface); border-bottom:2px solid var(--border); box-shadow:0 1px 4px rgba(0,0,0,.08); }
@@ -2154,38 +2147,25 @@
       <button class="shift-tab eve" onclick="sqr_selectShift('EVE')">EVE <span class="rs-tab-badge" id="sqr-badge-EVE"></span></button>
       <button class="shift-tab night" onclick="sqr_selectShift('NIGHT')">NIGHT <span class="rs-tab-badge" id="sqr-badge-NIGHT"></span></button>
     </div>
-    <div class="view-tabs">
-      <button class="view-tab-btn active" id="sqr-nav-check" onclick="sqr_showView('check')">체크리스트</button>
-      <button class="view-tab-btn" id="sqr-nav-saved" onclick="sqr_showView('saved')">저장된 기록</button>
-    </div>
   </div>
 
   <!-- 스크롤 영역 -->
   <div class="scroll-content" style="background:#f0f4f8">
-
-    <div id="sqr-view-check" class="rs-view active">
-      <div class="rs-section">
-        <div class="rs-section-label">침상 선택</div>
-        <div class="rs-bed-grid" id="sqr-bedGrid"></div>
-        <div class="rs-progress-wrap">
-          <div class="rs-progress-info">
-            <span id="sqr-progressLabel">침상을 선택하세요</span>
-            <span id="sqr-progressPct">0%</span>
-          </div>
-          <div class="rs-progress-bar"><div class="rs-progress-fill" id="sqr-progressFill" style="width:0%"></div></div>
+    <div class="rs-section">
+      <div class="rs-section-label">침상 선택</div>
+      <div class="rs-bed-grid" id="sqr-bedGrid"></div>
+      <div class="rs-progress-wrap">
+        <div class="rs-progress-info">
+          <span id="sqr-progressLabel">침상을 선택하세요</span>
+          <span id="sqr-progressPct">0%</span>
         </div>
-      </div>
-      <div class="rs-divider"></div>
-      <div class="rs-check-section" id="sqr-checkSection">
-        <div class="rs-empty"><div class="rs-icon">🏥</div><p>위에서 침상 번호를 선택하면<br>ABCDE 체크리스트가 표시됩니다.</p></div>
+        <div class="rs-progress-bar"><div class="rs-progress-fill" id="sqr-progressFill" style="width:0%"></div></div>
       </div>
     </div>
-
-    <div id="sqr-view-saved" class="rs-view">
-      <div class="rs-section"><div class="rs-section-label">저장된 기록</div></div>
-      <div class="rs-saved-section" id="sqr-savedList"></div>
+    <div class="rs-divider"></div>
+    <div class="rs-check-section" id="sqr-checkSection">
+      <div class="rs-empty"><div class="rs-icon">🏥</div><p>위에서 침상 번호를 선택하면<br>ABCDE 체크리스트가 표시됩니다.</p></div>
     </div>
-
     <div style="height:80px"></div>
   </div>
 
@@ -2222,45 +2202,32 @@
       <button class="shift-tab eve" onclick="cn_selectShift('EVE')">EVE <span class="rs-tab-badge" id="cn-badge-EVE"></span></button>
       <button class="shift-tab night" onclick="cn_selectShift('NIGHT')">NIGHT <span class="rs-tab-badge" id="cn-badge-NIGHT"></span></button>
     </div>
-    <div class="view-tabs">
-      <button class="view-tab-btn active" id="cn-nav-check" onclick="cn_showView('check')">체크리스트</button>
-      <button class="view-tab-btn" id="cn-nav-saved" onclick="cn_showView('saved')">저장된 기록</button>
-    </div>
   </div>
 
   <!-- 스크롤 영역 -->
   <div class="scroll-content" style="background:#f0f4f8">
-
-    <div id="cn-view-check" class="rs-view active">
-      <div class="rs-section">
-        <div class="rs-section-label">침상 선택</div>
-        <div class="rs-bed-grid" id="cn-bedGrid"></div>
-        <div class="rs-progress-wrap">
-          <div class="rs-progress-info">
-            <span id="cn-progressLabel">침상을 선택하세요</span>
-            <span id="cn-progressPct">0%</span>
-          </div>
-          <div class="rs-progress-bar"><div class="rs-progress-fill" id="cn-progressFill" style="width:0%"></div></div>
+    <div class="rs-section">
+      <div class="rs-section-label">침상 선택</div>
+      <div class="rs-bed-grid" id="cn-bedGrid"></div>
+      <div class="rs-progress-wrap">
+        <div class="rs-progress-info">
+          <span id="cn-progressLabel">침상을 선택하세요</span>
+          <span id="cn-progressPct">0%</span>
         </div>
-      </div>
-      <div class="rs-divider"></div>
-      <div class="rs-vent-card">
-        <div class="rs-vent-label">🫁 Ventilator Setting</div>
-        <div class="rs-vent-row">
-          <div class="rs-vent-text">여분의 Ventilator 1대 setting 완료</div>
-          <input type="checkbox" class="rs-toggle" id="cn-ventToggle">
-        </div>
-      </div>
-      <div class="rs-check-section" id="cn-checkSection">
-        <div class="rs-empty"><div class="rs-icon">🛏️</div><p>위에서 침상 번호를 선택하면<br>해당 침상의 체크리스트가 표시됩니다.</p></div>
+        <div class="rs-progress-bar"><div class="rs-progress-fill" id="cn-progressFill" style="width:0%"></div></div>
       </div>
     </div>
-
-    <div id="cn-view-saved" class="rs-view">
-      <div class="rs-section"><div class="rs-section-label">저장된 기록</div></div>
-      <div class="rs-saved-section" id="cn-savedList"></div>
+    <div class="rs-divider"></div>
+    <div class="rs-vent-card">
+      <div class="rs-vent-label">🫁 Ventilator Setting</div>
+      <div class="rs-vent-row">
+        <div class="rs-vent-text">여분의 Ventilator 1대 setting 완료</div>
+        <input type="checkbox" class="rs-toggle" id="cn-ventToggle">
+      </div>
     </div>
-
+    <div class="rs-check-section" id="cn-checkSection">
+      <div class="rs-empty"><div class="rs-icon">🛏️</div><p>위에서 침상 번호를 선택하면<br>해당 침상의 체크리스트가 표시됩니다.</p></div>
+    </div>
     <div style="height:80px"></div>
   </div>
 
@@ -2294,6 +2261,8 @@ const sqr_CATEGORIES = [
 ];
 const sqr_TOTAL = sqr_CATEGORIES.reduce((s,c) => s + c.items.length, 0);
 const sqr_SHIFTS = ['DAY','EVE','NIGHT'];
+const SQR_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyKuZ-38wn6lzOwO7IPjN9bGRRPgknspIKE6WG51RGzjC12LqUTQNVDk37mnP3vpfByRA/exec';
+
 let sqr_shift = 'DAY', sqr_bed = null;
 let sqr_selBeds = { DAY:new Set(), EVE:new Set(), NIGHT:new Set() };
 let sqr_checks = {};
@@ -2396,39 +2365,59 @@ function sqr_saveRecord() {
     done,total:beds.length*sqr_TOTAL,savedAt:new Date().toLocaleString('ko-KR')};
   const recs=JSON.parse(localStorage.getItem('sicu_quick_records')||'[]');
   recs.unshift(rec); localStorage.setItem('sicu_quick_records',JSON.stringify(recs));
-  sqr_toast('✅ 저장되었습니다!');
+  sqr_toast('✅ 저장 중...');
+  sqr_sendToSheets(rec);
 }
-function sqr_loadSaved() {
-  const recs=JSON.parse(localStorage.getItem('sicu_quick_records')||'[]');
-  const c=document.getElementById('sqr-savedList');
-  if(!recs.length){c.innerHTML='<div class="rs-empty"><div class="rs-icon">📭</div><p>저장된 기록이 없습니다.</p></div>';return;}
-  const sc={DAY:'#d97706',EVE:'#16a34a',NIGHT:'#2563eb'};
-  c.innerHTML=recs.map(r=>{
-    const p=r.total?Math.round(r.done/r.total*100):0;
-    return '<div class="rs-saved-item"><div class="rs-saved-info" onclick="sqr_loadRecord('+r.id+')"><div class="rs-saved-title">'+r.date+' · <span style="color:'+sc[r.shift]+'">'+r.shift+'</span></div><div class="rs-saved-meta">침상 '+r.beds.join(', ')+'번 · 체크 '+p+'%</div>'+(r.nurseOut||r.nurseIn?'<div class="rs-saved-meta" style="margin-top:3px">'+(r.nurseOut?'<span style="color:#f97316">⬅ '+r.nurseOut+'</span>':'')+(r.nurseOut&&r.nurseIn?' &nbsp;→&nbsp; ':' ')+(r.nurseIn?'<span style="color:#3fb950">'+r.nurseIn+' ➡</span>':'')+'</div>':'')+'<div class="rs-saved-meta">'+r.savedAt+'</div></div><button class="rs-saved-delete" onclick="sqr_delRecord('+r.id+',event)">삭제</button></div>';
-  }).join('');
-}
-function sqr_loadRecord(id) {
-  const r=JSON.parse(localStorage.getItem('sicu_quick_records')||'[]').find(x=>x.id===id);
-  if(!r) return;
-  document.getElementById('sqr-dateInput').value=r.date;
-  document.getElementById('sqr-nurseOut').value=r.nurseOut||'';
-  document.getElementById('sqr-nurseIn').value=r.nurseIn||'';
-  r.beds.forEach(b=>{sqr_selBeds[r.shift].add(b);sqr_checks[r.shift][b]=r.checks[b]||sqr_checks[r.shift][b];});
-  sqr_bed=r.beds[0]??null; sqr_showView('check'); sqr_selectShift(r.shift); sqr_toast('기록을 불러왔습니다.');
-}
-function sqr_delRecord(id,e) {
-  e.stopPropagation();
-  let recs=JSON.parse(localStorage.getItem('sicu_quick_records')||'[]').filter(x=>x.id!==id);
-  localStorage.setItem('sicu_quick_records',JSON.stringify(recs)); sqr_loadSaved();
-}
-function sqr_showView(name) {
-  document.querySelectorAll('#screen-sicu-quick-rounding .rs-view').forEach(v=>v.classList.remove('active'));
-  document.getElementById('sqr-view-'+name).classList.add('active');
-  document.querySelectorAll('#screen-sicu-quick-rounding .view-tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('sqr-nav-'+name).classList.add('active');
-  document.getElementById('sqr-fabSave').style.display=name==='check'?'flex':'none';
-  if(name==='saved') sqr_loadSaved();
+
+function sqr_sendToSheets(rec) {
+  const ck = v => v ? '✓' : '—';
+
+  const rows = rec.beds.map(bedNum => {
+    const bc = rec.checks[bedNum];
+
+    // 침상별 완료 수 집계
+    let bedDone = 0;
+    sqr_CATEGORIES.forEach(cat =>
+      cat.items.forEach((_, i) => { if (bc[cat.id][i]) bedDone++; })
+    );
+    const pct = Math.round(bedDone / sqr_TOTAL * 100);
+
+    // 카테고리 요약: A:1/2 B:3/3 C:1/2 D:2/3 E:4/4
+    const catSummary = sqr_CATEGORIES.map(cat => {
+      const d = cat.items.filter((_, i) => bc[cat.id][i]).length;
+      return `${cat.id}:${d}/${cat.items.length}`;
+    }).join(' ');
+
+    // 세부 항목 (헤더 순서: B 3개, C 2개, D 3개, E 4개)
+    const detail = [
+      ck(bc['B'][0]), ck(bc['B'][1]), ck(bc['B'][2]),   // A-산소흡입량, A-Vent, A-CRRT등
+      ck(bc['C'][0]), ck(bc['C'][1]),                    // C-중심정맥관, C-IV
+      ck(bc['D'][0]), ck(bc['D'][1]), ck(bc['D'][2]),   // D-의약라벨, D-약물희석, D-처방용량
+      ck(bc['E'][0]), ck(bc['E'][1]), ck(bc['E'][2]), ck(bc['E'][3]), // E 4개
+    ].join('\t');
+
+    return [
+      rec.savedAt,           // 저장일시
+      rec.date,              // 날짜
+      rec.shift,             // 근무
+      bedNum + '번',         // 침상번호
+      rec.nurseOut || '—',   // 교대전근무자
+      rec.nurseIn  || '—',   // 교대후근무자
+      bedDone,               // 완료항목
+      sqr_TOTAL,             // 전체항목
+      pct + '%',             // 달성률
+      catSummary,            // 카테고리요약
+      detail,                // 세부항목 (탭 구분)
+    ];
+  });
+
+  fetch(SQR_SHEET_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ sheetName: '퀵라운딩', rows }),
+  })
+  .then(() => sqr_toast('✅ 저장 완료! (Google Sheets 전송됨)'))
+  .catch(() => sqr_toast('✅ 로컬 저장 완료 (Sheets 전송 실패)'));
 }
 function sqr_toast(msg) {
   const t=document.getElementById('sqr-toast'); t.textContent=msg; t.classList.add('show');
@@ -2544,42 +2533,44 @@ function cn_saveRecord() {
   recs.unshift(rec); localStorage.setItem('cn_records',JSON.stringify(recs));
   cn_selBeds[cn_shift].clear(); cn_bed=null;
   cn_buildGrid(); cn_renderList(); cn_updateProg(); cn_updateBadges();
-  cn_toast('✅ 저장되었습니다! 다음 침상을 선택하세요.');
+  cn_toast('✅ 저장 중...');
+  cn_sendToSheets(rec);
 }
-function cn_loadSaved() {
-  const recs=JSON.parse(localStorage.getItem('cn_records')||'[]');
-  const c=document.getElementById('cn-savedList');
-  if(!recs.length){c.innerHTML='<div class="rs-empty"><div class="rs-icon">📭</div><p>저장된 기록이 없습니다.</p></div>';return;}
-  c.innerHTML=recs.map(r=>{
-    const groups=cn_getGroups(r.shift);
-    const bc=r.checks&&!r.bed?r.checks[r.beds?.[0]]:r.checks, bn=r.bed??r.beds?.[0];
-    let t=0,d=0; Object.entries(groups).forEach(([g,items])=>items.forEach((_,i)=>{t++;if(bc?.[g]?.[i])d++;}));
-    const p=t?Math.round(d/t*100):0;
-    const sc={DAY:'#d97706',EVE:'#16a34a',NIGHT:'#2563eb'}[r.shift];
-    return '<div class="rs-saved-item"><div class="rs-saved-info" onclick="cn_loadRecord('+r.id+')"><div class="rs-saved-title">'+r.date+' · <span style="color:'+sc+'">'+r.shift+'</span></div><div class="rs-saved-meta">침상 '+bn+'번 | 체크 '+p+'% | '+r.savedAt+'</div></div><button class="rs-saved-delete" onclick="cn_delRecord('+r.id+',event)">삭제</button></div>';
-  }).join('');
-}
-function cn_loadRecord(id) {
-  const r=JSON.parse(localStorage.getItem('cn_records')||'[]').find(x=>x.id===id);
-  if(!r) return;
-  const bn=r.bed??r.beds?.[0], bc=r.checks&&!r.bed?r.checks[bn]:r.checks;
-  document.getElementById('cn-dateInput').value=r.date; cn_setDate(r.date);
-  cn_checks[r.shift][bn]=bc; cn_ventState[r.shift]=r.vent;
-  cn_selBeds[r.shift].clear(); cn_selBeds[r.shift].add(bn); cn_bed=bn;
-  cn_showView('check'); cn_selectShift(r.shift); cn_toast('기록을 불러왔습니다.');
-}
-function cn_delRecord(id,e) {
-  e.stopPropagation();
-  localStorage.setItem('cn_records',JSON.stringify(JSON.parse(localStorage.getItem('cn_records')||'[]').filter(x=>x.id!==id)));
-  cn_loadSaved();
-}
-function cn_showView(name) {
-  document.querySelectorAll('#screen-cn-rounding .rs-view').forEach(v=>v.classList.remove('active'));
-  document.getElementById('cn-view-'+name).classList.add('active');
-  document.querySelectorAll('#screen-cn-rounding .view-tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('cn-nav-'+name).classList.add('active');
-  document.getElementById('cn-fabSave').style.display=name==='check'?'flex':'none';
-  if(name==='saved') cn_loadSaved();
+
+function cn_sendToSheets(rec) {
+  const ck = v => v ? '✓' : '—';
+  const groups = cn_getGroups(rec.shift);
+  let total = 0, done = 0;
+  Object.entries(groups).forEach(([grp, items]) =>
+    items.forEach((_, i) => { total++; if (rec.checks[grp]?.[i]) done++; })
+  );
+  const pct = total ? Math.round(done / total * 100) : 0;
+
+  // 고정 열 순서 (NIGHT 전용 항목은 해당 근무 외 N/A)
+  const isNight = rec.shift === 'NIGHT';
+  const detail = [
+    isNight ? ck(rec.checks['기록모니터링']?.[0]) : 'N/A', // 기록모니터링①
+    ck(rec.checks['중심정맥관']?.[0]),                       // 중심정맥관①
+    ck(rec.checks['중심정맥관']?.[1]),                       // 중심정맥관②
+    ck(rec.checks['IV']?.[0]),                               // IV①
+    ck(rec.checks['간호일지']?.[0]),                         // 간호일지①
+    ck(rec.checks['수혈']?.[0]),                             // 수혈①
+  ].join('\t');
+
+  const row = [
+    rec.savedAt, rec.date, rec.shift, rec.bed + '번',
+    rec.vent ? '✓' : '—',
+    done, total, pct + '%',
+    detail,
+  ];
+
+  fetch(SQR_SHEET_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ sheetName: 'CN라운딩', rows: [row] }),
+  })
+  .then(() => cn_toast('✅ 저장 완료! (Google Sheets 전송됨)'))
+  .catch(() => cn_toast('✅ 로컬 저장 완료 (Sheets 전송 실패)'));
 }
 function cn_toast(msg) {
   const t=document.getElementById('cn-toast'); t.textContent=msg; t.classList.add('show');
