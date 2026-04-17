@@ -33,6 +33,9 @@ function showScreen(id) {
   if (id === 'screen-qm-checklist') {
     setTimeout(() => initQMChecklist(), 0);
   }
+  if (id === 'screen-drugcalc') {
+    setTimeout(() => dc_goView('cat'), 0);
+  }
   // 북마크 버튼 상태 갱신
   setTimeout(() => updateAllBookmarkBtns(), 0);
 }

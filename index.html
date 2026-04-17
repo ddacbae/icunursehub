@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ICU Nurse Hub</title>
 <link rel="stylesheet" href="style.css">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Black+Han+Sans&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ─── CSS Variables ─── */
 #screen-sicu-quick-rounding {
@@ -214,6 +214,82 @@
 #screen-cn-rounding .rs-view { display:none; }
 #screen-sicu-quick-rounding .rs-view.active,
 #screen-cn-rounding .rs-view.active { display:block; }
+
+/* ─── Drug Calculator Screen ─── */
+#screen-drugcalc {
+  --dc-bg:#f5f7fa; --dc-surface:#fff; --dc-surface2:#f0f2f5; --dc-border:#dde1e7;
+  --dc-text:#1a1f2e; --dc-muted:#6b7280; --dc-dim:#9ca3af;
+  --dc-accent:#2563eb; --dc-green:#16a34a; --dc-yellow:#b45309;
+  --dc-red:#dc2626; --dc-purple:#7c3aed; --dc-radius:12px;
+  font-family:'IBM Plex Sans KR','Noto Sans KR',sans-serif; font-size:14px;
+}
+#screen-drugcalc .dc-view { display:none; }
+#screen-drugcalc .dc-view.active { display:block; animation:dcSlideIn .2s ease; }
+@keyframes dcSlideIn { from{opacity:0;transform:translateX(10px);}to{opacity:1;transform:translateX(0);} }
+#screen-drugcalc .dc-back-bar { display:flex; align-items:center; gap:8px; padding:12px 16px; background:var(--dc-surface); border-bottom:1px solid var(--dc-border); cursor:pointer; color:var(--dc-accent); font-size:14px; font-weight:500; }
+#screen-drugcalc .dc-back-bar:active { background:var(--dc-surface2); }
+#screen-drugcalc .dc-breadcrumb { font-size:12px; color:var(--dc-muted); padding:8px 16px; background:var(--dc-bg); border-bottom:1px solid var(--dc-border); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#screen-drugcalc .dc-breadcrumb .crumb-active { color:var(--dc-text); font-weight:500; }
+#screen-drugcalc .dc-section-label { font-size:11px; font-weight:600; color:var(--dc-muted); letter-spacing:.07em; text-transform:uppercase; padding:16px 16px 8px; }
+#screen-drugcalc .dc-cat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:4px 16px 16px; }
+#screen-drugcalc .dc-cat-card { background:var(--dc-surface); border:1.5px solid var(--dc-border); border-radius:var(--dc-radius); padding:16px 14px; cursor:pointer; transition:all .15s; -webkit-user-select:none; user-select:none; }
+#screen-drugcalc .dc-cat-card:active { background:var(--dc-surface2); transform:scale(.97); }
+#screen-drugcalc .dc-cat-icon { font-size:24px; margin-bottom:8px; }
+#screen-drugcalc .dc-cat-name { font-size:13px; font-weight:600; line-height:1.3; color:var(--dc-text); }
+#screen-drugcalc .dc-cat-count { font-size:11px; color:var(--dc-muted); margin-top:3px; }
+#screen-drugcalc .dc-cat-bar { height:3px; border-radius:2px; margin-top:10px; opacity:.6; }
+#screen-drugcalc .dc-drug-list { padding:4px 16px 16px; display:flex; flex-direction:column; gap:8px; }
+#screen-drugcalc .dc-drug-item { background:var(--dc-surface); border:1.5px solid var(--dc-border); border-radius:var(--dc-radius); padding:14px 16px; display:flex; align-items:center; gap:12px; cursor:pointer; transition:all .15s; -webkit-user-select:none; user-select:none; }
+#screen-drugcalc .dc-drug-item:active { background:var(--dc-surface2); transform:scale(.98); }
+#screen-drugcalc .dc-drug-body { flex:1; min-width:0; }
+#screen-drugcalc .dc-drug-name { font-size:14px; font-weight:600; color:var(--dc-text); display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+#screen-drugcalc .dc-drug-dose { font-size:11px; color:var(--dc-muted); font-family:'IBM Plex Mono',monospace; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#screen-drugcalc .dc-drug-unit { font-size:11px; color:var(--dc-muted); margin-top:2px; }
+#screen-drugcalc .dc-drug-conc { display:flex; gap:6px; margin-top:5px; }
+#screen-drugcalc .dc-conc-badge { font-size:10px; font-family:'IBM Plex Mono',monospace; padding:2px 7px; border-radius:4px; font-weight:500; }
+#screen-drugcalc .dc-conc-std { background:rgba(37,99,235,.08); color:var(--dc-accent); border:1px solid rgba(37,99,235,.18); }
+#screen-drugcalc .dc-conc-conc { background:rgba(180,83,9,.08); color:var(--dc-yellow); border:1px solid rgba(180,83,9,.2); }
+#screen-drugcalc .dc-drug-arrow { color:var(--dc-dim); font-size:18px; flex-shrink:0; }
+#screen-drugcalc .dc-tag { display:inline-block; font-size:10px; font-weight:600; padding:1px 6px; border-radius:4px; letter-spacing:.3px; }
+#screen-drugcalc .dc-tag-solo { background:rgba(124,58,237,.1); color:var(--dc-purple); }
+#screen-drugcalc .dc-tag-cline { background:rgba(220,38,38,.1); color:var(--dc-red); }
+#screen-drugcalc .dc-tag-p { background:rgba(22,163,74,.1); color:var(--dc-green); }
+#screen-drugcalc .dc-tag-c { background:rgba(220,38,38,.1); color:var(--dc-red); }
+#screen-drugcalc .dc-calc-body { padding:0 16px 24px; }
+#screen-drugcalc .dc-drug-header-card { background:var(--dc-surface); border:1.5px solid var(--dc-accent); border-radius:var(--dc-radius); padding:14px 16px; margin-top:12px; margin-bottom:12px; }
+#screen-drugcalc .dc-drug-header-name { font-size:17px; font-weight:600; color:var(--dc-accent); margin-bottom:3px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+#screen-drugcalc .dc-drug-header-dose { font-size:12px; color:var(--dc-muted); font-family:'IBM Plex Mono',monospace; }
+#screen-drugcalc .dc-mix-card { background:var(--dc-surface); border:1.5px solid var(--dc-border); border-radius:var(--dc-radius); overflow:hidden; margin-bottom:14px; }
+#screen-drugcalc .dc-mix-title { font-size:11px; font-weight:600; color:var(--dc-muted); letter-spacing:.07em; text-transform:uppercase; padding:10px 14px; background:var(--dc-surface2); border-bottom:1px solid var(--dc-border); }
+#screen-drugcalc .dc-mix-row { display:flex; justify-content:space-between; align-items:baseline; gap:8px; padding:10px 14px; border-bottom:1px solid var(--dc-border); }
+#screen-drugcalc .dc-mix-row:last-child { border-bottom:none; }
+#screen-drugcalc .dc-mix-key { font-size:12px; color:var(--dc-muted); flex-shrink:0; }
+#screen-drugcalc .dc-mix-val { font-size:13px; font-weight:500; font-family:'IBM Plex Mono',monospace; text-align:right; word-break:break-all; color:var(--dc-text); }
+#screen-drugcalc .dc-mix-val.dc-accent { color:var(--dc-accent); }
+#screen-drugcalc .dc-line-sel { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+#screen-drugcalc .dc-line-btn { padding:12px 8px; border-radius:10px; border:1.5px solid var(--dc-border); background:var(--dc-surface); color:var(--dc-muted); font-family:'IBM Plex Sans KR',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; text-align:center; }
+#screen-drugcalc .dc-line-btn:active { opacity:.8; }
+#screen-drugcalc .dc-line-btn.active-p { border-color:var(--dc-green); background:rgba(22,163,74,.06); color:var(--dc-green); }
+#screen-drugcalc .dc-line-btn.active-c { border-color:var(--dc-red); background:rgba(220,38,38,.06); color:var(--dc-red); }
+#screen-drugcalc .dc-input-group { margin-bottom:12px; }
+#screen-drugcalc .dc-input-label { display:block; font-size:12px; font-weight:500; color:var(--dc-muted); margin-bottom:6px; }
+#screen-drugcalc .dc-input-wrap { display:flex; align-items:center; background:var(--dc-surface); border:1.5px solid var(--dc-border); border-radius:10px; overflow:hidden; transition:border-color .15s; }
+#screen-drugcalc .dc-input-wrap:focus-within { border-color:var(--dc-accent); }
+#screen-drugcalc .dc-input-field { flex:1; border:none; outline:none; padding:13px 14px; font-size:18px; font-family:'IBM Plex Mono',monospace; color:var(--dc-text); background:transparent; -webkit-appearance:none; appearance:none; }
+#screen-drugcalc .dc-input-field::placeholder { color:var(--dc-dim); font-size:16px; }
+#screen-drugcalc .dc-input-unit { padding:0 14px; font-size:12px; color:var(--dc-muted); font-family:'IBM Plex Mono',monospace; white-space:nowrap; border-left:1px solid var(--dc-border); height:100%; display:flex; align-items:center; background:var(--dc-surface2); }
+#screen-drugcalc .dc-result-card { background:var(--dc-surface); border:1.5px solid var(--dc-accent); border-radius:var(--dc-radius); padding:20px 16px; margin-bottom:14px; display:none; text-align:center; }
+#screen-drugcalc .dc-result-card.show { display:block; animation:dcPopIn .2s ease; }
+@keyframes dcPopIn { from{transform:scale(.97);opacity:0;}to{transform:scale(1);opacity:1;} }
+#screen-drugcalc .dc-result-label { font-size:12px; color:var(--dc-muted); margin-bottom:6px; }
+#screen-drugcalc .dc-result-value { font-size:42px; font-weight:600; font-family:'IBM Plex Mono',monospace; color:var(--dc-accent); line-height:1; margin-bottom:4px; }
+#screen-drugcalc .dc-result-unit { font-size:14px; color:var(--dc-muted); margin-bottom:14px; }
+#screen-drugcalc .dc-result-formula { background:var(--dc-surface2); border-radius:8px; padding:10px 12px; font-size:12px; font-family:'IBM Plex Mono',monospace; color:var(--dc-muted); text-align:left; line-height:1.6; }
+#screen-drugcalc .dc-notes-card { background:rgba(180,83,9,.06); border:1.5px solid rgba(180,83,9,.2); border-radius:var(--dc-radius); padding:14px; margin-bottom:10px; }
+#screen-drugcalc .dc-notes-title { font-size:11px; font-weight:600; color:var(--dc-yellow); letter-spacing:.07em; text-transform:uppercase; margin-bottom:8px; }
+#screen-drugcalc .dc-notes-text { font-size:13px; color:var(--dc-muted); line-height:1.8; white-space:pre-wrap; }
+#screen-drugcalc .dc-warning { background:rgba(220,38,38,.05); border:1.5px solid rgba(220,38,38,.2); border-radius:var(--dc-radius); padding:12px 14px; font-size:13px; color:var(--dc-red); margin-bottom:10px; }
+#screen-drugcalc .dc-disclaimer { margin:0 16px 16px; padding:12px 14px; background:var(--dc-surface2); border-radius:10px; font-size:11px; color:var(--dc-dim); line-height:1.7; text-align:center; }
 </style>
 </head>
 <body>
@@ -860,11 +936,34 @@
     <span class="bookmark-btn" id="bm-screen-drugcalc" onclick="toggleBookmark('screen-drugcalc','약물 계산기','🧮')">⭐</span>
   </div>
 
-  <div style="position:relative; height:calc(100vh - 57px - 60px); overflow:hidden;">
-    <iframe src="외과계_약물계산기.html"
-      style="width:100%; height:100%; border:none; display:block;"
-      scrolling="yes"></iframe>
+  <div class="scroll-content" id="dc-scroll" style="background:#f5f7fa">
+
+    <!-- View 1: 약물 분류 -->
+    <div class="dc-view active" id="dc-view-cat">
+      <div class="dc-section-label">약물 분류 선택</div>
+      <div class="dc-cat-grid" id="dc-catGrid"></div>
+      <div class="dc-disclaimer">⚠️ 임상 참고용 계산기입니다.<br>실제 투약 전 처방 및 프로토콜을 반드시 확인하세요.</div>
+      <div style="height:20px"></div>
+    </div>
+
+    <!-- View 2: 약물 선택 -->
+    <div class="dc-view" id="dc-view-drug">
+      <div class="dc-back-bar" onclick="dc_goView('cat')">‹ 분류 목록</div>
+      <div class="dc-breadcrumb" id="dc-bc-drug"></div>
+      <div class="dc-section-label">약물 선택</div>
+      <div class="dc-drug-list" id="dc-drugList"></div>
+    </div>
+
+    <!-- View 3: 계산기 -->
+    <div class="dc-view" id="dc-view-calc">
+      <div class="dc-back-bar" onclick="dc_goView('drug')">‹ 약물 목록</div>
+      <div class="dc-breadcrumb" id="dc-bc-calc"></div>
+      <div class="dc-calc-body" id="dc-calcBody"></div>
+    </div>
+
+    <div style="height:80px"></div>
   </div>
+
   <nav class="bottom-nav">
     <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
     <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
@@ -2482,6 +2581,218 @@ function cn_toast(msg) {
   setTimeout(()=>t.classList.remove('show'),2400);
 }
 cn_selectShift('DAY');
+
+// ════════════════════════════════════════════════════════════════════════
+// Drug Calculator (dc_*)
+// ════════════════════════════════════════════════════════════════════════
+const dc_CATEGORIES = [
+  { id:"sedative", name:"Sedatives & Analgesics", icon:"💊", color:"#7c3aed", drugs:[
+    { name:"Dexmedetomidine", dose:"1@=200mcg/50cc or 1000mcg/250cc", mix:"원액 사용", fluid:null, preVol:null, postVol:null, conc:"4mcg/cc", concNum:4, concUnit:"mcg", unit:"mcg/kg/hr", calcType:"wt_hr", solo:false, clineOnly:false, isPandC:false, notes:"* loading 1mcg/kg for 10min 후 CIV\n* 유지용량 0.2~0.7mcg/kg/hr\n* max 1mcg/kg/hr\n* 고가약" },
+    { name:"Midazolam", dose:"1@=15mg/3cc", mix:"4@ (60mg)", fluid:"D5W 또는 N/S", preVol:"48cc", postVol:"60cc", conc:"1mg/cc", concNum:1, concUnit:"mg", unit:"mg/hr", calcType:"hr", solo:false, clineOnly:false, isPandC:false, notes:"* 1~3mg IV bolus 후 2~10mg/hr" },
+    { name:"Propofol", dose:"1vial=1000mg/50cc", mix:"원액 사용", fluid:null, preVol:null, postVol:null, conc:"20mg/cc (=20000mcg/cc)", concNum:20000, concUnit:"mcg", unit:"mcg/kg/min", calcType:"wt_min", unit2:"mg/kg/hr", calcType2:"wt_hr", concNum2:20, concUnit2:"mg", isDualUnit:true, solo:true, clineOnly:false, isPandC:false, notes:"* 유지: 30mcg/kg/min (= 1.8mg/kg/hr)\n* 12시간마다 line change (지질유제)" },
+    { name:"Remifentanil", dose:"1vial=2mg or 5mg", mix:"1ⓥ (2mg)", fluid:"D5W 또는 N/S", preVol:"100cc", postVol:"100cc", conc:"20mcg/cc", concNum:20, concUnit:"mcg", unit:"mcg/kg/min", calcType:"wt_min", solo:false, clineOnly:false, isPandC:false, notes:null },
+    { name:"Sufentanyl", dose:"1@=250mcg/5cc", mix:"4@ (1000mcg)", fluid:"D5W only", preVol:"180cc", postVol:"200cc", conc:"5mcg/cc", concNum:5, concUnit:"mcg", unit:"mcg/kg/hr", calcType:"wt_hr", solo:false, clineOnly:false, isPandC:false, notes:null },
+    { name:"Thiopental", dose:"1vial=500mg", mix:"4ⓥ (2000mg)", fluid:"D5W* 또는 N/S", preVol:"200cc", postVol:"200cc", conc:"10mg/cc", concNum:10, concUnit:"mg", unit:"mg/hr", calcType:"hr", solo:true, clineOnly:false, isPandC:false, notes:"* 50~100mg IV bolus 후 100mg/hr로 시작" }
+  ]},
+  { id:"nmb", name:"Neuromuscular Blockers", icon:"🧬", color:"#d97706", drugs:[
+    { name:"Rocuronium", dose:"1vial=50mg/5cc", mix:"4ⓥ (200mg)", fluid:"D5W 또는 N/S", preVol:"80cc", postVol:"100cc", conc:"2mg/cc", concNum:2, concUnit:"mg", unit:"mg/kg/hr", calcType:"wt_hr", solo:false, clineOnly:false, isPandC:false, notes:"* 초기용량 0.6mg/kg\n* 연속주입 0.3~0.6mg/kg/hr (첫 1hr)\n* 평균 0.2~0.5mg/kg/hr (이후 6~12hr)" },
+    { name:"Vecuronium", dose:"1vial=10mg (녹일 때 WFI만 가능)", mix:"5ⓥ (50mg)", fluid:"D5W 또는 N/S", preVol:"혼합할 용액만큼 제거", postVol:"50cc", conc:"1mg/cc (=1000mcg/cc)", concNum:1000, concUnit:"mcg", unit:"mcg/kg/min", calcType:"wt_min", solo:false, clineOnly:false, isPandC:false, notes:"* 유지용량 0.8~1.2mcg/kg/min" }
+  ]},
+  { id:"inotropic", name:"Inotropics & Vasopressors", icon:"❤️", color:"#dc2626", drugs:[
+    { name:"Dopamine", dose:"1@=200mg/5cc", mix:"Premix(400mg/200cc) 또는 농축 2@(400mg)", fluid:"D5W 또는 N/S", preVol:"원액 또는 90cc", postVol:"원액 또는 100cc", conc:"2mg/cc 또는 4mg/cc(농축)", concNum:2000, concNum_c:4000, concUnit:"mcg", concStd:"2mg/cc", concConc:"4mg/cc", unit:"mcg/kg/min", calcType:"wt_min", solo:false, clineOnly:false, isDual:true, isPandC:false, notes:"* 3~40mcg/kg/min" },
+    { name:"Dobutamine", dose:"1@=250mg/5cc", mix:"Premix(500mg/250cc) 또는 농축 2@(500mg)", fluid:"D5W 또는 N/S", preVol:"원액 또는 115cc", postVol:"원액 또는 125cc", conc:"2mg/cc 또는 4mg/cc(농축)", concNum:2000, concNum_c:4000, concUnit:"mcg", concStd:"2mg/cc", concConc:"4mg/cc", unit:"mcg/kg/min", calcType:"wt_min", solo:false, clineOnly:false, isDual:true, isPandC:false, notes:"* 3~40mcg/kg/min" },
+    { name:"Epinephrine", dose:"1@=1mg/1cc", mix:"1@(1mg) 또는 농축 2@(2mg)", fluid:"D5W 또는 N/S", preVol:"99cc 또는 98cc", postVol:"100cc", conc:"10mcg/cc 또는 20mcg/cc(농축·C-line)", concNum:10, concNum_c:20, concUnit:"mcg", concStd:"10mcg/cc", concConc:"20mcg/cc", unit:"mcg/kg/min", calcType:"wt_min", solo:false, clineOnly:false, isDual:true, isPandC:false, notes:"* 농축은 C-line만 가능\n* 초기용량 0.01mcg/kg/min\n* 필요시 20~50mcg/cc 농축" },
+    { name:"Norepinephrine", dose:"1@=4mg/4cc", mix:"2@(8mg) [P] 또는 1@(4mg) [C]", fluid:"only D5W", preVol:"[P] 492cc  /  [C] 96cc", postVol:"[P] 500cc  /  [C] 100cc", conc:"[P] 16mcg/cc  /  [C] 40mcg/cc(농축)", concNum:16, concNum_c:40, concUnit:"mcg", concStd:"16mcg/cc", concConc:"40mcg/cc", unit:"mcg/min", calcType:"min", solo:false, clineOnly:false, isPandC:true, notes:"* 농축은 C-line만 가능 (Written order 필요)\n* 2mcg/min 시작 ~ 64mcg/min\n* TS: mcg/kg/min" },
+    { name:"Vasopressin", dose:"1@=20unit/1cc", mix:"1@(20unit)", fluid:"D5W 또는 N/S", preVol:"99cc", postVol:"100cc", conc:"0.2unit/cc", concNum:0.2, concUnit:"unit", unit:"unit/min", calcType:"min", solo:false, clineOnly:false, isPandC:false, notes:"* 0.01unit/min로 시작\n* 냉장보관" }
+  ]},
+  { id:"antiarr", name:"Anti-arrhythmics", icon:"⚡", color:"#b45309", drugs:[
+    { name:"Amiodarone", dose:"1@=150mg/3cc", mix:"2@(300mg)", fluid:"D5W only", preVol:"94cc", postVol:"100cc", conc:"3mg/cc", concNum:3, concUnit:"mg", unit:"mg/min", calcType:"min", unit2:"mg/day", calcType2:"day", concNum2:3, concUnit2:"mg", isDualUnit:true, solo:false, clineOnly:false, isPandC:false, notes:"* 150mg loading 후 1mg/min for 6hrs → 0.5mg/min for 18hrs\n* TS: loading 후 600~800mg/day" },
+    { name:"Diltiazem", dose:"1vial=50mg", mix:"2ⓥ(100mg)", fluid:"D5W 또는 N/S", preVol:"100cc", postVol:"100cc", conc:"1mg/cc", concNum:1, concUnit:"mg", unit:"mg/hr", calcType:"hr", solo:false, clineOnly:false, isPandC:false, notes:"* 10~50mg loading 후 CIV\n* 5~15mg/hr" },
+    { name:"Esmolol", dose:"1@=2.5g/10cc", mix:"1@(2.5g)", fluid:"D5W 또는 N/S", preVol:"240cc", postVol:"250cc", conc:"10mg/cc (=10000mcg/cc)", concNum:10000, concUnit:"mcg", unit:"mcg/kg/min", calcType:"wt_min", solo:false, clineOnly:false, isPandC:false, notes:"* 500mcg/kg loading 후 CIV (★Bolus용: 100mg/10cc 제형)\n* 25mcg/kg/min 시작 ~ 100mcg/kg/min" },
+    { name:"Isoproterenol", dose:"1@=0.2mg/1cc", mix:"3@(0.6mg)", fluid:"D5W* 또는 N/S", preVol:"97cc", postVol:"100cc", conc:"6mcg/cc", concNum:6, concUnit:"mcg", unit:"mcg/min", calcType:"min", solo:false, clineOnly:false, isPandC:false, notes:"* 0.5~5mcg/min\n* 차광보관\n* 카테콜아민류와 병용 금기" },
+    { name:"Lidocaine (2%)", dose:"1vial=400mg/20cc", mix:"2ⓥ(800mg)", fluid:"D5W 또는 N/S", preVol:"40cc", postVol:"80cc", conc:"10mg/cc", concNum:10, concUnit:"mg", unit:"mg/min", calcType:"min", solo:false, clineOnly:false, isPandC:false, notes:"* 1mg/kg IV bolus 후 CIV\n* TS: mg/kg/hr로 시작" }
+  ]},
+  { id:"antihtn", name:"Antihypertensives", icon:"🔵", color:"#16a34a", drugs:[
+    { name:"Labetalol", dose:"1@=100mg/20cc", mix:"1@(100mg)", fluid:"D5W* 또는 N/S", preVol:"80cc", postVol:"100cc", conc:"1mg/cc", concNum:1, concUnit:"mg", unit:"mg/hr", calcType:"hr", solo:false, clineOnly:false, isPandC:false, notes:null },
+    { name:"Nicardipine", dose:"1@=10mg/10cc", mix:"5@(50mg)", fluid:"D5W 또는 N/S", preVol:"[P] 200cc  /  [C] 50cc", postVol:"[P] 250cc  /  [C] 100cc", conc:"[P] 0.2mg/cc  /  [C] 0.5mg/cc", concNum:0.2, concNum_c:0.5, concUnit:"mg", unit:"mg/hr", calcType:"hr", solo:false, clineOnly:false, isPandC:true, notes:"* 혈관 자극 심함 → 말초 12시간마다 infusion site 변경\n* 1~2mg씩 shooting 하기도 함" }
+  ]},
+  { id:"vasodilator", name:"Vasodilators", icon:"🫀", color:"#2563eb", drugs:[
+    { name:"Milrinone", dose:"1@=10mg/10cc", mix:"2@(20mg)", fluid:"D5W 또는 N/S", preVol:"80cc", postVol:"100cc", conc:"0.2mg/cc (=200mcg/cc)", concNum:200, concUnit:"mcg", unit:"mcg/kg/min", calcType:"wt_min", solo:false, clineOnly:false, isPandC:false, notes:"* 0.2~0.75mcg/kg/min" },
+    { name:"Nimodipine", dose:"1vial=10mg/50cc", mix:"원액 사용", fluid:null, preVol:null, postVol:null, conc:"0.2mg/cc", concNum:0.2, concUnit:"mg", unit:"mg/hr", calcType:"hr", solo:true, clineOnly:true, isPandC:false, notes:"* 중심정맥관으로 주입\n* 말초정맥: 5cc/hr + N/S 1L 20cc/hr (같은 루트 3-way, 1:4 비율)" },
+    { name:"Nitroglycerin", dose:"1@=50mg/50cc", mix:"1ⓥ(50mg) [표준] 또는 1ⓥ(50mg) [농축]", fluid:"D5W 또는 N/S", preVol:"[표준] 200cc  /  [농축] 50cc", postVol:"[표준] 250cc  /  [농축] 100cc", conc:"0.2mg/cc 또는 0.5mg/cc(농축)", concNum:200, concNum_c:500, concUnit:"mcg", concStd:"0.2mg/cc", concConc:"0.5mg/cc", unit:"mcg/min", calcType:"min", unit2:"mcg/kg/min", calcType2:"wt_min", concNum2:200, concUnit2:"mcg", isDualUnit:true, solo:false, clineOnly:false, isDual:true, isPandC:false, notes:"* 10~200mcg/min\n* TS: mcg/kg/min" }
+  ]},
+  { id:"etc", name:"ETC.", icon:"💉", color:"#6b7280", drugs:[
+    { name:"Furosemide", dose:"1@=20mg/2cc", mix:"5@(100mg)", fluid:"only N/S", preVol:"90cc", postVol:"100cc", conc:"1mg/cc", concNum:1, concUnit:"mg", unit:"mg/hr", calcType:"hr", solo:true, clineOnly:false, isPandC:false, notes:null },
+    { name:"Heparin", dose:"1vial=25,000unit/5cc", mix:"1ⓥ(25,000unit)", fluid:"D5W 또는 N/S", preVol:"495cc", postVol:"500cc", conc:"50unit/cc", concNum:50, concUnit:"unit", unit:"unit/kg/hr", calcType:"wt_hr", solo:false, clineOnly:false, isPandC:false, notes:"* 60~80unit/kg loading 후 CIV\n* aPTT f/u (과량투여 시 protamine 투여)" },
+    { name:"Humulin R (Insulin)", dose:"1vial=1,000unit", mix:"1cc(100unit)", fluid:"N/S* 또는 D5W", preVol:"99cc", postVol:"100cc", conc:"1unit/cc", concNum:1, concUnit:"unit", unit:"unit/hr", calcType:"hr", solo:false, clineOnly:false, isPandC:false, notes:null }
+  ]}
+];
+
+let dc_selCat=null, dc_selDrug=null, dc_selLine='P', dc_selVariant=0, dc_selUnit=0;
+
+function dc_goView(id) {
+  document.querySelectorAll('#screen-drugcalc .dc-view').forEach(s=>s.classList.remove('active'));
+  document.getElementById('dc-view-'+id).classList.add('active');
+  const sc=document.getElementById('dc-scroll'); if(sc) sc.scrollTop=0;
+}
+
+function dc_init() {
+  const grid=document.getElementById('dc-catGrid'); if(!grid) return;
+  grid.innerHTML='';
+  dc_CATEGORIES.forEach(cat=>{
+    const card=document.createElement('div');
+    card.className='dc-cat-card';
+    card.innerHTML=`<div class="dc-cat-icon">${cat.icon}</div><div class="dc-cat-name">${cat.name}</div><div class="dc-cat-count">${cat.drugs.length}종</div><div class="dc-cat-bar" style="background:${cat.color}"></div>`;
+    card.addEventListener('click',()=>dc_selectCat(cat));
+    grid.appendChild(card);
+  });
+}
+
+function dc_selectCat(cat) {
+  dc_selCat=cat;
+  document.getElementById('dc-bc-drug').innerHTML=`<span>${cat.icon} ${cat.name}</span>`;
+  dc_renderDrugList(cat); dc_goView('drug');
+}
+
+function dc_renderDrugList(cat) {
+  const list=document.getElementById('dc-drugList'); list.innerHTML='';
+  cat.drugs.forEach(drug=>{
+    const item=document.createElement('div');
+    item.className='dc-drug-item';
+    let tags='';
+    if(drug.solo)      tags+=`<span class="dc-tag dc-tag-solo">단독</span>`;
+    if(drug.clineOnly) tags+=`<span class="dc-tag dc-tag-cline">C-line</span>`;
+    if(drug.isPandC)   tags+=`<span class="dc-tag dc-tag-p">P</span><span class="dc-tag dc-tag-c">C</span>`;
+    if(drug.isDual)    tags+=`<span class="dc-tag" style="background:rgba(180,83,9,0.1);color:#b45309">농축선택</span>`;
+    const concBadges=(drug.concStd&&drug.concConc)?`<div class="dc-drug-conc"><span class="dc-conc-badge dc-conc-std">표준 ${drug.concStd}</span><span class="dc-conc-badge dc-conc-conc">농축 ${drug.concConc}</span></div>`:'';
+    item.innerHTML=`<div class="dc-drug-body"><div class="dc-drug-name">${drug.name}${tags}</div><div class="dc-drug-dose">${drug.dose}</div><div class="dc-drug-unit">${drug.unit}</div>${concBadges}</div><div class="dc-drug-arrow">›</div>`;
+    item.addEventListener('click',()=>dc_selectDrug(drug));
+    list.appendChild(item);
+  });
+}
+
+function dc_selectDrug(drug) {
+  dc_selDrug=drug; dc_selLine='P'; dc_selVariant=0; dc_selUnit=0;
+  document.getElementById('dc-bc-calc').innerHTML=`<span>${dc_selCat.icon} ${dc_selCat.name}</span> › <span class="crumb-active">${drug.name}</span>`;
+  dc_renderCalc(drug); dc_goView('calc');
+}
+
+function dc_renderCalc(d) {
+  const body=document.getElementById('dc-calcBody');
+  let mixRows=`<div class="dc-mix-row"><span class="dc-mix-key">혼합 약물</span><span class="dc-mix-val dc-accent">${d.mix}</span></div>`;
+  if(d.fluid)   mixRows+=`<div class="dc-mix-row"><span class="dc-mix-key">수액 종류</span><span class="dc-mix-val">${d.fluid}</span></div>`;
+  if(d.preVol)  mixRows+=`<div class="dc-mix-row"><span class="dc-mix-key">혼합 전 수액량</span><span class="dc-mix-val">${d.preVol}</span></div>`;
+  if(d.postVol) mixRows+=`<div class="dc-mix-row"><span class="dc-mix-key">혼합 후 수액량</span><span class="dc-mix-val">${d.postVol}</span></div>`;
+  if(d.concStd&&d.concConc) {
+    const sl=d.isPandC?'[P] 말초':'표준', cl=d.isPandC?'[C] 농축':'농축';
+    mixRows+=`<div class="dc-mix-row" style="align-items:center"><span class="dc-mix-key">혼합 농도</span><span style="display:flex;gap:6px;flex-wrap:wrap"><span class="dc-conc-badge dc-conc-std">${sl} ${d.concStd}</span><span class="dc-conc-badge dc-conc-conc">${cl} ${d.concConc}</span></span></div>`;
+  } else {
+    mixRows+=`<div class="dc-mix-row"><span class="dc-mix-key">혼합 농도</span><span class="dc-mix-val">${d.conc}</span></div>`;
+  }
+  mixRows+=`<div class="dc-mix-row"><span class="dc-mix-key">투여 단위</span><span class="dc-mix-val" id="dc-mix-unit">${d.unit}${d.isDualUnit?' / '+d.unit2:''}</span></div>`;
+
+  let lineSel='';
+  if(d.isPandC) lineSel=`<div class="dc-section-label" style="padding-left:0;padding-top:0">투여 경로</div><div class="dc-line-sel"><button class="dc-line-btn active-p" id="dc-btn-p" onclick="dc_setLine('P')">[P] 말초정맥관</button><button class="dc-line-btn" id="dc-btn-c" onclick="dc_setLine('C')">[C] 중심정맥관</button></div>`;
+
+  let dualUnitSel='';
+  if(d.isDualUnit) dualUnitSel=`<div class="dc-section-label" style="padding-left:0;padding-top:0">투여 단위 선택</div><div class="dc-line-sel"><button class="dc-line-btn active-p" id="dc-btn-unit0" onclick="dc_setUnit(0)">${d.unit}</button><button class="dc-line-btn" id="dc-btn-unit1" onclick="dc_setUnit(1)">${d.unit2}</button></div>`;
+
+  let dualSel='';
+  if(d.isDual) dualSel=`<div class="dc-section-label" style="padding-left:0;padding-top:0">농도 선택</div><div class="dc-line-sel"><button class="dc-line-btn active-p" id="dc-btn-std" onclick="dc_setVariant(0)">표준 농도${d.concStd?`<span style="opacity:.7;font-size:11px;margin-left:4px">${d.concStd}</span>`:''}</button><button class="dc-line-btn" id="dc-btn-conc" onclick="dc_setVariant(1)">농축${d.concConc?`<span style="opacity:.7;font-size:11px;margin-left:4px">${d.concConc}</span>`:''}</button></div>`;
+
+  const needsWtP=['wt_min','wt_hr'].includes(d.calcType);
+  const needsWtS=d.isDualUnit&&['wt_min','wt_hr'].includes(d.calcType2);
+  const wtHidden=!needsWtP&&needsWtS;
+  const wtInput=(needsWtP||needsWtS)?`<div class="dc-input-group" id="dc-weight-group"${wtHidden?' style="display:none"':''}><label class="dc-input-label">환자 체중</label><div class="dc-input-wrap"><input class="dc-input-field" id="dc-inp-weight" type="number" inputmode="decimal" placeholder="0" step="0.1" min="0" oninput="dc_calculate()"><span class="dc-input-unit">kg</span></div></div>`:'';
+
+  body.innerHTML=`
+    <div class="dc-drug-header-card">
+      <div class="dc-drug-header-name">${d.name}${d.solo?'<span class="dc-tag dc-tag-solo">단독</span>':''}${d.clineOnly?'<span class="dc-tag dc-tag-cline">C-line</span>':''}</div>
+      <div class="dc-drug-header-dose">${d.dose}</div>
+    </div>
+    <div class="dc-mix-card"><div class="dc-mix-title">혼합법 정보</div>${mixRows}</div>
+    ${d.notes?`<div class="dc-notes-card"><div class="dc-notes-title">📌 참고사항</div><div class="dc-notes-text">${d.notes}</div></div>`:''}
+    ${dualUnitSel}${lineSel}${dualSel}${wtInput}
+    <div class="dc-input-group">
+      <label class="dc-input-label">목표 투여 속도</label>
+      <div class="dc-input-wrap"><input class="dc-input-field" id="dc-inp-rate" type="number" inputmode="decimal" placeholder="0" step="any" min="0" oninput="dc_calculate()"><span class="dc-input-unit" id="dc-inp-rate-unit">${d.unit}</span></div>
+    </div>
+    <div class="dc-result-card" id="dc-result-card">
+      <div class="dc-result-label" id="dc-result-label">주입 속도</div>
+      <div class="dc-result-value" id="dc-result-value">—</div>
+      <div class="dc-result-unit">cc / hr (mL/hr)</div>
+      <div class="dc-result-formula" id="dc-result-formula"></div>
+    </div>
+    <div id="dc-warning-area"></div>`;
+}
+
+function dc_setLine(line) {
+  dc_selLine=line;
+  const bp=document.getElementById('dc-btn-p'), bc=document.getElementById('dc-btn-c');
+  if(!bp||!bc) return;
+  bp.className='dc-line-btn'+(line==='P'?' active-p':'');
+  bc.className='dc-line-btn'+(line==='C'?' active-c':'');
+  dc_calculate();
+}
+
+function dc_setUnit(u) {
+  dc_selUnit=u;
+  const d=dc_selDrug; if(!d||!d.isDualUnit) return;
+  const aUnit=u===0?d.unit:d.unit2, aCT=u===0?d.calcType:d.calcType2;
+  document.getElementById('dc-btn-unit0').className='dc-line-btn'+(u===0?' active-p':'');
+  document.getElementById('dc-btn-unit1').className='dc-line-btn'+(u===1?' active-p':'');
+  const ul=document.getElementById('dc-inp-rate-unit'); if(ul) ul.textContent=aUnit;
+  const wg=document.getElementById('dc-weight-group'); if(wg) wg.style.display=['wt_min','wt_hr'].includes(aCT)?'':'none';
+  const re=document.getElementById('dc-inp-rate'); if(re) re.value='';
+  const we=document.getElementById('dc-inp-weight'); if(we) we.value='';
+  const rc=document.getElementById('dc-result-card'); if(rc) rc.classList.remove('show');
+}
+
+function dc_setVariant(v) {
+  dc_selVariant=v;
+  const bs=document.getElementById('dc-btn-std'), bc=document.getElementById('dc-btn-conc');
+  if(!bs||!bc) return;
+  bs.className='dc-line-btn'+(v===0?' active-p':'');
+  bc.className='dc-line-btn'+(v===1?' active-c':'');
+  dc_calculate();
+}
+
+function dc_calculate() {
+  const d=dc_selDrug; if(!d) return;
+  const rateEl=document.getElementById('dc-inp-rate'), weightEl=document.getElementById('dc-inp-weight');
+  const card=document.getElementById('dc-result-card'); if(!rateEl||!card) return;
+  const rate=parseFloat(rateEl.value), weight=weightEl?parseFloat(weightEl.value):NaN;
+  const aUnit=(d.isDualUnit&&dc_selUnit===1)?d.unit2:d.unit;
+  const aCT=(d.isDualUnit&&dc_selUnit===1)?d.calcType2:d.calcType;
+  const aCN=(d.isDualUnit&&dc_selUnit===1)?d.concNum2:d.concNum;
+  const aCU=(d.isDualUnit&&dc_selUnit===1)?d.concUnit2:d.concUnit;
+  const needsWt=['wt_min','wt_hr'].includes(aCT);
+  if(isNaN(rate)||rate<0||(needsWt&&(isNaN(weight)||weight<=0))){card.classList.remove('show');return;}
+  let concNum=aCN;
+  if(d.isPandC&&dc_selLine==='C'&&d.concNum_c!=null) concNum=d.concNum_c;
+  if(d.isDual&&dc_selVariant===1&&d.concNum_c!=null) concNum=d.concNum_c;
+  let cchr=0, formula='';
+  switch(aCT){
+    case 'wt_min': cchr=(rate*weight*60)/concNum; formula=`${rate} ${aUnit} × ${weight} kg × 60 ÷ ${concNum} ${aCU}/cc`; break;
+    case 'wt_hr':  cchr=(rate*weight)/concNum;    formula=`${rate} ${aUnit} × ${weight} kg ÷ ${concNum} ${aCU}/cc`; break;
+    case 'min':    cchr=(rate*60)/concNum;         formula=`${rate} ${aUnit} × 60 ÷ ${concNum} ${aCU}/cc`; break;
+    case 'hr':     cchr=rate/concNum;              formula=`${rate} ${aUnit} ÷ ${concNum} ${aCU}/cc`; break;
+    case 'day':    cchr=rate/(concNum*24);         formula=`${rate} ${aUnit} ÷ ${concNum} ${aCU}/cc ÷ 24hr`; break;
+  }
+  const result=Math.round(cchr*100)/100;
+  let lineLabel='';
+  if(d.isPandC) lineLabel=` (${dc_selLine==='P'?'말초정맥':'중심정맥'})`;
+  if(d.isDual)  lineLabel=` (${dc_selVariant===0?'표준농도':'농축농도'})`;
+  document.getElementById('dc-result-label').textContent='주입 속도'+lineLabel;
+  document.getElementById('dc-result-value').textContent=result;
+  document.getElementById('dc-result-formula').textContent=formula+'\n= '+result+' cc/hr';
+  card.classList.add('show');
+  const wa=document.getElementById('dc-warning-area');
+  const warn=d.clineOnly||(d.isPandC&&dc_selLine==='C')||(d.isDual&&dc_selVariant===1&&d.name!=='Dopamine'&&d.name!=='Dobutamine');
+  wa.innerHTML=warn?'<div class="dc-warning">⚠️ 이 농도(경로)는 중심정맥관(C-line)으로만 투여해야 합니다.</div>':'';
+}
+
+dc_init();
 </script>
 
 <script src="app.js"></script>
