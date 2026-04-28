@@ -2390,11 +2390,11 @@ function sqr_sendToSheets(rec) {
 
     // 세부 항목 (헤더 순서: B 3개, C 2개, D 3개, E 4개)
     const detail = [
-      ck(bc['B'][0]), ck(bc['B'][1]), ck(bc['B'][2]),   // A-산소흡입량, A-Vent, A-CRRT등
-      ck(bc['C'][0]), ck(bc['C'][1]),                    // C-중심정맥관, C-IV
-      ck(bc['D'][0]), ck(bc['D'][1]), ck(bc['D'][2]),   // D-의약라벨, D-약물희석, D-처방용량
-      ck(bc['E'][0]), ck(bc['E'][1]), ck(bc['E'][2]), ck(bc['E'][3]), // E 4개
-    ].join('\t');
+  ck(bc['A'][0]), ck(bc['A'][1]),                       // A-EKG리듬확인, A-알람설정
+  ck(bc['B'][0]), ck(bc['B'][1]), ck(bc['B'][2]),        // B-산소흡입량, B-Vent세팅, B-CRRT등
+  ck(bc['C'][0]), ck(bc['C'][1]),                        // C-중심정맥관, C-IV카테터
+  ck(bc['D'][0]), ck(bc['D'][1]), ck(bc['D'][2]),        // D-의약라벨, D-약물희석, D-처방용량
+  ck(bc['E'][0]), ck(bc['E'][1]), ck(bc['E'][2]), ck(bc['E'][3]), // E-상처, E-배액관드레싱, E-배액관압력, E-배액량].join('\t');
 
     return [
       rec.savedAt,           // 저장일시
