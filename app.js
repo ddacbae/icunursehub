@@ -1486,12 +1486,41 @@ function foleySave() {
   }
   foleyAutoSave();
   const shift = FOLEY_SHIFTS.find(s => s.key === foleyCurrentShift);
-  const date = foleyGetDateKey();
+  const date  = foleyGetDateKey();
   const allCbs = document.querySelectorAll('#foley-sections input[type=checkbox]');
   const total = allCbs.length;
   let checked = 0;
   allCbs.forEach(cb => { if (cb.checked) checked++; });
   alert(`✅ 저장 완료\n\n📅 날짜: ${date}\n근무: ${shift.label} (${shift.name})\n👤 확인자: ${confirmer}\n📊 체크: ${checked}/${total}`);
+
+  // Google Sheets 전송 — 침상별 1행
+  const ck = v => v ? '✓' : '—';
+  const savedAt = new Date().toLocaleString('ko-KR');
+  const rows = [];
+
+  for (let bed = 1; bed <= FOLEY_BEDS; bed++) {
+    const present = document.querySelector(`input[data-row="present"][data-bed="${bed}"]`)?.checked || false;
+    const loose   = document.querySelector(`input[data-row="loose"][data-bed="${bed}"]`)?.checked   || false;
+    // 시간별 체크 (최대 3개 time 행)
+    const times = shift.times.map((t, ti) =>
+      ck(document.querySelector(`input[data-row="time${ti}"][data-bed="${bed}"]`)?.checked)
+    );
+    // 도뇨관 없는 침상은 전송 생략
+    if (!present && !loose && times.every(t => t === '—')) continue;
+
+    rows.push([
+      savedAt, date, shift.label, confirmer,
+      bed + '번', ck(present), ck(loose),
+      ...times,
+    ]);
+  }
+
+  if (rows.length === 0) return;
+  fetch(SQR_SHEET_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ sheetName: '유치도뇨관', rows }),
+  }).catch(() => {});
 }
 
 function foleyResetShift() {
@@ -1848,19 +1877,35 @@ function qmResetBed() {
 function qmSaveData() {
   if (!qmCurrentBed) return;
   qmAutoSave();
-  const date = qmGetDateKey();
-  const shift = document.getElementById('qm-shift')?.value || '';
+  const date   = qmGetDateKey();
+  const shift  = document.getElementById('qm-shift')?.value || '';
   const worker = document.getElementById('qm-worker')?.value || '미입력';
   const charge = document.getElementById('qm-charge-nurse')?.value || '미입력';
+  const notes  = document.getElementById('qm-handover-notes')?.value || '';
 
   const all = document.querySelectorAll('#qm-panel-checklist input[type=checkbox]');
   const total = all.length;
   let checked = 0;
-  all.forEach(cb => { if (cb.checked) checked++; });
+  const cbStates = [];
+  all.forEach(cb => { if (cb.checked) checked++; cbStates.push(cb.checked ? '✓' : '—'); });
   const pct = Math.round(checked / total * 100);
 
   alert(`✅ 저장 완료\n\n📅 ${date}  근무: ${shift}\n🛏 ${qmCurrentBed}번 침상\n👤 ${worker}  책임: ${charge}\n📊 ${checked}/${total} (${pct}%)`);
   qmShowBedPanel();
+
+  // Google Sheets 전송
+  const row = [
+    new Date().toLocaleString('ko-KR'), date, shift, qmCurrentBed + '번',
+    worker, charge,
+    checked, total, pct + '%',
+    notes,
+    cbStates.join('\t'),
+  ];
+  fetch(SQR_SHEET_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ sheetName: 'QM체크리스트', rows: [row] }),
+  }).catch(() => {});
 }
 
 // ===== SICU 업무메뉴얼 =====
