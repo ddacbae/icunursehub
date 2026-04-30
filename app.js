@@ -1498,14 +1498,14 @@ function foleySave() {
 
   for (let bed = 1; bed <= FOLEY_BEDS; bed++) {
     const present = document.querySelector(`input[data-row="present"][data-bed="${bed}"]`)?.checked || false;
-    const loose   = document.querySelector(`input[data-row="loose"][data-bed="${bed}"]`)?.checked   || false;
-    const times   = shift.times.map((t, ti) => {
-      const chk = document.querySelector(`input[data-row="time${ti}"][data-bed="${bed}"]`)?.checked;
-      return `${t} ${ck(chk)}`;
-    });
+    const loose      = document.querySelector(`input[data-row="loose"][data-bed="${bed}"]`)?.checked || false;
+    const timeChecks = shift.times.map((t, ti) =>
+      document.querySelector(`input[data-row="time${ti}"][data-bed="${bed}"]`)?.checked || false
+    );
+    const times = shift.times.map((t, ti) => `${t} ${ck(timeChecks[ti])}`);
 
     // 체크값 없는 침상 제외
-    if (!present && !loose && times.every(t => t.endsWith('—'))) continue;
+    if (!present && !loose && timeChecks.every(c => !c)) continue;
 
     const key = `${date}_${foleyCurrentShift}_${bed}`;
     if (savedKeys.has(key)) {
