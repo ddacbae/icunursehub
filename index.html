@@ -2549,12 +2549,12 @@ function cn_sendToSheets(rec) {
   // 고정 열 순서 (NIGHT 전용 항목은 해당 근무 외 N/A)
   const isNight = rec.shift === 'NIGHT';
   const detail = [
-    isNight ? ck(rec.checks['기록모니터링']?.[0]) : 'N/A', // 기록모니터링①
-    ck(rec.checks['중심정맥관']?.[0]),                       // 중심정맥관①
-    ck(rec.checks['중심정맥관']?.[1]),                       // 중심정맥관②
-    ck(rec.checks['IV']?.[0]),                               // IV①
-    ck(rec.checks['간호일지']?.[0]),                         // 간호일지①
-    ck(rec.checks['수혈']?.[0]),                             // 수혈①
+    ck(rec.checks['중심정맥관']?.[0]),                       // 중심정맥관-삽입부위확인
+    ck(rec.checks['중심정맥관']?.[1]),                       // 중심정맥관-blood흔적
+    ck(rec.checks['IV']?.[0]),                               // IV-삽입부위확인
+    ck(rec.checks['간호일지']?.[0]),                         // 간호일지-기록작성
+    ck(rec.checks['수혈']?.[0]),                             // 수혈-경로확인
+    isNight ? ck(rec.checks['기록모니터링']?.[0]) : 'N/A',  // 기록모니터링-비대면인계
   ].join('\t');
 
   const row = [
@@ -2567,7 +2567,7 @@ function cn_sendToSheets(rec) {
   fetch(SQR_SHEET_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ sheetName: 'CN라운딩', rows: [row] }),
+    body: JSON.stringify({ sheetName: '책임간호사라운딩', rows: [row] }),
   })
   .then(() => cn_toast('✅ 저장 완료! (Google Sheets 전송됨)'))
   .catch(() => cn_toast('✅ 로컬 저장 완료 (Sheets 전송 실패)'));
