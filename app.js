@@ -1502,9 +1502,10 @@ function foleySave() {
     const present = document.querySelector(`input[data-row="present"][data-bed="${bed}"]`)?.checked || false;
     const loose   = document.querySelector(`input[data-row="loose"][data-bed="${bed}"]`)?.checked   || false;
     // 시간별 체크 (최대 3개 time 행)
-    const times = shift.times.map((t, ti) =>
-      ck(document.querySelector(`input[data-row="time${ti}"][data-bed="${bed}"]`)?.checked)
-    );
+    const times = shift.times.map((t, ti) => {
+      const checked = document.querySelector(`input[data-row="time${ti}"][data-bed="${bed}"]`)?.checked;
+      return `${t} ${ck(checked)}`;
+    });
     // 도뇨관 없는 침상은 전송 생략
     if (!present && !loose && times.every(t => t === '—')) continue;
 
