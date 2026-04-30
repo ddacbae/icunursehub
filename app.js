@@ -1485,38 +1485,54 @@ function foleySave() {
     return;
   }
   foleyAutoSave();
-  const shift = FOLEY_SHIFTS.find(s => s.key === foleyCurrentShift);
-  const date  = foleyGetDateKey();
-  const allCbs = document.querySelectorAll('#foley-sections input[type=checkbox]');
-  const total = allCbs.length;
-  let checked = 0;
-  allCbs.forEach(cb => { if (cb.checked) checked++; });
-  alert(`✅ 저장 완료\n\n📅 날짜: ${date}\n근무: ${shift.label} (${shift.name})\n👤 확인자: ${confirmer}\n📊 체크: ${checked}/${total}`);
-
-  // Google Sheets 전송 — 침상별 1행
-  const ck = v => v ? '✓' : '—';
+  const shift   = FOLEY_SHIFTS.find(s => s.key === foleyCurrentShift);
+  const date    = foleyGetDateKey();
   const savedAt = new Date().toLocaleString('ko-KR');
-  const rows = [];
+  const savedKeys = new Set(JSON.parse(localStorage.getItem('foley_saved_beds') || '[]'));
+  const rows    = [];
+  const newKeys = [];
+  const skipped = [];
 
   for (let bed = 1; bed <= FOLEY_BEDS; bed++) {
-    const present = document.querySelector(`input[data-row="present"][data-bed="${bed}"]`)?.checked || false;
-    const loose   = document.querySelector(`input[data-row="loose"][data-bed="${bed}"]`)?.checked   || false;
-    // 시간별 체크 (최대 3개 time 행)
-    const times = shift.times.map((t, ti) => {
-      const checked = document.querySelector(`input[data-row="time${ti}"][data-bed="${bed}"]`)?.checked;
-      return `${t} ${ck(checked)}`;
-    });
-    // 도뇨관 없는 침상은 전송 생략
-    if (!present && !loose && times.every(t => t === '—')) continue;
+    const present    = document.querySelector(`input[data-row="present"][data-bed="${bed}"]`)?.checked || false;
+    const loose      = document.querySelector(`input[data-row="loose"][data-bed="${bed}"]`)?.checked   || false;
+    const timeChecks = shift.times.map((t, ti) =>
+      document.querySelector(`input[data-row="time${ti}"][data-bed="${bed}"]`)?.checked || false
+    );
+
+    // 아무것도 체크 안 된 침상은 전송 생략
+    if (!present && !loose && timeChecks.every(c => !c)) continue;
+
+    // 중복 저장 방지
+    const key = `${date}_${foleyCurrentShift}_${bed}`;
+    if (savedKeys.has(key)) { skipped.push(bed); continue; }
 
     rows.push([
-      savedAt, date, shift.label, confirmer,
-      bed + '번', ck(present), ck(loose),
-      ...times,
+      savedAt, date, shift.label, confirmer, bed + '번',
+      present ? '✓' : '',
+      loose   ? '✓' : '',
+      ...timeChecks.map((c, ti) => c ? `${shift.times[ti]} ✓` : ''),
     ]);
+    newKeys.push(key);
   }
 
-  if (rows.length === 0) return;
+  if (rows.length === 0) {
+    const msg = skipped.length > 0
+      ? `⚠️ 이미 저장된 데이터입니다.\n중복 침상: ${skipped.join(', ')}번`
+      : '저장할 데이터가 없습니다.';
+    alert(msg);
+    return;
+  }
+
+  if (skipped.length > 0) {
+    alert(`✅ 저장 완료 (중복 제외)\n\n📅 ${date}  근무: ${shift.label}\n👤 확인자: ${confirmer}\n✔ 저장: ${rows.length}개 침상 / ⚠ 중복 제외: ${skipped.join(', ')}번`);
+  } else {
+    alert(`✅ 저장 완료\n\n📅 날짜: ${date}\n근무: ${shift.label} (${shift.name})\n👤 확인자: ${confirmer}\n✔ 저장: ${rows.length}개 침상`);
+  }
+
+  newKeys.forEach(k => savedKeys.add(k));
+  localStorage.setItem('foley_saved_beds', JSON.stringify([...savedKeys]));
+
   fetch(SQR_SHEET_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
