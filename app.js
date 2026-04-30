@@ -1511,7 +1511,7 @@ function foleySave() {
       savedAt, date, shift.label, confirmer, bed + '번',
       present ? '✓' : '',
       loose   ? '✓' : '',
-      ...timeChecks.map((c, ti) => c ? `${shift.times[ti]} ✓` : ''),
+      ...timeChecks.map(c => c ? '✓' : ''),
     ]);
     newKeys.push(key);
   }
