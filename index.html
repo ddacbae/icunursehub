@@ -367,44 +367,38 @@
   </div>
 
   <div class="scroll-content">
-    <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input type="text" placeholder="검색 (질환, 장비, 약물...)" class="search-input">
-    </div>
-
-    <div class="edu-grid">
-      <div class="edu-card" onclick="showScreen('screen-initial-assessment')">
+    <div class="edu-grid" id="edu-grid">
+      <div class="edu-card" data-search="초기 사정 메뉴얼 진료과별 환자 사정" onclick="showScreen('screen-initial-assessment')">
         <div class="edu-card-icon purple">📋</div>
         <div class="edu-card-label">초기 사정<br>메뉴얼</div>
         <div class="edu-card-sub">진료과별 환자 사정</div>
       </div>
-      <div class="edu-card" onclick="showScreen('screen-sicu-manual')">
+      <div class="edu-card" data-search="외과계중환자실 업무메뉴얼 챕터" onclick="showScreen('screen-sicu-manual')">
         <div class="edu-card-icon teal">📘</div>
         <div class="edu-card-label">외과계중환자실<br>업무메뉴얼</div>
         <div class="edu-card-sub">12개 챕터</div>
       </div>
-      <div class="edu-card">
+      <div class="edu-card" data-search="질환별 핵심 요약 sepsis ards aki 뇌졸중">
         <div class="edu-card-icon orange">🫁</div>
         <div class="edu-card-label">질환별<br>핵심 요약</div>
         <div class="edu-card-sub">업데이트 예정</div>
       </div>
-      <div class="edu-card">
+      <div class="edu-card" data-search="장비 가이드 인공호흡기 crrt iabp ecmo">
         <div class="edu-card-icon blue">📺</div>
         <div class="edu-card-label">장비 가이드</div>
         <div class="edu-card-sub">업데이트 예정</div>
       </div>
-      <div class="edu-card">
+      <div class="edu-card" data-search="약물 가이드 승압제 진통제 항생제">
         <div class="edu-card-icon red">💊</div>
         <div class="edu-card-label">약물 가이드</div>
         <div class="edu-card-sub">업데이트 예정</div>
       </div>
-      <div class="edu-card urgent-card">
+      <div class="edu-card urgent-card" data-search="응급 프로토콜 code blue 심폐소생술">
         <div class="edu-card-icon red-bg">🚨</div>
         <div class="edu-card-label">응급<br>프로토콜</div>
         <div class="edu-card-sub">업데이트 예정</div>
       </div>
     </div>
-
     <div style="height: 80px;"></div>
   </div>
 
@@ -2790,6 +2784,16 @@ function dc_calculate() {
 
 dc_init();
 </script>
+
+<!-- ===== 사정 완료 팝업 ===== -->
+<div id="proto-complete-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:20px; padding:32px 28px; max-width:320px; width:88%; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+    <div style="font-size:48px; margin-bottom:12px;">✅</div>
+    <div style="font-size:18px; font-weight:700; color:#1a1a2e; margin-bottom:8px;">사정이 완료되었습니다.</div>
+    <div style="font-size:13px; color:#666; margin-bottom:24px;">모든 항목이 체크되었습니다.<br>확인 시 초기화됩니다.</div>
+    <button id="proto-complete-ok" style="background:#1565C0; color:#fff; border:none; border-radius:12px; padding:12px 40px; font-size:15px; font-weight:600; cursor:pointer; font-family:inherit;">확인</button>
+  </div>
+</div>
 
 <script src="app.js"></script>
 <script>

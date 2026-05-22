@@ -934,7 +934,8 @@ html, body {
   padding: 16px 18px;
 }
 .proto-breadcrumb { font-size: 11px; opacity: 0.7; margin-bottom: 5px; font-weight: 500; }
-.proto-full-title { font-size: 17px; font-weight: 700; margin-bottom: 12px; line-height: 1.4; letter-spacing: -0.2px; }
+.proto-full-title { font-size: 17px; font-weight: 700; margin-bottom: 10px; line-height: 1.4; letter-spacing: -0.2px; }
+.proto-disclaimer { font-size: 11px; opacity: 0.75; line-height: 1.5; font-style: italic; margin-bottom: 4px; }
 .proto-focus-box {
   background: rgba(255,255,255,0.12);
   border-radius: 10px; padding: 11px 13px;
