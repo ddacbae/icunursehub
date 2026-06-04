@@ -56,6 +56,14 @@
   --radius: 14px;
   --radius-sm: 10px;
   --radius-xs: 6px;
+
+  /* Safe Area */
+  --status-bar-height: 0px;
+}
+
+/* ─── Safe Area (아이폰 + 안드로이드 상태바 대응) ─── */
+body {
+  padding-top: max(env(safe-area-inset-top), var(--status-bar-height));
 }
 
 html, body {
