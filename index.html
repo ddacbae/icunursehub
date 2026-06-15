@@ -216,6 +216,44 @@
 #screen-sicu-quick-rounding .rs-view.active,
 #screen-cn-rounding .rs-view.active { display:block; }
 
+/* ─── Antibiotic AST Screen ─── */
+#screen-antibiotic-ast { background:#f8fafc; font-family:'Noto Sans KR',sans-serif; }
+.ast-banner { margin:12px 14px 0; border-radius:10px; padding:12px 14px; }
+.ast-banner-warn { background:#fef2f2; border:1.5px solid #fecaca; display:flex; align-items:flex-start; gap:8px; }
+.ast-banner-warn-text { font-size:13px; font-weight:700; color:#dc2626; line-height:1.5; }
+.ast-banner-info { background:#eff6ff; border:1px solid #bfdbfe; }
+.ast-banner-judge { background:#f0fdf4; border:1px solid #bbf7d0; }
+.ast-banner-unspec { background:#fffbeb; border:1px solid #fde68a; }
+.ast-banner-title { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin-bottom:7px; }
+.ast-banner-info .ast-banner-title { color:#1d4ed8; }
+.ast-banner-judge .ast-banner-title { color:#15803d; }
+.ast-banner-unspec .ast-banner-title { color:#b45309; }
+.ast-banner-body { font-size:12.5px; line-height:1.8; }
+.ast-banner-info .ast-banner-body { color:#1e3a5f; }
+.ast-banner-judge .ast-banner-body { color:#14532d; }
+.ast-banner-unspec .ast-banner-body { color:#92400e; }
+.ast-tab-row { display:flex; gap:6px; padding:12px 14px 4px; overflow-x:auto; -webkit-overflow-scrolling:touch; flex-shrink:0; }
+.ast-tab { flex-shrink:0; padding:7px 14px; border:1.5px solid #e2e8f0; border-radius:99px; background:#fff; color:#64748b; font-size:12px; font-weight:600; cursor:pointer; font-family:'Noto Sans KR',sans-serif; transition:all .15s; }
+.ast-tab.active { background:#1e293b; border-color:#1e293b; color:#fff; }
+.ast-card { margin:8px 14px 0; background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; overflow:hidden; }
+.ast-card-hdr { padding:10px 14px; display:flex; align-items:center; gap:8px; }
+.ast-cat-badge { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:99px; flex-shrink:0; }
+.ast-card-group { font-size:12.5px; font-weight:600; color:#1e293b; flex:1; }
+.ast-card-dose { font-size:11px; font-family:'IBM Plex Mono',monospace; font-weight:600; white-space:nowrap; }
+.ast-drug { padding:12px 14px; border-top:1px solid #f1f5f9; }
+.ast-drug-name { font-size:13px; font-weight:600; color:#1e293b; margin-bottom:6px; line-height:1.5; }
+.ast-drug-chips { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:10px; }
+.ast-chip { font-size:11px; padding:2px 7px; border-radius:4px; font-family:'IBM Plex Mono',monospace; font-weight:500; }
+.ast-chip-solv { background:#faf5ff; color:#6d28d9; border:1px solid #ede9fe; }
+.ast-chip-conc { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; }
+.ast-chip-dose { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
+.ast-chip-time { background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; }
+.ast-steps { display:flex; flex-direction:column; gap:6px; }
+.ast-step { display:flex; align-items:flex-start; gap:8px; }
+.ast-step-n { width:20px; height:20px; border-radius:50%; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+.ast-step-txt { font-size:12.5px; color:#334155; line-height:1.55; flex:1; }
+.ast-conc-tag { display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10.5px; border-radius:4px; padding:1px 5px; margin-left:3px; vertical-align:middle; }
+
 /* ─── Drug Calculator Screen ─── */
 #screen-drugcalc {
   --dc-bg:#f5f7fa; --dc-surface:#fff; --dc-surface2:#f0f2f5; --dc-border:#dde1e7;
@@ -376,10 +414,10 @@
         <div class="edu-card-label">초기 사정<br>메뉴얼</div>
         <div class="edu-card-sub">진료과별 환자 사정</div>
       </div>
-      <div class="edu-card" data-search="외과계중환자실 업무메뉴얼 챕터" onclick="showScreen('screen-sicu-manual')">
-        <div class="edu-card-icon teal">📘</div>
-        <div class="edu-card-label">외과계중환자실<br>업무메뉴얼</div>
-        <div class="edu-card-sub">12개 챕터</div>
+      <div class="edu-card" data-search="항생제 AST 피내 주사 세파 페니실린 조제" onclick="showScreen('screen-antibiotic-ast')">
+        <div class="edu-card-icon teal">💉</div>
+        <div class="edu-card-label">항생제<br>AST 가이드</div>
+        <div class="edu-card-sub">용액 조제 · 판정 방법</div>
       </div>
       <div class="edu-card" data-search="질환별 핵심 요약 sepsis ards aki 뇌졸중">
         <div class="edu-card-icon orange">🫁</div>
@@ -395,6 +433,11 @@
         <div class="edu-card-icon red">💊</div>
         <div class="edu-card-label">약물 가이드</div>
         <div class="edu-card-sub">업데이트 예정</div>
+      </div>
+      <div class="edu-card" data-search="외과계중환자실 업무메뉴얼 챕터" onclick="showScreen('screen-sicu-manual')">
+        <div class="edu-card-icon teal">📘</div>
+        <div class="edu-card-label">외과계중환자실<br>업무메뉴얼</div>
+        <div class="edu-card-sub">12개 챕터</div>
       </div>
       <div class="edu-card urgent-card" data-search="응급 프로토콜 code blue 심폐소생술">
         <div class="edu-card-icon red-bg">🚨</div>
@@ -2077,6 +2120,72 @@
   </nav>
 </div>
 
+<!-- ===== 항생제 AST SCREEN ===== -->
+<div id="screen-antibiotic-ast" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">항생제 AST 가이드</span>
+    <span class="bookmark-btn" id="bm-screen-antibiotic-ast" onclick="toggleBookmark('screen-antibiotic-ast','항생제 AST 가이드','💉')">⭐</span>
+  </div>
+
+  <div class="scroll-content" style="background:#f8fafc;">
+
+    <!-- 경고 배너 -->
+    <div class="ast-banner ast-banner-warn">
+      <span style="font-size:18px; flex-shrink:0; margin-top:1px;">⚠️</span>
+      <div class="ast-banner-warn-text">중단일로부터 7일 이후에 재투여 시 AST 재시행</div>
+    </div>
+
+    <!-- 시험 방법 -->
+    <div class="ast-banner ast-banner-info">
+      <div class="ast-banner-title">시험 방법</div>
+      <div class="ast-banner-body">
+        ① AST 용액을 <strong>전완(forearm)</strong>에 정해진 투여량만큼 <strong>피내(intra-dermal)</strong>에 주사<br>
+        ② 양성인 경우, AST 시행부위에서 <strong>3~4cm 떨어진 곳</strong> 또는 반대쪽 대칭부위에 <strong>NS 0.02ml</strong>를 피내주사하여 비교
+      </div>
+    </div>
+
+    <!-- 판정 방법 -->
+    <div class="ast-banner ast-banner-judge">
+      <div class="ast-banner-title">판정 방법</div>
+      <div class="ast-banner-body">
+        ① <strong>페니실린 &amp; 세파계:</strong> 팽진 <strong>2~3mm 이상</strong> + 발적 동반 → 양성<br>
+        ② <strong>Asparaginase:</strong> wheal and/or erythema 발생 → 양성
+      </div>
+    </div>
+
+    <!-- AST 미지정 약물 -->
+    <div class="ast-banner ast-banner-unspec">
+      <div class="ast-banner-title">AST 미지정 약물 (각 계열 기준 적용)</div>
+      <div class="ast-banner-body">
+        · 합성 페니실린계: <strong>Piperacillin/Tazobactam (Tazoperan)</strong><br>
+        · 세파계: <strong>Ceftolozane/Tazobactam (Zerbaxa)</strong>
+      </div>
+    </div>
+
+    <!-- 카테고리 탭 -->
+    <div class="ast-tab-row">
+      <button class="ast-tab active" onclick="ast_filter(this,'all')">전체</button>
+      <button class="ast-tab" onclick="ast_filter(this,'peni')">페니실린계</button>
+      <button class="ast-tab" onclick="ast_filter(this,'cepha')">세파계</button>
+      <button class="ast-tab" onclick="ast_filter(this,'other')">기타</button>
+    </div>
+
+    <!-- 약물 카드 컨테이너 -->
+    <div id="ast-cards" style="padding-bottom:4px;"></div>
+
+    <div style="height:80px;"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
 <!-- ===== 외과계중환자실 업무메뉴얼 SCREEN ===== -->
 <div id="screen-sicu-manual" class="screen">
   <div class="sub-header">
@@ -2786,6 +2895,174 @@ function dc_calculate() {
 }
 
 dc_init();
+
+// ════════════════════════════════════════════════════════════════════════
+// 항생제 AST (ast_*)
+// ════════════════════════════════════════════════════════════════════════
+const AST_DATA = [
+  {
+    cat:'peni', catLabel:'천연 페니실린', catColor:'#2563eb', catBg:'#eff6ff',
+    form:'바이알',
+    groups:[{
+      drugs:['Benzathine penicillin G (Benzetacil)'],
+      vol:'120만 unit', solvent:'NS 또는 첨부된 용제', finalConc:'10,000 unit/cc',
+      doseAmount:'0.02ml', doseTime:'15-20분',
+      steps:[
+        {text:'용해액 <strong>3cc</strong>로 녹이기', conc:'400,000 unit/cc'},
+        {text:'<strong>0.25cc</strong>를 취해 총 1cc가 되도록 희석', conc:'100,000 unit/cc'},
+        {text:'<strong>0.1cc</strong>를 취해 총 1cc가 되도록 희석', conc:'10,000 unit/cc'},
+      ]
+    }]
+  },
+  {
+    cat:'peni', catLabel:'합성 페니실린', catColor:'#2563eb', catBg:'#eff6ff',
+    form:'바이알',
+    groups:[
+      {
+        drugs:['Ampicillin (Penbrex)','Ampicillin/Sulbactam (Ubactam)','Amoxicillin/Sulbactam (Sultamox)'],
+        vol:'500mg', solvent:'NS 또는 WFI', finalConc:'20mg/cc',
+        doseAmount:'0.02ml', doseTime:'15-20분',
+        steps:[
+          {text:'용해액 <strong>5cc</strong>로 녹이기', conc:'100mg/cc'},
+          {text:'<strong>0.2cc</strong>를 취해 총 1cc가 되도록 희석', conc:'20mg/cc'},
+        ]
+      },
+      {
+        drugs:['Nafcillin (Nafcillin)'],
+        vol:'1g', solvent:'NS 또는 WFI', finalConc:'0.025mg/cc',
+        doseAmount:'0.02ml', doseTime:'15-20분',
+        steps:[
+          {text:'용해액 <strong>5cc</strong>로 녹이기', conc:'200mg/cc'},
+          {text:'<strong>0.05cc</strong>를 취해 총 1cc가 되도록 희석', conc:'10mg/cc'},
+          {text:'<strong>0.05cc</strong>를 취해 총 1cc가 되도록 희석', conc:'0.5mg/cc'},
+          {text:'<strong>0.05cc</strong>를 취해 총 1cc가 되도록 희석', conc:'0.025mg/cc'},
+        ]
+      }
+    ]
+  },
+  {
+    cat:'cepha', catLabel:'세파계', catColor:'#16a34a', catBg:'#f0fdf4',
+    form:'바이알',
+    groups:[
+      {
+        drugs:['Flomoxef (Flumarin)'],
+        vol:'500mg', solvent:'NS 또는 WFI', finalConc:'2mg/cc',
+        doseAmount:'0.02ml', doseTime:'15-30분',
+        steps:[
+          {text:'용해액 <strong>5cc</strong>로 녹이기', conc:'100mg/cc'},
+          {text:'<strong>0.2cc</strong>를 취해 총 1cc가 되도록 희석', conc:'20mg/cc'},
+          {text:'<strong>0.1cc</strong>를 취해 총 1cc가 되도록 희석', conc:'2mg/cc'},
+        ]
+      },
+      {
+        drugs:['Cefazolin (Cefazolin)','Cefminox (Meicelin)','Cefoxitin (Jeitin)','Cefotetan (Cefotetan)','Ceftriaxone (Ceftriaxone)','Cefotaxime (Cefotaxime)','Ceftizoxime (Epocelin)','Ceftazidime (Cefazime)','Cefepime (Maxipim)'],
+        vol:'1g', solvent:'NS 또는 WFI', finalConc:'2mg/cc',
+        doseAmount:'0.02ml', doseTime:'15-30분',
+        steps:[
+          {text:'용해액 <strong>10cc</strong>로 녹이기', conc:'100mg/cc'},
+          {text:'<strong>0.2cc</strong>를 취해 총 1cc가 되도록 희석', conc:'20mg/cc'},
+          {text:'<strong>0.1cc</strong>를 취해 총 1cc가 되도록 희석', conc:'2mg/cc'},
+        ]
+      },
+      {
+        drugs:['Ceftriaxone (Ceftriaxone)','Cefotaxime (Cefotaxime)','Ceftazidime/Avibactam (Zavicefta)'],
+        vol:'2g', solvent:'NS 또는 WFI', finalConc:'2mg/cc',
+        doseAmount:'0.02ml', doseTime:'15-30분',
+        steps:[
+          {text:'용해액 <strong>10cc</strong>로 녹이기', conc:'200mg/cc'},
+          {text:'<strong>0.1cc</strong>를 취해 총 1cc가 되도록 희석', conc:'20mg/cc'},
+          {text:'<strong>0.1cc</strong>를 취해 총 1cc가 되도록 희석', conc:'2mg/cc'},
+        ]
+      },
+    ]
+  },
+  {
+    cat:'cepha', catLabel:'세파계', catColor:'#16a34a', catBg:'#f0fdf4',
+    form:'키트',
+    groups:[
+      {
+        drugs:['Ceftriaxone (Triaxone)'],
+        vol:'1g', solvent:'NS 100cc', finalConc:'2mg/cc',
+        doseAmount:'0.02ml', doseTime:'15-30분',
+        steps:[
+          {text:'NS <strong>100cc</strong>에 희석', conc:'10mg/cc'},
+          {text:'<strong>0.2cc</strong>를 취해 총 1cc가 되도록 희석', conc:'2mg/cc'},
+        ]
+      },
+      {
+        drugs:['Ceftriaxone (Triaxone)'],
+        vol:'2g', solvent:'NS 100cc', finalConc:'2mg/cc',
+        doseAmount:'0.02ml', doseTime:'15-30분',
+        steps:[
+          {text:'NS <strong>100cc</strong>에 희석', conc:'20mg/cc'},
+          {text:'<strong>0.1cc</strong>를 취해 총 1cc가 되도록 희석', conc:'2mg/cc'},
+        ]
+      },
+    ]
+  },
+  {
+    cat:'other', catLabel:'기타', catColor:'#d97706', catBg:'#fffbeb',
+    form:'바이알',
+    groups:[{
+      drugs:['L-Asparaginase (Leunase)'],
+      vol:'1만 unit', solvent:'NS 또는 D5W', finalConc:'20 unit/cc',
+      doseAmount:'0.1ml', doseTime:'1시간 이상',
+      steps:[
+        {text:'용해액 <strong>5cc</strong>로 녹이기', conc:'2,000 unit/cc'},
+        {text:'<strong>0.1cc</strong>를 취해 총 1cc가 되도록 희석', conc:'200 unit/cc'},
+        {text:'<strong>0.1cc</strong>를 취해 총 1cc가 되도록 희석', conc:'20 unit/cc'},
+      ]
+    }]
+  }
+];
+
+let ast_currentCat = 'all';
+
+function ast_filter(btn, cat) {
+  ast_currentCat = cat;
+  document.querySelectorAll('.ast-tab').forEach(t => {
+    t.classList.remove('active');
+  });
+  btn.classList.add('active');
+  ast_renderCards();
+}
+
+function ast_renderCards() {
+  const container = document.getElementById('ast-cards');
+  if (!container) return;
+  const filtered = ast_currentCat === 'all' ? AST_DATA : AST_DATA.filter(d => d.cat === ast_currentCat);
+  let html = '';
+  filtered.forEach(section => {
+    const c = section.catColor, bg = section.catBg;
+    section.groups.forEach(group => {
+      html += `<div class="ast-card">
+        <div class="ast-card-hdr" style="background:${bg}; border-bottom:1px solid ${c}33;">
+          <span class="ast-cat-badge" style="background:${c};color:#fff;">${section.catLabel}</span>
+          <span class="ast-card-group">${section.form} ${group.vol}</span>
+          <span class="ast-card-dose" style="color:${c};">${group.doseAmount} · ${group.doseTime}</span>
+        </div>
+        <div class="ast-drug">
+          <div class="ast-drug-name">${group.drugs.join('<br>')}</div>
+          <div class="ast-drug-chips">
+            <span class="ast-chip ast-chip-solv">💧 ${group.solvent}</span>
+            <span class="ast-chip ast-chip-conc">최종 ${group.finalConc}</span>
+            <span class="ast-chip ast-chip-dose">📌 ${group.doseAmount}</span>
+            <span class="ast-chip ast-chip-time">⏱ ${group.doseTime}</span>
+          </div>
+          <div class="ast-steps">`;
+      group.steps.forEach((step, si) => {
+        html += `<div class="ast-step">
+          <div class="ast-step-n" style="background:${bg};color:${c};">${si+1}</div>
+          <div class="ast-step-txt">${step.text}<span class="ast-conc-tag" style="background:${bg};color:${c};">${step.conc}</span></div>
+        </div>`;
+      });
+      html += `</div></div></div>`;
+    });
+  });
+  container.innerHTML = html;
+}
+
+ast_renderCards();
 </script>
 
 <!-- ===== 사정 완료 팝업 ===== -->
