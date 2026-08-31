@@ -1715,7 +1715,11 @@ function qmRenderBedGrid() {
       const raw = localStorage.getItem(key);
       if (raw) {
         const data = JSON.parse(raw);
-        const checks = Object.values(data.checks || {});
+        // N 근무가 아니면 N 전용 항목은 완료 판정에서 제외
+        const skip = shift === 'N' ? [] : qmNightOnlyIndexes();
+        const checks = Object.entries(data.checks || {})
+          .filter(([k]) => skip.indexOf(Number(k)) === -1)
+          .map(([, v]) => v);
         const total = checks.length;
         const checkedCount = checks.filter(Boolean).length;
         if (total > 0 && checkedCount === total) status = 'done';
@@ -1744,7 +1748,7 @@ function qmSelectBed(bed) {
   qmShowChecklistPanel(bed);
   qmClearChecklist();
   qmLoadBedData(bed);
-  qmUpdateProgress();
+  qmApplyShiftLock();   // 근무에 따라 N 전용 항목 잠금 (내부에서 진행률도 갱신)
 }
 
 function qmShowBedPanel() {
@@ -1814,7 +1818,58 @@ function qmLoadBedData(bed) {
   if (notes && data.notes) notes.value = data.notes;
 }
 
+// ── 근무별 항목 잠금 ──────────────────────────────
+/** 현재 선택된 근무가 N(Night) 인지 */
+function qmIsNight() {
+  return (document.getElementById('qm-shift')?.value || 'D') === 'N';
+}
+
+/** N 근무 전용 항목을 근무에 따라 잠그거나 풀어줌 */
+function qmApplyShiftLock() {
+  const night = qmIsNight();
+  document.querySelectorAll('#qm-panel-checklist .qm-night-only').forEach(item => {
+    item.classList.toggle('qm-locked', !night);
+    const cb = item.querySelector('input[type=checkbox]');
+    if (!cb) return;
+    cb.disabled = !night;
+    if (!night && cb.checked) {          // N 이 아닌 근무로 바꾸면 체크를 해제
+      cb.checked = false;
+      item.classList.remove('qm-checked');
+    }
+  });
+  qmUpdateProgress();
+  qmAutoSave();
+}
+
+/** 현재 근무에서 실제로 체크할 수 있는 항목만 추림 */
+function qmActiveCheckboxes() {
+  const night = qmIsNight();
+  return [...document.querySelectorAll('#qm-panel-checklist input[type=checkbox]')]
+    .filter(cb => night || !cb.closest('.qm-night-only'));
+}
+
+/** N 전용 항목이 전체 체크박스 중 몇 번째인지 (저장 데이터가 순번으로 되어 있어 필요) */
+function qmNightOnlyIndexes() {
+  const out = [];
+  document.querySelectorAll('#qm-panel-checklist input[type=checkbox]')
+    .forEach((cb, i) => { if (cb.closest('.qm-night-only')) out.push(i); });
+  return out;
+}
+
+/** 근무 선택이 바뀌었을 때 – 해당 근무의 저장분을 다시 불러오고 잠금을 적용 */
+function qmOnShiftChange() {
+  const panel = document.getElementById('qm-panel-checklist');
+  const open = qmCurrentBed && panel && panel.style.display !== 'none';
+  if (open) {
+    qmClearChecklist();
+    qmLoadBedData(qmCurrentBed);   // 근무가 바뀌면 저장 위치도 바뀜
+  }
+  qmApplyShiftLock();
+  qmRenderBedGrid();               // 침상별 완료 표시도 근무 기준으로 갱신
+}
+
 function qmToggle(item) {
+  if (item.classList.contains('qm-locked')) return;   // 잠긴 항목은 무시
   const cb = item.querySelector('input[type=checkbox]');
   if (!cb) return;
   cb.checked = !cb.checked;
@@ -1824,7 +1879,7 @@ function qmToggle(item) {
 }
 
 function qmUpdateProgress() {
-  const all = document.querySelectorAll('#qm-panel-checklist input[type=checkbox]');
+  const all = qmActiveCheckboxes();
   const total = all.length;
   let checked = 0;
   all.forEach(cb => { if (cb.checked) checked++; });
@@ -1856,25 +1911,34 @@ function qmSaveData() {
   const date   = qmGetDateKey();
   const shift  = document.getElementById('qm-shift')?.value || '';
   const worker = document.getElementById('qm-worker')?.value || '미입력';
-  const charge = document.getElementById('qm-charge-nurse')?.value || '미입력';
   const notes  = document.getElementById('qm-handover-notes')?.value || '';
 
+  // 시트 열 수를 유지하려면 모든 체크박스를 훑되,
+  // 이번 근무에 해당 없는 항목(N 근무 전용)은 'N/A' 로 보내 준수율에서 빠지게 함
+  const night = qmIsNight();
   const all = document.querySelectorAll('#qm-panel-checklist input[type=checkbox]');
-  const total = all.length;
-  let checked = 0;
+  let total = 0, checked = 0;
   const cbStates = [];
-  all.forEach(cb => { if (cb.checked) checked++; cbStates.push(cb.checked ? '✓' : '—'); });
-  const pct = Math.round(checked / total * 100);
+  all.forEach(cb => {
+    if (!night && cb.closest('.qm-night-only')) { cbStates.push('N/A'); return; }
+    total++;
+    if (cb.checked) checked++;
+    cbStates.push(cb.checked ? '✓' : '—');
+  });
+  const pct = total > 0 ? Math.round(checked / total * 100) : 0;
 
   // 저장 즉시 버튼을 잠금 (전송 응답을 기다리지 않음 – 이 화면은 곧 침상 목록으로 바뀜)
   saveBtnDone('qm-saveBtn');
   saveBtnDone('qm-save-btn', '✅');
-  alert(`✅ 저장 완료\n\n📅 ${date}  근무: ${shift}\n🛏 ${qmCurrentBed}번 침상\n👤 ${worker}  책임: ${charge}\n📊 ${checked}/${total} (${pct}%)`);
+  alert(`✅ 저장 완료\n\n📅 ${date}  근무: ${shift}\n🛏 ${qmCurrentBed}번 침상\n👤 ${worker}\n📊 ${checked}/${total} (${pct}%)`);
 
   // Google Sheets 전송
+  // 열 순서는 시트 헤더와 동일해야 함
+  // 저장일시 / 날짜 / 근무 / 근무자 / 책임간호사 / 침상번호 / 완료 / 전체 / 달성률 / 인계메모 / 체크22개
+  // ※ 인계메모는 GAS 가 맨 뒤로 옮겨줍니다 (fixQmOrder_)
   const row = [
-    new Date().toLocaleString('ko-KR'), date, shift, qmCurrentBed + '번',
-    worker, charge,
+    new Date().toLocaleString('ko-KR'), date, shift,
+    worker, '', qmCurrentBed + '번',
     checked, total, pct + '%',
     notes,
     cbStates.join('\t'),

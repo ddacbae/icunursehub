@@ -1854,7 +1854,7 @@
         </div>
         <div class="qm-info-field">
           <span class="qm-info-label">근무</span>
-          <select id="qm-shift" class="qm-shift-select">
+          <select id="qm-shift" class="qm-shift-select" onchange="qmOnShiftChange()">
             <option value="D">D (Day)</option>
             <option value="E">E (Evening)</option>
             <option value="N">N (Night)</option>
@@ -1863,10 +1863,6 @@
         <div class="qm-info-field">
           <span class="qm-info-label">👤</span>
           <input type="text" class="qm-info-input" placeholder="근무자" id="qm-worker">
-        </div>
-        <div class="qm-info-field">
-          <span class="qm-info-label">👩‍⚕️</span>
-          <input type="text" class="qm-info-input" placeholder="책임간호사" id="qm-charge-nurse">
         </div>
       </div>
     </div>
@@ -1991,7 +1987,7 @@
             <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
             <span class="qm-check-text">Infusion pump (분리하여 6면, 제정), IPC pump (기계, line)</span>
           </div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
+          <div class="qm-check-item qm-night-only" onclick="qmToggle(this)">
             <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
             <span class="qm-check-text">🌙 (N근무) 6A30 SICU 환경위생 알림 및 시행사부 확인</span>
           </div>

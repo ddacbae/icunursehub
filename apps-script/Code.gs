@@ -268,7 +268,72 @@ function convertLegacyToBinary() {
   });
 
   props.setProperty('QM_REORDER_DONE', 'yes');
+
+  // 근무자 / 책임간호사 / 침상번호 열 교정 (백업은 위 반복문에서 이미 떠 둠)
+  const idFix = fixQmIdentityColumns_(ss, false);
+  if (idFix.fixed) report.push('QM체크리스트: ' + idFix.fixed + '행 근무자/침상번호 열 교정');
+
   ui.alert('변환 완료', report.join('\n') + '\n\n백업 시트: *_백업_' + stamp, ui.ButtonSet.OK);
+}
+
+
+/** 메뉴에서 단독 실행 – QM 근무자/책임간호사/침상번호 열만 바로잡음 */
+function fixQmIdentityColumns() {
+  const ui = SpreadsheetApp.getUi();
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const r = fixQmIdentityColumns_(ss, true);
+
+  if (r.scanned === 0) { ui.alert('QM체크리스트에 데이터가 없습니다.'); return; }
+  ui.alert('QM 근무자/침상번호 열 교정',
+    r.scanned + '행 확인\n'
+    + r.fixed + '행 교정\n'
+    + r.skipped + '행은 이미 정상\n'
+    + (r.fixed ? '\n백업 시트를 함께 만들었습니다.' : ''),
+    ui.ButtonSet.OK);
+}
+
+/**
+ * 예전 앱은 [침상번호, 근무자, 책임간호사] 순서로 보냈지만
+ * 헤더는 [근무자, 책임간호사, 침상번호] 순서입니다.
+ *
+ * '12번' 형태의 침상번호가 어느 칸에 들어 있는지로 판별하므로
+ * 여러 번 실행해도 이미 정상인 행은 건드리지 않습니다.
+ */
+function fixQmIdentityColumns_(ss, backup) {
+  const name = 'QM체크리스트';
+  const out = { scanned: 0, fixed: 0, skipped: 0 };
+
+  const sheet = ss.getSheetByName(name);
+  if (!sheet || sheet.getLastRow() < 2) return out;
+
+  const headers = HEADERS[name];
+  const nRows = sheet.getLastRow() - 1;
+  const nCols = Math.max(sheet.getLastColumn(), headers.length);
+  const rng    = sheet.getRange(2, 1, nRows, nCols);
+  const values = rng.getValues();
+
+  const isBed = v => /^\s*\d+\s*번\s*$/.test(String(v == null ? '' : v));
+  const needsFix = r => isBed(r[3]) && !isBed(r[5]);
+
+  out.scanned = nRows;
+  if (!values.some(needsFix)) { out.skipped = nRows; return out; }
+
+  if (backup) {
+    sheet.copyTo(ss).setName(
+      (name + '_백업_' + Utilities.formatDate(new Date(), TZ, 'yyyyMMdd_HHmm')).slice(0, 100));
+  }
+
+  values.forEach(r => {
+    if (!needsFix(r)) { out.skipped++; return; }
+    const bed = r[3], worker = r[4], charge = r[5];
+    r[3] = worker;   // 근무자
+    r[4] = charge;   // 책임간호사
+    r[5] = bed;      // 침상번호
+    out.fixed++;
+  });
+
+  rng.setValues(values);
+  return out;
 }
 
 
@@ -615,6 +680,7 @@ function onOpen() {
     .addItem('매월 자동 생성 끄기', 'removeMonthlyTrigger')
     .addSeparator()
     .addItem('기존 ✓/— 데이터를 0/1 로 변환', 'convertLegacyToBinary')
+    .addItem('QM 근무자/침상번호 열 교정', 'fixQmIdentityColumns')
     .addItem('시트 헤더 재설정', 'fixHeaders')
     .addToUi();
 }

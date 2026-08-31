@@ -1105,6 +1105,13 @@ html, body {
 .qm-check-item:hover { background:#f8f9fa; }
 .qm-check-item.qm-checked { background:#f0fff4; }
 .qm-check-item.qm-checked .qm-check-text { color:#888; text-decoration:line-through; }
+/* N(Night) 근무에서만 체크 가능한 항목 – 다른 근무에서는 잠금 */
+.qm-check-item.qm-locked { background:#fafafa; cursor:not-allowed; opacity:0.5; }
+.qm-check-item.qm-locked:hover { background:#fafafa; }
+.qm-check-item.qm-locked .qm-cb { cursor:not-allowed; }
+.qm-check-item.qm-locked .qm-check-text::after {
+  content:' — N 근무에서만 체크'; font-size:11px; color:#9ca3af; font-weight:600; white-space:nowrap;
+}
 .qm-cb { width:18px; height:18px; margin-top:2px; flex-shrink:0; accent-color:#1a56db; cursor:pointer; }
 .qm-check-text { font-size:13px; color:#333; line-height:1.5; flex:1; }
 .qm-check-num {
