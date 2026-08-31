@@ -1220,6 +1220,7 @@ const FOLEY_SHIFTS = [
 const FOLEY_BEDS = 18;
 const FOLEY_STORAGE_KEY = 'foley_v2';
 let foleyCurrentShift = null;
+let foleyTimeIdx = 0;          // 지금 체크 중인 시간대 (0=1차, 1=2차, 2=3차)
 
 function initFoleyMonitoring() {
   const dateEl = document.getElementById('foleySheetDate');
@@ -1230,8 +1231,8 @@ function foleyOnDateChange() {
   saveBtnReset('foley-saveBtn');
   // 날짜 바뀌면 현재 선택된 교대 데이터 다시 로드
   if (foleyCurrentShift) {
+    document.querySelectorAll('#foley-sections input[type=checkbox]').forEach(cb => cb.checked = false);
     foleyLoadShiftData(foleyCurrentShift);
-    foleyRestoreConfirmer();
   }
 }
 
@@ -1267,9 +1268,10 @@ function foleySelectShift(shiftKey) {
   });
 
   // 섹션 렌더
+  foleyTimeIdx = 0;                 // 근무를 바꾸면 1차 시간부터
   foleyBuildShiftSection(shift);
+  foleyApplyTimeSelection();
   foleyLoadShiftData(shiftKey);
-  foleyRestoreConfirmer();
 }
 
 function foleyBuildShiftSection(shift) {
@@ -1297,6 +1299,16 @@ function foleyBuildShiftSection(shift) {
     </td>`
   ).join('');
 
+  // 시간대 선택 버튼 (선택한 시간만 체크 가능, 나머지는 읽기 전용)
+  const timeBar = shift.times.map((time, ti) =>
+    `<button id="foley-timebtn-${ti}" onclick="foleySelectTime(${ti})"
+      style="flex:1; padding:10px 0; border:2px solid ${shift.color}; border-radius:10px;
+             background:#fff; color:${shift.color}; font-size:15px; font-weight:800;
+             cursor:pointer; font-family:inherit; transition:all 0.15s;">
+      ${time}
+    </button>`
+  ).join('');
+
   const timeRows = shift.times.map((time, ti) => {
     const cells = Array.from({length: FOLEY_BEDS}, (_, i) =>
       `<td style="border:1px solid #ddd; text-align:center; padding:4px 2px; background:#f9f9f9;" data-time-cell data-bed="${i+1}">
@@ -1306,8 +1318,9 @@ function foleyBuildShiftSection(shift) {
           onchange="foleyAutoSave()">
       </td>`
     ).join('');
-    return `<tr>
-      <td style="border:1px solid #ddd; padding:5px 8px; font-size:12px; font-weight:600; background:#f5f5f5; white-space:nowrap; text-align:center;">${time}</td>
+    return `<tr data-time-row="${ti}">
+      <td style="border:1px solid #ddd; padding:5px 8px; font-size:12px; font-weight:600; background:#f5f5f5; white-space:nowrap; text-align:center; cursor:pointer;"
+          onclick="foleySelectTime(${ti})">${time}</td>
       ${cells}
     </tr>`;
   }).join('');
@@ -1317,6 +1330,13 @@ function foleyBuildShiftSection(shift) {
     <div style="display:flex; align-items:center; padding:8px 14px; background:${shift.color}; border-radius:10px 10px 0 0; margin-bottom:0;">
       <span style="font-size:22px; font-weight:900; color:#fff; margin-right:10px;">${shift.label}</span>
       <span style="font-size:12px; color:rgba(255,255,255,0.92); font-weight:600;">${shift.name}</span>
+    </div>
+
+    <!-- 확인 시간 선택 -->
+    <div style="padding:10px 12px; background:#fff; border:1.5px solid ${shift.color}; border-top:none;">
+      <div style="font-size:12px; color:#555; font-weight:700; margin-bottom:6px;">⏰ 지금 확인하는 시간을 선택하세요</div>
+      <div style="display:flex; gap:8px;">${timeBar}</div>
+      <div style="font-size:11px; color:#888; margin-top:6px;">선택한 시간만 체크할 수 있고, 나머지 시간은 확인용으로 표시됩니다.</div>
     </div>
 
     <!-- 테이블 (가로 스크롤) -->
@@ -1364,17 +1384,49 @@ function foleyBuildShiftSection(shift) {
   `;
 }
 
+// ── 확인 시간 선택 ────────────────────────────────
+/** 지금 체크할 시간대를 고름 (선택한 행만 편집 가능) */
+function foleySelectTime(ti) {
+  foleyTimeIdx = ti;
+  foleyApplyTimeSelection();
+  for (let b = 1; b <= FOLEY_BEDS; b++) foleyCheckBedActivation(b);
+}
+
+/** 시간 버튼과 표의 행 강조를 현재 선택에 맞춤 */
+function foleyApplyTimeSelection() {
+  const shift = FOLEY_SHIFTS.find(s => s.key === foleyCurrentShift);
+  if (!shift) return;
+
+  shift.times.forEach((_, ti) => {
+    const btn = document.getElementById(`foley-timebtn-${ti}`);
+    if (btn) {
+      const on = ti === foleyTimeIdx;
+      btn.style.background = on ? shift.color : '#fff';
+      btn.style.color      = on ? '#fff' : shift.color;
+    }
+    const tr = document.querySelector(`#foley-sections tr[data-time-row="${ti}"]`);
+    if (tr) tr.style.background = ti === foleyTimeIdx ? '#e8f5e9' : '';
+  });
+}
+
 function foleyCheckBedActivation(bed) {
   const presentCb = document.querySelector(`input[data-row="present"][data-bed="${bed}"]`);
   const looseCb   = document.querySelector(`input[data-row="loose"][data-bed="${bed}"]`);
   const active = presentCb?.checked && looseCb?.checked;
+
   document.querySelectorAll(`input[data-row^="time"][data-bed="${bed}"]`).forEach(cb => {
-    cb.disabled = !active;
-    cb.style.opacity = active ? '1' : '0.3';
-    cb.style.cursor  = active ? 'pointer' : 'not-allowed';
-    if (!active) cb.checked = false;
+    const ti = Number(String(cb.dataset.row).replace('time', ''));
+    // 도뇨관 보유 + 무른변 환자 이면서, 지금 선택한 시간대일 때만 체크 가능
+    const editable = active && ti === foleyTimeIdx;
+
+    cb.disabled = !editable;
+    cb.style.cursor  = editable ? 'pointer' : 'not-allowed';
+    // 선택 안 한 시간대는 값은 그대로 두고 읽기 전용으로만 표시
+    cb.style.opacity = editable ? '1' : (active ? '0.6' : '0.3');
+    if (!active) cb.checked = false;   // 해당 침상 자체가 대상이 아니면 초기화
+
     const td = cb.closest('td');
-    if (td) td.style.background = active ? '' : '#f9f9f9';
+    if (td) td.style.background = editable ? '' : '#f9f9f9';
   });
 }
 
@@ -1382,7 +1434,7 @@ function foleyAutoSave() {
   saveBtnReset('foley-saveBtn');   // 체크를 바꾸면 다시 저장할 수 있게
   if (!foleyCurrentShift) return;
   const key = foleyGetStorageKey(foleyCurrentShift);
-  const data = { confirmer: document.getElementById('foley-confirmer')?.value || '', checks: {} };
+  const data = { checks: {} };
   document.querySelectorAll('#foley-sections input[type=checkbox]').forEach(cb => {
     data.checks[`${cb.dataset.row}_${cb.dataset.bed}`] = cb.checked;
   });
@@ -1407,40 +1459,25 @@ function foleyLoadShiftData(shiftKey) {
   // 2단계: 활성화 여부 판별 (time 체크박스 enable/disable)
   for (let b = 1; b <= FOLEY_BEDS; b++) foleyCheckBedActivation(b);
 
-  // 3단계: time 체크박스 복원 (활성화된 침상만 실제로 반영됨)
+  // 3단계: time 체크박스 복원
+  //   disabled 여부와 무관하게 복원해야 선택하지 않은 시간대의 기록도 보입니다
   document.querySelectorAll('#foley-sections input[type=checkbox]').forEach(cb => {
     if (cb.dataset.row && cb.dataset.row.startsWith('time')) {
       const id = `${cb.dataset.row}_${cb.dataset.bed}`;
-      if (data.checks[id] !== undefined && !cb.disabled) cb.checked = data.checks[id];
+      const bedActive = document.querySelector(`input[data-row="present"][data-bed="${cb.dataset.bed}"]`)?.checked
+                     && document.querySelector(`input[data-row="loose"][data-bed="${cb.dataset.bed}"]`)?.checked;
+      if (data.checks[id] !== undefined && bedActive) cb.checked = data.checks[id];
     }
   });
 }
 
-function foleyRestoreConfirmer() {
-  if (!foleyCurrentShift) return;
-  const key = foleyGetStorageKey(foleyCurrentShift);
-  const raw = localStorage.getItem(key);
-  if (!raw) return;
-  const data = JSON.parse(raw);
-  const el = document.getElementById('foley-confirmer');
-  if (el && data.confirmer) el.value = data.confirmer;
-}
-
 function foleySave() {
-  const confirmer = document.getElementById('foley-confirmer')?.value.trim();
-  if (!confirmer) {
-    alert('확인자 이름을 입력해주세요.');
-    document.getElementById('foley-confirmer')?.focus();
-    return;
-  }
+  if (!foleyCurrentShift) { alert('근무를 먼저 선택하세요.'); return; }
   foleyAutoSave();
   const shift   = FOLEY_SHIFTS.find(s => s.key === foleyCurrentShift);
   const date    = foleyGetDateKey();
   const savedAt = new Date().toLocaleString('ko-KR');
-  const savedKeys = new Set(JSON.parse(localStorage.getItem('foley_saved_beds') || '[]'));
   const rows    = [];
-  const newKeys = [];
-  const skipped = [];
 
   for (let bed = 1; bed <= FOLEY_BEDS; bed++) {
     const present    = document.querySelector(`input[data-row="present"][data-bed="${bed}"]`)?.checked || false;
@@ -1452,35 +1489,19 @@ function foleySave() {
     // 아무것도 체크 안 된 침상은 전송 생략
     if (!present && !loose && timeChecks.every(c => !c)) continue;
 
-    // 중복 저장 방지
-    const key = `${date}_${foleyCurrentShift}_${bed}`;
-    if (savedKeys.has(key)) { skipped.push(bed); continue; }
-
+    // 확인자 열은 비워 둠 (시트 열 개수를 유지하기 위해 자리는 남김)
+    // 같은 시행일+근무+침상 행은 GAS 가 찾아서 덮어쓰므로 몇 번을 저장해도 한 줄
     rows.push([
-      savedAt, date, shift.label, confirmer, bed + '번',
+      savedAt, date, shift.label, '', bed + '번',
       present ? '✓' : '',
       loose   ? '✓' : '',
       ...timeChecks.map(c => c ? '✓' : ''),
     ]);
-    newKeys.push(key);
   }
 
-  if (rows.length === 0) {
-    const msg = skipped.length > 0
-      ? `⚠️ 이미 저장된 데이터입니다.\n중복 침상: ${skipped.join(', ')}번`
-      : '저장할 데이터가 없습니다.';
-    alert(msg);
-    return;
-  }
+  if (rows.length === 0) { alert('저장할 데이터가 없습니다.'); return; }
 
-  if (skipped.length > 0) {
-    alert(`✅ 저장 완료 (중복 제외)\n\n📅 ${date}  근무: ${shift.label}\n👤 확인자: ${confirmer}\n✔ 저장: ${rows.length}개 침상 / ⚠ 중복 제외: ${skipped.join(', ')}번`);
-  } else {
-    alert(`✅ 저장 완료\n\n📅 날짜: ${date}\n근무: ${shift.label} (${shift.name})\n👤 확인자: ${confirmer}\n✔ 저장: ${rows.length}개 침상`);
-  }
-
-  newKeys.forEach(k => savedKeys.add(k));
-  localStorage.setItem('foley_saved_beds', JSON.stringify([...savedKeys]));
+  alert(`✅ 저장 완료\n\n📅 날짜: ${date}\n근무: ${shift.label} (${shift.name})\n⏰ 확인 시간: ${shift.times[foleyTimeIdx]}\n✔ 저장: ${rows.length}개 침상\n\n같은 근무에서 다음 시간대를 체크한 뒤 다시 저장하면\n기존 기록에 이어서 갱신됩니다.`);
 
   saveBtnBusy('foley-saveBtn');
   saveBtnAfter(fetch(SQR_SHEET_URL, {
@@ -1502,7 +1523,6 @@ function foleyResetShift() {
 function foleyPrint() {
   if (!foleyCurrentShift) { alert('근무를 먼저 선택하세요.'); return; }
   const date = foleyGetDateKey();
-  const confirmer = document.getElementById('foley-confirmer')?.value || '';
   const shift = FOLEY_SHIFTS.find(s => s.key === foleyCurrentShift);
   const sectionsHtml = document.getElementById('foley-sections').innerHTML;
   const w = window.open('', '_blank', 'width=1200,height=800');
@@ -1519,7 +1539,7 @@ button { display:none; }
 </style></head><body>
 <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
   <b style="font-size:14px;">SICU 유치도뇨관 유지/관리 모니터링</b>
-  <span>시행일: ${date} | 근무: ${shift.label} | 확인자: ${confirmer}</span>
+  <span>시행일: ${date} | 근무: ${shift.label}</span>
 </div>
 ${sectionsHtml}
 </body></html>`);

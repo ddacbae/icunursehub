@@ -75,6 +75,13 @@ function range_(a, b) {
   return out;
 }
 
+// 같은 값이 들어오면 새 줄을 만들지 않고 기존 줄을 덮어쓸 시트와 그 기준 열
+//   유치도뇨관: 시행일(1) + 근무(2) + 침상번호(4)
+//   → 한 근무 안에서 09:30 / 11:30 / 14:30 을 나눠 저장해도 침상당 한 줄로 유지됨
+const UPSERT_KEYS = {
+  '유치도뇨관': [1, 2, 4],
+};
+
 
 // ════════════════════════════════════════════════════════════════════════
 // 1. 값 정규화   ✓ / — → 1 / 0,  N/A → 빈칸
@@ -180,8 +187,7 @@ function doPost(e) {
     const sheet     = getOrCreateSheet(ss, sheetName);
     const cfg       = SHEET_CFG[sheetName];
 
-    const rows = payload.rows || [];
-    rows.forEach(function (row) {
+    const prepared = (payload.rows || []).map(function (row) {
       // 앱이 탭 문자로 묶어 보낸 세부 항목을 개별 열로 펼침
       let expanded = row.reduce(function (acc, v) {
         if (typeof v === 'string' && v.indexOf('\t') !== -1) return acc.concat(v.split('\t'));
@@ -191,9 +197,15 @@ function doPost(e) {
 
       if (sheetName === 'QM체크리스트') expanded = fixQmOrder_(expanded);
       if (cfg) expanded = normalizeRow_(expanded, cfg.binCols);
-
-      sheet.appendRow(expanded);
+      return expanded;
     });
+
+    const rows = prepared;
+    if (UPSERT_KEYS[sheetName]) {
+      upsertRows_(sheet, sheetName, prepared);
+    } else {
+      prepared.forEach(function (r) { sheet.appendRow(r); });
+    }
 
     try { sheet.autoResizeColumns(1, sheet.getLastColumn()); } catch (_) {}
 
@@ -212,6 +224,57 @@ function doGet(e) {
   return ContentService
     .createTextOutput('✅ ICU Nurse Hub API 정상 작동 중')
     .setMimeType(ContentService.MimeType.TEXT);
+}
+
+
+/**
+ * 기준 열이 같은 행이 이미 있으면 덮어쓰고, 없으면 새로 추가합니다.
+ * 시트를 한 번만 읽어 색인을 만들므로 여러 행을 한꺼번에 보내도 빠릅니다.
+ */
+function upsertRows_(sheet, sheetName, rows) {
+  const keys  = UPSERT_KEYS[sheetName];
+  const width = HEADERS[sheetName].length;
+  const last  = sheet.getLastRow();
+  const index = {};
+
+  if (last >= 2) {
+    const nCols  = Math.max(sheet.getLastColumn(), width);
+    const values = sheet.getRange(2, 1, last - 1, nCols).getValues();
+    values.forEach(function (v, i) {
+      index[rowSignature_(v, keys)] = i + 2;   // 뒤쪽 행이 우선 (최신 기록)
+    });
+  }
+
+  const toAppend = [];
+  rows.forEach(function (row) {
+    const at = index[rowSignature_(row, keys)];
+    if (at) sheet.getRange(at, 1, 1, row.length).setValues([row]);
+    else    toAppend.push(row);
+  });
+
+  if (toAppend.length) {
+    const w = Math.max(width, Math.max.apply(null, toAppend.map(function (r) { return r.length; })));
+    const padded = toAppend.map(function (r) {
+      const out = r.slice();
+      while (out.length < w) out.push('');
+      return out;
+    });
+    sheet.getRange(sheet.getLastRow() + 1, 1, padded.length, w).setValues(padded);
+  }
+}
+
+function rowSignature_(row, keys) {
+  return keys.map(function (c) { return keyText_(row[c]); }).join('|');
+}
+
+/** 날짜가 문자열/날짜값 어느 쪽으로 저장돼 있어도 같은 키로 비교되게 함 */
+function keyText_(v) {
+  const s = String(v == null ? '' : v).trim();
+  if (s.length >= 8) {
+    const d = parseDate_(v);
+    if (d) return Utilities.formatDate(d, TZ, 'yyyy-MM-dd');
+  }
+  return s;
 }
 
 
