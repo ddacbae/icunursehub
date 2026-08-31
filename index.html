@@ -3133,7 +3133,22 @@ ast_renderCards();
 <script src="app.js"></script>
 <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
+    // updateViaCache:'none' — sw.js 자체를 브라우저 캐시에서 읽지 않고 항상 서버에서 확인
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+      .then(reg => {
+        reg.update();
+        // 새 버전이 설치되면 자동으로 한 번 새로고침
+        reg.addEventListener('updatefound', () => {
+          const sw = reg.installing;
+          if (!sw) return;
+          sw.addEventListener('statechange', () => {
+            if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+              location.reload();
+            }
+          });
+        });
+      })
+      .catch(() => {});
   }
 </script>
 </body>
