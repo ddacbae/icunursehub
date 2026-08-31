@@ -1,5 +1,5 @@
 // 앱을 수정해서 배포할 때마다 아래 버전 숫자를 올려주세요 (v2 → v3 → ...)
-const CACHE_NAME = 'icu-hub-v4';
+const CACHE_NAME = 'icu-hub-v5';
 const FILES = ['./', './index.html', './app.js', './style.css', './manifest.json', './icon.png'];
 
 self.addEventListener('install', e => {

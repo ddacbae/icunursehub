@@ -1112,7 +1112,9 @@ html, body {
 .qm-check-item.qm-locked .qm-check-text::after {
   content:' — N 근무에서만 체크'; font-size:11px; color:#9ca3af; font-weight:600; white-space:nowrap;
 }
-.qm-cb { width:18px; height:18px; margin-top:2px; flex-shrink:0; accent-color:#1a56db; cursor:pointer; }
+/* pointer-events:none — 체크박스를 직접 눌러도 클릭은 부모(.qm-check-item)가 처리.
+   없으면 체크박스가 스스로 토글한 뒤 qmToggle 이 한 번 더 뒤집어 체크가 안 됨 */
+.qm-cb { width:18px; height:18px; margin-top:2px; flex-shrink:0; accent-color:#1a56db; cursor:pointer; pointer-events:none; }
 .qm-check-text { font-size:13px; color:#333; line-height:1.5; flex:1; }
 .qm-check-num {
   font-size:11px; color:#1a56db; font-weight:600;
