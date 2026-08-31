@@ -359,7 +359,7 @@
         <div class="home-menu-icon">🔧</div>
         <div class="home-menu-text">
           <div class="home-menu-label">업무지원</div>
-          <div class="home-menu-desc">계산기 · 대응 가이드 · 인계 · 메모</div>
+          <div class="home-menu-desc">계산기 · 퇴원 도우미 · 대응 가이드 · 메모</div>
         </div>
         <div class="home-menu-arrow">›</div>
       </div>
@@ -480,13 +480,13 @@
         </div>
         <span class="chevron">›</span>
       </div>
-      <div class="work-menu-item" style="opacity:0.5; pointer-events:none;">
-        <div class="work-menu-icon orange">📋</div>
+      <div class="work-menu-item" onclick="showScreen('screen-discharge')">
+        <div class="work-menu-icon orange">🚪</div>
         <div class="work-menu-content">
-          <div class="work-menu-title">인계 도우미</div>
-          <div class="work-menu-desc">업데이트 예정</div>
+          <div class="work-menu-title">퇴원 도우미</div>
+          <div class="work-menu-desc">사망 퇴원 · 전원/퇴원 체크리스트</div>
         </div>
-        <span class="chevron" style="font-size:11px; color:#9ca3af;">준비중</span>
+        <span class="chevron">›</span>
       </div>
     </div>
 
@@ -1357,6 +1357,61 @@
     </div>
     <div style="height: 80px;"></div>
   </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+    <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>
+    <div class="nav-item active" onclick="showScreen('screen-work')"><span class="nav-icon">🔧</span><span class="nav-label">업무지원</span></div>
+    <div class="nav-item" onclick="showScreen('screen-icu-rounding')"><span class="nav-icon">🩺</span><span class="nav-label">ICU 라운딩</span></div>
+  </nav>
+</div>
+
+<!-- ===== 퇴원 도우미 SCREEN ===== -->
+<div id="screen-discharge" class="screen">
+
+  <div class="sub-header">
+    <span class="back-btn" onclick="goBack()">←</span>
+    <span class="sub-title">퇴원 도우미</span>
+    <span class="bookmark-btn" id="bm-screen-discharge" onclick="toggleBookmark('screen-discharge','퇴원 도우미','🚪')">⭐</span>
+  </div>
+
+  <!-- 체크리스트 선택 탭 -->
+  <div class="memo-tabs">
+    <button class="memo-tab active" id="dc-tab-death" onclick="dcSelectTab('death')">🕊 사망 퇴원</button>
+    <button class="memo-tab" id="dc-tab-transfer" onclick="dcSelectTab('transfer')">🚑 전원 / 퇴원</button>
+  </div>
+
+  <!-- 진행률 -->
+  <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; background:#f8f9fa; border-bottom:1px solid #e2e8f0;">
+    <div style="flex:1; height:8px; background:#dee2e6; border-radius:4px; overflow:hidden;">
+      <div id="dc-prog-fill" style="height:100%; width:0%; background:#e53e3e; border-radius:4px; transition:width 0.3s;"></div>
+    </div>
+    <span id="dc-prog-text" style="font-size:12px; color:#555; white-space:nowrap;">0 / 0</span>
+    <span id="dc-prog-pct" style="font-size:13px; font-weight:700; color:#1a56db; white-space:nowrap;">0%</span>
+  </div>
+
+  <div class="scroll-content" style="padding:0;">
+
+    <div style="padding:10px 10px 90px;">
+
+      <div id="dc-list"></div>
+
+      <!-- 비고 -->
+      <div class="qm-category">
+        <div class="qm-cat-header" style="background:#718096;">📌 비고 / 메모</div>
+        <div style="padding:10px 14px;">
+          <textarea id="dc-notes"
+            style="width:100%; border:1px solid #dee2e6; border-radius:8px; padding:8px 10px; font-size:13px; font-family:inherit; resize:vertical; min-height:60px; outline:none; color:#333;"
+            placeholder="특이사항, 인수인계 내용..."></textarea>
+        </div>
+      </div>
+
+      <div style="margin-top:12px; font-size:11px; color:#9ca3af; text-align:center; line-height:1.6;">
+        서울대학교병원운영 서울특별시보라매병원 · 26.06 기준
+      </div>
+
+    </div>
+  </div>
+
   <nav class="bottom-nav">
     <div class="nav-item" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
     <div class="nav-item" onclick="showScreen('screen-edu')"><span class="nav-icon">📚</span><span class="nav-label">교육자료</span></div>

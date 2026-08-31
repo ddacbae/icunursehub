@@ -33,6 +33,9 @@ function showScreen(id) {
   if (id === 'screen-qm-checklist') {
     setTimeout(() => initQMChecklist(), 0);
   }
+  if (id === 'screen-discharge') {
+    setTimeout(() => initDischarge(), 0);
+  }
   if (id === 'screen-drugcalc') {
     setTimeout(() => dc_goView('cat'), 0);
   }
@@ -1873,4 +1876,192 @@ function toggleSicuChapter(id) {
   const card = document.getElementById(id);
   if (!card) return;
   card.classList.toggle('open');
+}
+
+// ===== 퇴원 도우미 (사망 퇴원 / 전원·퇴원 체크리스트) =====
+// 출처: 보라매병원 「전원, 퇴원, 사망 체크리스트」 (26.06)
+
+const DC_LISTS = {
+  death: {
+    label: '사망 퇴원',
+    sections: [
+      {
+        title: '담당간호사 할일', icon: '🕊', color: '#4a5568',
+        items: [
+          '사망 전 보호자 도착 가능한 시간 확인',
+          '보호자 임종면회 조정',
+          '사망 선언 — 선언한 시간과 일치하여 메모와 간호기록 남기기',
+          '사망 선언시간 EKG Strip 출력 → 심전도 결과 라벨 부착 후 스캔 내리기',
+          '정규약 조제유보 또는 D/C 오더 받기',
+          '사용한 마약, 투석액, 냉장약 포함 비품약 전부 오더 받기',
+          "환자약(고위험약 / 냉장약 / 약칸 / 반납약칸) '사망 환자 반납' 리스트 작성 & 반납",
+          '마약 반납',
+          '처치수가 (심사마감 전 완료)',
+          '식이 금식 발행',
+          '환자분류 (입퇴실 관리 항목 → 사망환자 간호 클릭)',
+          '퇴원 간호 기록지 (사망 클릭)',
+          'POLST 서류 작성 완료 확인 · 연명의료실에 서류 내려갔는지 확인 (주말 제외)',
+          '각종 line · tube 제거 및 사후처치 (IV route, A-line, Foley, L-tube 제거 / C-line·도관은 인턴 통해 제거 후 필요시 Suture)',
+          '현위치 이동 (사망 클릭)',
+          '아파치',
+        ],
+      },
+      {
+        title: '필수 오더', icon: '💊', color: '#c53030',
+        items: [
+          '퇴원 지시 오더 (퇴원지시 · 정상퇴원 · 사망)',
+          '사망 진단서',
+        ],
+      },
+      {
+        title: '사망 진단서 확인사항', icon: '📄', color: '#2b6cb0',
+        items: [
+          '사망 일시: 24시간제로 작성',
+          '주소: 주민등록등본상 주소와 일치',
+          '사망장소 주소: 보라매병원 (서울특별시 동작구 보라매로5길 20)',
+          '사망원인: 반드시 한글로 작성',
+          '사망의 종류: 외인사 또는 기타·불상의 경우 경찰에 신고 필요',
+        ],
+      },
+      {
+        title: '보호자 확인사항', icon: '👨‍👩‍👧', color: '#805ad5',
+        items: [
+          'HIS상 주소와 주민등록증 주소지 일치 여부 확인 (불일치 시 원무과 / 야간·주말은 응급원무에 변경 요청)',
+          '이용할 장례식장 확인 — 보라매병원 장례식장 이용 원하는 경우 자리 있는지 장례식장에 확인',
+          '사망 진단서 필요 부수 확인 (원본 1부, 사본 n부)',
+          '심사 완료 후 원무과 수납 안내',
+          '면회 재조정 및 환자 짐·귀중품 전달 (틀니 / 보청기 / Bone flap / 자가약 / 지갑 / 핸드폰)',
+        ],
+      },
+    ],
+  },
+  transfer: {
+    label: '전원 / 퇴원',
+    sections: [
+      {
+        title: '전날 — 보호자 안내사항', icon: '📞', color: '#805ad5',
+        items: [
+          '환자 및 보호자 신분증, 가족관계증명서 지참',
+          '환자 이송 2시간 전에 보호자 내원 안내',
+          '예상 이송시간 앰뷸런스 예약',
+          '필요한 서류 (진단서 / 소견서 / 영상자료 / 투석일지) 조사',
+          '전원병원 환의 (퇴원인 경우 개인옷) 가져오도록 안내',
+        ],
+      },
+      {
+        title: '전날까지 할일', icon: '📆', color: '#2b6cb0',
+        items: [
+          '전원 날짜·시간 확정 (예: 6/23 3P)',
+          '구급차 또는 이송차량 도착 시간 확정 (예: 6/23 2P30)',
+          '이송 시 의료진 동반 필요 여부 주치의 확인',
+          '퇴원약 오더 확인 (주사 시행처 [집으로])',
+          '진단서 · 소견서: 의사에게 작성 요청',
+          '영상자료: DVD · CD copy 오더 받기 [Image DVD/CD Copy]',
+          '투석일지: 인공신실에 전화해 수령',
+          '도관 삽입일 기록 — Foley(최근 삽입일) / Levin tube(최근 삽입일) / C-line·PICC ins(최근 삽입일) / T-can change(최근 변경일)',
+          '홈벤트 유지하며 퇴원 시 홈벤트 회사 연락하기',
+        ],
+      },
+      {
+        title: '당일 — N 근무', icon: '🌙', color: '#4a5568',
+        items: [
+          '약 (마약 / 냉장 / 고위험약 / 반납약칸 / 약 수납장) 모두 확인 후 반납 내리기',
+          '사용한 마약, 투석액, 냉장약 포함 비품약 전부 오더 받기',
+          '퇴원 당일 정규약 조제유보',
+          '퇴실 예정 시간 확인 후 퇴식끼니 발행',
+        ],
+      },
+      {
+        title: '당일 — D 근무', icon: '☀️', color: '#dd6b20',
+        items: [
+          '퇴원약 수령',
+          '처치수가 (심사마감 전 완료)',
+          '환자분류 / 아파치',
+          '필요시 의무기록 복사 창구 안내',
+          '퇴원간호기록지 출력하여 교육하기 (투약사항, 외래일정 및 검사, 주의사항 등)',
+          '심사 완료 후 보호자 수납 안내 (퇴원간호기록지 지참)',
+          '귀중품 인계 (틀니 / 보청기 / Bone flap / 치아 / 지갑 / 핸드폰 / 자가약)',
+        ],
+      },
+      {
+        title: '외래검사 예약', icon: '🏥', color: '#38a169',
+        items: [
+          '외래 예약 [재진예약] → [예약 날짜 클릭]',
+          'CT / MRI 검사 예약 [검사예약관리] → 오더에 있는 검사 날짜로 클릭 (빈 슬롯이 없으면 검사실에 전화해서 예약)',
+        ],
+      },
+    ],
+  },
+};
+
+let dcCurrentType = 'death';
+
+// ── 화면 진입 / 탭 ────────────────────────────────
+function initDischarge() {
+  dcSelectTab(dcCurrentType);
+}
+
+function dcSelectTab(type) {
+  if (!DC_LISTS[type]) return;
+  dcCurrentType = type;
+
+  document.getElementById('dc-tab-death')?.classList.toggle('active', type === 'death');
+  document.getElementById('dc-tab-transfer')?.classList.toggle('active', type === 'transfer');
+
+  dcRenderList(type);
+  dcUpdateProgress();
+
+  const sc = document.querySelector('#screen-discharge .scroll-content');
+  if (sc) sc.scrollTop = 0;
+}
+
+// ── 렌더 ────────────────────────────────────────
+function dcRenderList(type) {
+  const wrap = document.getElementById('dc-list');
+  if (!wrap) return;
+  wrap.innerHTML = DC_LISTS[type].sections.map((sec, si) => `
+    <div class="qm-category">
+      <div class="qm-cat-header" style="background:${sec.color};">${sec.icon} ${sec.title}</div>
+      ${sec.items.map((text, ii) => `
+        <div class="qm-check-item" onclick="dcToggle(this)">
+          <input type="checkbox" class="qm-cb" data-dc-key="${si}-${ii}" onclick="event.stopPropagation()" onchange="dcOnCbChange(this)">
+          <span class="qm-check-text">${text}</span>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+// ── 체크 동작 ────────────────────────────────────
+function dcToggle(item) {
+  const cb = item.querySelector('input[type=checkbox]');
+  if (!cb) return;
+  cb.checked = !cb.checked;
+  dcOnCbChange(cb);
+}
+
+function dcOnCbChange(cb) {
+  cb.closest('.qm-check-item')?.classList.toggle('qm-checked', cb.checked);
+  const done = dcUpdateProgress();
+  // 마지막 항목까지 체크된 순간에만 완료 안내
+  if (done && cb.checked) setTimeout(() => alert('✅ 모든 업무가 완료되었습니다.'), 100);
+}
+
+// 전체 완료 여부를 반환
+function dcUpdateProgress() {
+  const all = document.querySelectorAll('#dc-list input[type=checkbox]');
+  const total = all.length;
+  let checked = 0;
+  all.forEach(cb => { if (cb.checked) checked++; });
+  const pct = total > 0 ? Math.round(checked / total * 100) : 0;
+
+  const fill = document.getElementById('dc-prog-fill');
+  if (fill) {
+    fill.style.width = pct + '%';
+    fill.style.background = pct >= 100 ? '#38a169' : pct >= 50 ? '#1a56db' : '#e53e3e';
+  }
+  const text  = document.getElementById('dc-prog-text');
+  const pctEl = document.getElementById('dc-prog-pct');
+  if (text)  text.textContent  = checked + ' / ' + total;
+  if (pctEl) pctEl.textContent = pct + '%';
+
+  return total > 0 && checked === total;
 }
