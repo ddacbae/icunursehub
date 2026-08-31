@@ -377,6 +377,15 @@ html, body {
 .recent-list-icon { font-size: 18px; }
 .recent-list-text { flex: 1; font-size: 14px; font-weight: 500; }
 .chevron { color: var(--gray-300); font-size: 16px; }
+/* 목록형 메뉴(라운딩 등) 안의 즐겨찾기 버튼 — 항목 열기와 겹치지 않게 터치 영역 확보 */
+.work-bm-btn {
+  padding: 6px 8px; margin: -6px -2px -6px 0;
+  font-size: 16px; line-height: 1; flex-shrink: 0;
+  cursor: pointer; user-select: none;
+  opacity: 0.35; transition: opacity .15s, transform .15s;
+}
+.work-bm-btn:active { transform: scale(1.25); }
+.work-bm-btn.bm-active { opacity: 1; }
 
 /* ===== CHECKLIST PREVIEW ===== */
 .checklist-preview { display: flex; flex-direction: column; gap: 6px; padding: 0 12px 12px; }
