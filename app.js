@@ -1227,6 +1227,7 @@ function initFoleyMonitoring() {
 }
 
 function foleyOnDateChange() {
+  saveBtnReset('foley-saveBtn');
   // 날짜 바뀌면 현재 선택된 교대 데이터 다시 로드
   if (foleyCurrentShift) {
     foleyLoadShiftData(foleyCurrentShift);
@@ -1245,6 +1246,7 @@ function foleyGetStorageKey(shiftKey) {
 
 // 교대 선택 → 버튼 강조 + 테이블 렌더
 function foleySelectShift(shiftKey) {
+  saveBtnReset('foley-saveBtn');
   foleyCurrentShift = shiftKey;
   const shift = FOLEY_SHIFTS.find(s => s.key === shiftKey);
 
@@ -1354,7 +1356,7 @@ function foleyBuildShiftSection(shift) {
         style="flex:1; padding:12px; background:#f0f0f0; color:#333; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit;">
         🔄 초기화
       </button>
-      <button onclick="foleySave()"
+      <button id="foley-saveBtn" onclick="foleySave()"
         style="flex:2; padding:12px; background:${shift.color}; color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;">
         💾 저장
       </button>
@@ -1377,6 +1379,7 @@ function foleyCheckBedActivation(bed) {
 }
 
 function foleyAutoSave() {
+  saveBtnReset('foley-saveBtn');   // 체크를 바꾸면 다시 저장할 수 있게
   if (!foleyCurrentShift) return;
   const key = foleyGetStorageKey(foleyCurrentShift);
   const data = { confirmer: document.getElementById('foley-confirmer')?.value || '', checks: {} };
@@ -1479,17 +1482,21 @@ function foleySave() {
   newKeys.forEach(k => savedKeys.add(k));
   localStorage.setItem('foley_saved_beds', JSON.stringify([...savedKeys]));
 
-  fetch(SQR_SHEET_URL, {
+  saveBtnBusy('foley-saveBtn');
+  saveBtnAfter(fetch(SQR_SHEET_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({ sheetName: '유치도뇨관', rows }),
-  }).catch(() => {});
+  }), ok => {
+    saveBtnDone('foley-saveBtn', ok === true ? '✅ 저장 완료' : '✅ 저장 완료 (전송 확인 필요)');
+  });
 }
 
 function foleyResetShift() {
   if (!confirm('현재 교대 체크를 모두 초기화할까요?')) return;
   document.querySelectorAll('#foley-sections input[type=checkbox]').forEach(cb => cb.checked = false);
   if (foleyCurrentShift) localStorage.removeItem(foleyGetStorageKey(foleyCurrentShift));
+  saveBtnReset('foley-saveBtn');
 }
 
 function foleyPrint() {
@@ -1731,6 +1738,8 @@ function qmRenderBedGrid() {
 
 // ── 침상 선택 → 체크리스트 패널 ──────────────────
 function qmSelectBed(bed) {
+  saveBtnReset('qm-saveBtn');
+  saveBtnReset('qm-save-btn');
   qmCurrentBed = bed;
   qmShowChecklistPanel(bed);
   qmClearChecklist();
@@ -1778,6 +1787,8 @@ function qmClearChecklist() {
 }
 
 function qmAutoSave() {
+  saveBtnReset('qm-saveBtn');      // 체크를 바꾸면 다시 저장할 수 있게
+  saveBtnReset('qm-save-btn');
   if (!qmCurrentBed) return;
   const key = qmGetStorageKey(qmCurrentBed);
   const checks = {};
@@ -1834,6 +1845,8 @@ function qmResetBed() {
   if (!confirm(`${qmCurrentBed}번 침상 체크를 초기화할까요?`)) return;
   qmClearChecklist();
   if (qmCurrentBed) localStorage.removeItem(qmGetStorageKey(qmCurrentBed));
+  saveBtnReset('qm-saveBtn');
+  saveBtnReset('qm-save-btn');
   qmUpdateProgress();
 }
 
@@ -1853,8 +1866,10 @@ function qmSaveData() {
   all.forEach(cb => { if (cb.checked) checked++; cbStates.push(cb.checked ? '✓' : '—'); });
   const pct = Math.round(checked / total * 100);
 
+  // 저장 즉시 버튼을 잠금 (전송 응답을 기다리지 않음 – 이 화면은 곧 침상 목록으로 바뀜)
+  saveBtnDone('qm-saveBtn');
+  saveBtnDone('qm-save-btn', '✅');
   alert(`✅ 저장 완료\n\n📅 ${date}  근무: ${shift}\n🛏 ${qmCurrentBed}번 침상\n👤 ${worker}  책임: ${charge}\n📊 ${checked}/${total} (${pct}%)`);
-  qmShowBedPanel();
 
   // Google Sheets 전송
   const row = [
@@ -1869,6 +1884,8 @@ function qmSaveData() {
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({ sheetName: 'QM체크리스트', rows: [row] }),
   }).catch(() => {});
+
+  setTimeout(qmShowBedPanel, 600);   // '저장 완료'를 잠깐 보여준 뒤 침상 목록으로
 }
 
 // ===== SICU 업무메뉴얼 =====

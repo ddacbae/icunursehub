@@ -2039,7 +2039,7 @@
             style="flex:1; padding:12px; background:#f0f0f0; color:#333; border:none; border-radius:8px; font-size:14px; font-weight:500; cursor:pointer; font-family:inherit;">
             🔄 초기화
           </button>
-          <button onclick="qmSaveData()"
+          <button id="qm-saveBtn" onclick="qmSaveData()"
             style="flex:2; padding:12px; background:#1a56db; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;">
             💾 저장 후 침상 목록
           </button>
@@ -2405,6 +2405,67 @@
 
 <script>
 // ════════════════════════════════════════════════════════════════════════
+// 저장 버튼 상태 공용 헬퍼  (저장 → 저장 중… → 저장 완료 → 내용 바뀌면 원상복구)
+//   app.js 의 QM / 유치도뇨관 화면에서도 함께 씁니다.
+// ════════════════════════════════════════════════════════════════════════
+function saveBtnRemember_(b) {
+  if (b.dataset.sbHtml === undefined) b.dataset.sbHtml = b.innerHTML;
+  if (b.dataset.sbBg   === undefined) b.dataset.sbBg   = b.style.background || '';
+}
+
+/** 저장 진행 중 – 잠금 */
+function saveBtnBusy(id, label) {
+  const b = document.getElementById(id);
+  if (!b) return;
+  saveBtnRemember_(b);
+  b.disabled = true;
+  b.innerHTML = label || '⏳ 저장 중…';
+  b.style.opacity = '0.65';
+  b.style.cursor = 'wait';
+  b.style.pointerEvents = 'none';   // span 으로 만든 버튼도 잠기도록
+}
+
+/** 저장 완료 – 잠금 유지 */
+function saveBtnDone(id, label) {
+  const b = document.getElementById(id);
+  if (!b) return;
+  saveBtnRemember_(b);
+  b.disabled = true;
+  b.dataset.sbSaved = '1';
+  b.innerHTML = label || '✅ 저장 완료';
+  if (b.tagName === 'BUTTON') b.style.background = '#16a34a';   // 아이콘(span)은 배경 유지
+  b.style.opacity = '1';
+  b.style.cursor = 'default';
+  b.style.pointerEvents = 'none';
+}
+
+/**
+ * 전송 결과를 기다리되, 응답이 늦어도 6초 뒤에는 넘어갑니다.
+ * (네트워크가 멈춰도 버튼이 '저장 중…' 상태로 잠기지 않도록)
+ * @param {Promise}  p        fetch 프로미스
+ * @param {Function} onSettle true=전송 성공, false=전송 실패, null=응답 지연
+ */
+function saveBtnAfter(p, onSettle) {
+  let fired = false;
+  const run = ok => { if (fired) return; fired = true; onSettle(ok); };
+  p.then(() => run(true), () => run(false));
+  setTimeout(() => run(null), 6000);
+}
+
+/** 입력이 바뀌면 다시 저장할 수 있도록 원래 모습으로 되돌림 */
+function saveBtnReset(id) {
+  const b = document.getElementById(id);
+  if (!b || b.dataset.sbHtml === undefined) return;
+  b.disabled = false;
+  delete b.dataset.sbSaved;
+  b.innerHTML = b.dataset.sbHtml;
+  b.style.background = b.dataset.sbBg;
+  b.style.opacity = '';
+  b.style.cursor = 'pointer';
+  b.style.pointerEvents = '';
+}
+
+// ════════════════════════════════════════════════════════════════════════
 // SICU Quick Rounding (sqr_*)
 // ════════════════════════════════════════════════════════════════════════
 const sqr_CATEGORIES = [
@@ -2435,8 +2496,10 @@ sqr_SHIFTS.forEach(s => {
   }
 });
 document.getElementById('sqr-dateInput').value = new Date().toISOString().slice(0,10);
+document.getElementById('sqr-dateInput').addEventListener('change',()=>saveBtnReset('sqr-fabSave'));
 
 function sqr_selectShift(s) {
+  saveBtnReset('sqr-fabSave');
   sqr_shift = s; sqr_bed = [...sqr_selBeds[s]][0] ?? null;
   document.querySelectorAll('#screen-sicu-quick-rounding .shift-tab').forEach(t => t.classList.remove('active'));
   document.querySelector('#screen-sicu-quick-rounding .shift-tab.'+s.toLowerCase()).classList.add('active');
@@ -2456,6 +2519,7 @@ function sqr_buildGrid() {
   }
 }
 function sqr_clickBed(n) {
+  saveBtnReset('sqr-fabSave');
   if (sqr_bed===n) { sqr_selBeds[sqr_shift].clear(); sqr_bed=null; }
   else { sqr_selBeds[sqr_shift].clear(); sqr_selBeds[sqr_shift].add(n); sqr_bed=n; }
   sqr_buildGrid(); sqr_renderList(); sqr_updateProg(); sqr_updateBadges();
@@ -2484,6 +2548,7 @@ function sqr_renderList() {
 }
 function sqr_toggle(catId, idx, el) {
   if (!sqr_bed) return;
+  saveBtnReset('sqr-fabSave');
   const cur = sqr_checks[sqr_shift][sqr_bed][catId][idx];
   sqr_checks[sqr_shift][sqr_bed][catId][idx] = !cur;
   el.classList.toggle('checked'); el.querySelector('.rs-checkbox').textContent = !cur?'✓':'';
@@ -2526,6 +2591,7 @@ function sqr_saveRecord() {
     done,total:beds.length*sqr_TOTAL,savedAt:new Date().toLocaleString('ko-KR')};
   const recs=JSON.parse(localStorage.getItem('sicu_quick_records')||'[]');
   recs.unshift(rec); localStorage.setItem('sicu_quick_records',JSON.stringify(recs));
+  saveBtnBusy('sqr-fabSave');
   sqr_toast('✅ 저장 중...');
   sqr_sendToSheets(rec);
 }
@@ -2572,13 +2638,16 @@ const detail = [
     ];
   });
 
-  fetch(SQR_SHEET_URL, {
+  saveBtnAfter(fetch(SQR_SHEET_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({ sheetName: '퀵라운딩', rows }),
-  })
-  .then(() => sqr_toast('✅ 저장 완료! (Google Sheets 전송됨)'))
-  .catch(() => sqr_toast('✅ 로컬 저장 완료 (Sheets 전송 실패)'));
+  }), ok => {
+    saveBtnDone('sqr-fabSave');
+    sqr_toast(ok === true  ? '✅ 저장 완료! (Google Sheets 전송됨)'
+            : ok === false ? '✅ 로컬 저장 완료 (Sheets 전송 실패)'
+            :                '✅ 저장 완료 (전송 중 – 네트워크 확인 필요)');
+  });
 }
 function sqr_toast(msg) {
   const t=document.getElementById('sqr-toast'); t.textContent=msg; t.classList.add('show');
@@ -2613,6 +2682,7 @@ document.getElementById('cn-dateInput').addEventListener('change',function(){cn_
 document.getElementById('cn-ventToggle').addEventListener('change',function(){cn_ventState[cn_shift]=this.checked;});
 
 function cn_setDate(v) {
+  saveBtnReset('cn-fabSave');
   const el=document.getElementById('cn-dateDisplay');
   if(!v){el.textContent='날짜 선택';el.classList.add('placeholder');return;}
   const [y,m,d]=v.split('-');
@@ -2620,6 +2690,7 @@ function cn_setDate(v) {
   el.textContent=y+'.'+m+'.'+d+' ('+dow+')'; el.classList.remove('placeholder');
 }
 function cn_selectShift(s) {
+  saveBtnReset('cn-fabSave');
   cn_shift=s; cn_bed=[...cn_selBeds[s]][0]??null;
   document.querySelectorAll('#screen-cn-rounding .shift-tab').forEach(t=>t.classList.remove('active'));
   document.querySelector('#screen-cn-rounding .shift-tab.'+s.toLowerCase()).classList.add('active');
@@ -2637,6 +2708,7 @@ function cn_buildGrid() {
   }
 }
 function cn_clickBed(n) {
+  saveBtnReset('cn-fabSave');
   if(cn_bed===n){cn_selBeds[cn_shift].clear();cn_bed=null;}
   else{
     cn_selBeds[cn_shift].clear(); cn_selBeds[cn_shift].add(n); cn_bed=n;
@@ -2665,6 +2737,7 @@ function cn_renderList() {
 }
 function cn_toggle(grp,idx,el) {
   if(!cn_bed) return;
+  saveBtnReset('cn-fabSave');
   const cur=cn_checks[cn_shift][cn_bed][grp][idx];
   cn_checks[cn_shift][cn_bed][grp][idx]=!cur;
   el.classList.toggle('checked'); el.querySelector('.rs-checkbox').textContent=!cur?'✓':'';
@@ -2694,6 +2767,7 @@ function cn_saveRecord() {
   recs.unshift(rec); localStorage.setItem('cn_records',JSON.stringify(recs));
   cn_selBeds[cn_shift].clear(); cn_bed=null;
   cn_buildGrid(); cn_renderList(); cn_updateProg(); cn_updateBadges();
+  saveBtnBusy('cn-fabSave');
   cn_toast('✅ 저장 중...');
   cn_sendToSheets(rec);
 }
@@ -2725,13 +2799,16 @@ function cn_sendToSheets(rec) {
     detail,
   ];
 
-  fetch(SQR_SHEET_URL, {
+  saveBtnAfter(fetch(SQR_SHEET_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({ sheetName: '책임간호사라운딩', rows: [row] }),
-  })
-  .then(() => cn_toast('✅ 저장 완료! (Google Sheets 전송됨)'))
-  .catch(() => cn_toast('✅ 로컬 저장 완료 (Sheets 전송 실패)'));
+  }), ok => {
+    saveBtnDone('cn-fabSave');
+    cn_toast(ok === true  ? '✅ 저장 완료! (Google Sheets 전송됨)'
+           : ok === false ? '✅ 로컬 저장 완료 (Sheets 전송 실패)'
+           :                '✅ 저장 완료 (전송 중 – 네트워크 확인 필요)');
+  });
 }
 function cn_toast(msg) {
   const t=document.getElementById('cn-toast'); t.textContent=msg; t.classList.add('show');
