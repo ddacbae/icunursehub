@@ -1084,6 +1084,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // 즐겨찾기 가능한 화면 목록
 const BOOKMARKABLE = [
   { screen: 'screen-initial-assessment',  icon: '📋', label: '초기사정 메뉴얼' },
+  { screen: 'screen-antibiotic-ast',      icon: '💉', label: '항생제 AST 가이드' },
   { screen: 'screen-sicu-manual',         icon: '📖', label: '외과계중환자실 업무 메뉴얼' },
   { screen: 'screen-disease-summary',     icon: '🏥', label: '질환별 핵심 요약' },
   { screen: 'screen-equipment',           icon: '🖥️', label: '장비 가이드' },
@@ -1130,8 +1131,15 @@ function isBookmarked(screenId) {
 }
 
 function updateAllBookmarkBtns() {
+  // 각 화면 헤더의 ⭐ 버튼
   document.querySelectorAll('[id^="bm-"]').forEach(btn => {
     const screenId = btn.id.replace('bm-', '');
+    btn.textContent = isBookmarked(screenId) ? '★' : '⭐';
+    btn.classList.toggle('bm-active', isBookmarked(screenId));
+  });
+  // 교육자료 카드의 ⭐ 버튼 (id 중복을 피하려고 data 속성 사용)
+  document.querySelectorAll('[data-bm-screen]').forEach(btn => {
+    const screenId = btn.dataset.bmScreen;
     btn.textContent = isBookmarked(screenId) ? '★' : '⭐';
     btn.classList.toggle('bm-active', isBookmarked(screenId));
   });

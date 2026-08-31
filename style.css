@@ -338,6 +338,7 @@ html, body {
 
 .edu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 4px 14px 12px; }
 .edu-card {
+  position: relative;                /* 즐겨찾기 별 버튼 기준점 */
   background: white; border-radius: var(--radius);
   padding: 16px 14px; cursor: pointer;
   box-shadow: var(--shadow);
@@ -345,6 +346,15 @@ html, body {
   transition: transform .15s;
 }
 .edu-card:active { transform: scale(0.97); }
+/* 카드 우측 상단 즐겨찾기 버튼 — 카드 열기와 겹치지 않게 넓은 터치 영역 확보 */
+.edu-bm-btn {
+  position: absolute; top: 2px; right: 2px;
+  padding: 6px 8px; font-size: 15px; line-height: 1;
+  cursor: pointer; user-select: none;
+  opacity: 0.35; transition: opacity .15s, transform .15s;
+}
+.edu-bm-btn:active { transform: scale(1.25); }
+.edu-bm-btn.bm-active { opacity: 1; }
 .edu-card.urgent-card { border: 1.5px solid var(--red); }
 .edu-card-icon {
   width: 44px; height: 44px; border-radius: 12px;
