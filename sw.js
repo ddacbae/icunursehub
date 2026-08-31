@@ -1,5 +1,5 @@
 // 앱을 수정해서 배포할 때마다 아래 버전 숫자를 올려주세요 (v2 → v3 → ...)
-const CACHE_NAME = 'icu-hub-v11';
+const CACHE_NAME = 'icu-hub-v12';
 const FILES = ['./', './index.html', './app.js', './style.css', './manifest.json', './icon.png'];
 
 self.addEventListener('install', e => {
@@ -30,6 +30,9 @@ self.addEventListener('fetch', e => {
   // 같은 출처(내 앱 파일)만 처리. 외부 요청(구글시트 조회 등)은 그대로 통과
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+
+  // APK 는 한 번 받으면 끝인 1MB 넘는 파일이라 캐시에 담지 않음
+  if (url.pathname.endsWith('.apk')) return;
 
   e.respondWith(
     // cache:'no-store' — 브라우저 HTTP 캐시(10분)를 건너뛰고 항상 서버 최신본을 받음

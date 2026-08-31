@@ -7,3 +7,6 @@ signing-key-info.txt
 *.apk
 *.aab
 ICU Nurse Hub - Google Play package/
+
+# 배포용 APK 하나만 예외 — 이 파일은 다운로드 링크로 제공합니다
+!app/icu-nurse-hub.apk
