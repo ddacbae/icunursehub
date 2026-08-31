@@ -256,6 +256,7 @@
 .ast-step-n { width:20px; height:20px; border-radius:50%; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
 .ast-step-txt { font-size:12.5px; color:#334155; line-height:1.55; flex:1; }
 .ast-conc-tag { display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10.5px; border-radius:4px; padding:1px 5px; margin-left:3px; vertical-align:middle; }
+.ast-ref { margin:14px 14px 0; font-size:11px; color:#94a3b8; line-height:1.6; }
 
 /* ─── Drug Calculator Screen ─── */
 #screen-drugcalc {
@@ -419,7 +420,7 @@
         <div class="edu-card-label">초기 사정<br>메뉴얼</div>
         <div class="edu-card-sub">진료과별 환자 사정</div>
       </div>
-      <div class="edu-card" data-search="항생제 AST 피내 주사 세파 페니실린 조제" onclick="showScreen('screen-antibiotic-ast')">
+      <div class="edu-card" data-search="항생제 AST 피내 주사 세파 페니실린 조제 스킨테스트 Fetroja Zerbaxa Tazoperan" onclick="showScreen('screen-antibiotic-ast')">
         <span class="edu-bm-btn" data-bm-screen="screen-antibiotic-ast"
           onclick="event.stopPropagation(); toggleBookmark('screen-antibiotic-ast','항생제 AST 가이드','💉')">⭐</span>
         <div class="edu-card-icon teal">💉</div>
@@ -2202,7 +2203,7 @@
   <div class="sub-header">
     <span class="back-btn" onclick="goBack()">←</span>
     <span class="sub-title">항생제 AST 가이드</span>
-    <span style="font-size:10px; color:#94a3b8; margin-left:auto; white-space:nowrap;">간호교육파트<br>2025년 11월 개정</span>
+    <span style="font-size:10px; color:#94a3b8; margin-left:auto; white-space:nowrap;">간호교육파트<br>2026년 8월 개정</span>
   </div>
 
   <div class="scroll-content" style="background:#f8fafc;">
@@ -2218,7 +2219,7 @@
       <div class="ast-banner-title">시험 방법</div>
       <div class="ast-banner-body">
         ① AST 용액을 <strong>전완(forearm)</strong>에 정해진 투여량만큼 <strong>피내(intra-dermal)</strong>에 주사<br>
-        ② 양성인 경우, AST 시행부위에서 <strong>3~4cm 떨어진 곳</strong> 또는 반대쪽 대칭부위에 <strong>NS 0.02ml</strong>를 피내주사하여 비교
+        ② ①의 시행 결과 <strong>양성인 경우</strong>, AST 시행부위에서 <strong>3~4cm 떨어진 곳</strong> 또는 반대쪽 대칭부위에 <strong>NS 0.02ml</strong>를 피내주사하여 항생제 주사부위와 비교
       </div>
     </div>
 
@@ -2226,8 +2227,8 @@
     <div class="ast-banner ast-banner-judge">
       <div class="ast-banner-title">판정 방법</div>
       <div class="ast-banner-body">
-        ① <strong>페니실린 &amp; 세파계:</strong> 팽진 <strong>2~3mm 이상</strong> + 발적 동반 → 양성<br>
-        ② <strong>Asparaginase:</strong> wheal and/or erythema 발생 → 양성
+        ① <strong>페니실린 &amp; 세파계:</strong> 팽진이 <strong>2~3mm 이상</strong>이고 <strong>발적</strong>을 동반한 경우 → 양성<br>
+        ② <strong>Asparaginase:</strong> wheal and/or erythema가 생기면 → 양성
       </div>
     </div>
 
@@ -2236,7 +2237,7 @@
       <div class="ast-banner-title">AST 미지정 약물 (각 계열 기준 적용)</div>
       <div class="ast-banner-body">
         · 합성 페니실린계: <strong>Piperacillin/Tazobactam (Tazoperan)</strong><br>
-        · 세파계: <strong>Ceftolozane/Tazobactam (Zerbaxa)</strong>
+        · 세파계: <strong>Ceftolozane/Tazobactam (Zerbaxa)</strong>, <strong>Cefiderocol (Fetroja)</strong>
       </div>
     </div>
 
@@ -2250,6 +2251,8 @@
 
     <!-- 약물 카드 컨테이너 -->
     <div id="ast-cards" style="padding-bottom:4px;"></div>
+
+    <div class="ast-ref">Reference: 원내 AST 가이드라인 개정(2026.8), 보라매병원 그룹웨어</div>
 
     <div style="height:80px;"></div>
   </div>
