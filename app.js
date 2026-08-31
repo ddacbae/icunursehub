@@ -1241,6 +1241,7 @@ function foleyOnDateChange() {
   if (foleyCurrentShift) {
     document.querySelectorAll('#foley-sections input[type=checkbox]').forEach(cb => cb.checked = false);
     foleyLoadShiftData(foleyCurrentShift);
+    foleyRestoreConfirmer();
   }
 }
 
@@ -1280,6 +1281,7 @@ function foleySelectShift(shiftKey) {
   foleyBuildShiftSection(shift);
   foleyApplyTimeSelection();
   foleyLoadShiftData(shiftKey);
+  foleyRestoreConfirmer();
 }
 
 function foleyBuildShiftSection(shift) {
@@ -1442,7 +1444,7 @@ function foleyAutoSave() {
   saveBtnReset('foley-saveBtn');   // 체크를 바꾸면 다시 저장할 수 있게
   if (!foleyCurrentShift) return;
   const key = foleyGetStorageKey(foleyCurrentShift);
-  const data = { checks: {} };
+  const data = { confirmer: document.getElementById('foley-confirmer')?.value || '', checks: {} };
   document.querySelectorAll('#foley-sections input[type=checkbox]').forEach(cb => {
     data.checks[`${cb.dataset.row}_${cb.dataset.bed}`] = cb.checked;
   });
@@ -1479,8 +1481,26 @@ function foleyLoadShiftData(shiftKey) {
   });
 }
 
+/** 저장해 둔 확인자 이름을 입력란에 되살림 */
+function foleyRestoreConfirmer() {
+  if (!foleyCurrentShift) return;
+  const raw = localStorage.getItem(foleyGetStorageKey(foleyCurrentShift));
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    const el = document.getElementById('foley-confirmer');
+    if (el && data.confirmer) el.value = data.confirmer;
+  } catch (e) {}
+}
+
 function foleySave() {
   if (!foleyCurrentShift) { alert('근무를 먼저 선택하세요.'); return; }
+  const confirmer = document.getElementById('foley-confirmer')?.value.trim() || '';
+  if (!confirmer) {
+    alert('확인자 이름을 입력해주세요.');
+    document.getElementById('foley-confirmer')?.focus();
+    return;
+  }
   foleyAutoSave();
   const shift   = FOLEY_SHIFTS.find(s => s.key === foleyCurrentShift);
   const date    = foleyGetDateKey();
@@ -1497,10 +1517,10 @@ function foleySave() {
     // 아무것도 체크 안 된 침상은 전송 생략
     if (!present && !loose && timeChecks.every(c => !c)) continue;
 
-    // 확인자 열은 비워 둠 (시트 열 개수를 유지하기 위해 자리는 남김)
     // 같은 시행일+근무+침상 행은 GAS 가 찾아서 덮어쓰므로 몇 번을 저장해도 한 줄
+    // (확인자는 갱신 기준이 아니므로 마지막으로 저장한 사람 이름이 남음)
     rows.push([
-      savedAt, date, shift.label, '', bed + '번',
+      savedAt, date, shift.label, confirmer, bed + '번',
       present ? '✓' : '',
       loose   ? '✓' : '',
       ...timeChecks.map(c => c ? '✓' : ''),
@@ -1509,7 +1529,7 @@ function foleySave() {
 
   if (rows.length === 0) { alert('저장할 데이터가 없습니다.'); return; }
 
-  alert(`✅ 저장 완료\n\n📅 날짜: ${date}\n근무: ${shift.label} (${shift.name})\n⏰ 확인 시간: ${shift.times[foleyTimeIdx]}\n✔ 저장: ${rows.length}개 침상\n\n같은 근무에서 다음 시간대를 체크한 뒤 다시 저장하면\n기존 기록에 이어서 갱신됩니다.`);
+  alert(`✅ 저장 완료\n\n📅 날짜: ${date}\n근무: ${shift.label} (${shift.name})\n⏰ 확인 시간: ${shift.times[foleyTimeIdx]}\n👤 확인자: ${confirmer}\n✔ 저장: ${rows.length}개 침상\n\n같은 근무에서 다음 시간대를 체크한 뒤 다시 저장하면\n기존 기록에 이어서 갱신됩니다.`);
 
   saveBtnBusy('foley-saveBtn');
   saveBtnAfter(fetch(SQR_SHEET_URL, {
@@ -1547,7 +1567,7 @@ button { display:none; }
 </style></head><body>
 <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
   <b style="font-size:14px;">SICU 유치도뇨관 유지/관리 모니터링</b>
-  <span>시행일: ${date} | 근무: ${shift.label}</span>
+  <span>시행일: ${date} | 근무: ${shift.label} | 확인자: ${document.getElementById('foley-confirmer')?.value || ''}</span>
 </div>
 ${sectionsHtml}
 </body></html>`);
