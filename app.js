@@ -1958,8 +1958,16 @@ function qmSaveData() {
   qmAutoSave();
   const date   = qmGetDateKey();
   const shift  = document.getElementById('qm-shift')?.value || '';
-  const worker = document.getElementById('qm-worker')?.value || '미입력';
+  const workerEl = document.getElementById('qm-worker');
+  const worker = (workerEl?.value || '').trim();
   const notes  = document.getElementById('qm-handover-notes')?.value || '';
+
+  // 근무자 이름은 필수 (글로 적는 인계메모는 비워 두어도 됩니다)
+  if (!worker) {
+    alert('⚠️ 근무자 이름을 입력해 주세요.');
+    workerEl?.focus();
+    return;
+  }
 
   // 시트 열 수를 유지하려면 모든 항목을 훑되,
   // 이번 근무에 해당 없는 항목(N 근무 전용)은 'N/A' 로 보내 준수율에서 빠지게 함
@@ -1979,13 +1987,21 @@ function qmSaveData() {
   const pct     = t.pct === null ? 0 : t.pct;
   const missing = t.total - t.answered;
 
+  // 입력하지 않은 체크 항목이 있으면 저장하지 않음
+  // (글로 적는 칸 – 근무자 이름 · 인계메모 – 은 비워 두어도 됩니다)
+  if (missing) {
+    alert(`⚠️ 아직 입력하지 않은 항목이 ${missing}개 있습니다.\n\n`
+        + `모든 항목을 수행 / 미수행 / 해당없음 중 하나로 표시해 주세요.`);
+    triFlagMissing(qmActiveItems().filter(item => !qmItemState(item)));
+    return;
+  }
+
   // 저장 즉시 버튼을 잠금 (전송 응답을 기다리지 않음 – 이 화면은 곧 침상 목록으로 바뀜)
   saveBtnDone('qm-saveBtn');
   saveBtnDone('qm-save-btn', '✅');
   alert(`✅ 저장 완료\n\n📅 ${date}  근무: ${shift}\n🛏 ${qmCurrentBed}번 침상\n👤 ${worker}\n`
       + `📊 수행 ${checked}/${total} (${pct}%)`
-      + (t.na ? `\n➖ 해당없음 ${t.na}개` : '')
-      + (missing ? `\n⚠️ 미응답 ${missing}개 (미수행으로 저장됨)` : ''));
+      + (t.na ? `\n➖ 해당없음 ${t.na}개` : ''));
 
   // Google Sheets 전송
   // 열 순서는 시트 헤더와 동일해야 함

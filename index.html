@@ -1880,7 +1880,7 @@
         </div>
         <div class="qm-info-field">
           <span class="qm-info-label">👤</span>
-          <input type="text" class="qm-info-input" placeholder="근무자" id="qm-worker">
+          <input type="text" class="qm-info-input" placeholder="근무자 (필수)" id="qm-worker">
         </div>
       </div>
     </div>
@@ -2401,14 +2401,14 @@
             <span class="nurse-role-dot" style="background:#f97316"></span>
             <span class="nurse-role-label" style="color:#f97316">교대 전 근무자</span>
           </div>
-          <input class="nurse-input" id="sqr-nurseOut" type="text" placeholder="이름 입력" autocomplete="off">
+          <input class="nurse-input" id="sqr-nurseOut" type="text" placeholder="이름 입력 (필수)" autocomplete="off">
         </div>
         <div class="nurse-block">
           <div class="nurse-role">
             <span class="nurse-role-dot" style="background:#3fb950"></span>
             <span class="nurse-role-label" style="color:#3fb950">교대 후 근무자</span>
           </div>
-          <input class="nurse-input" id="sqr-nurseIn" type="text" placeholder="이름 입력" autocomplete="off">
+          <input class="nurse-input" id="sqr-nurseIn" type="text" placeholder="이름 입력 (필수)" autocomplete="off">
         </div>
       </div>
     </div>
@@ -2614,6 +2614,15 @@ function triButtons(cur, onclickFor) {
   }).join('') + '</div>';
 }
 /**
+ * 입력하지 않은 항목을 잠깐 강조하고 첫 항목으로 스크롤합니다.
+ * (글로 적는 칸 – 근무자 이름 · 인계메모 등 – 은 비워 두어도 됩니다)
+ */
+function triFlagMissing(items) {
+  items.forEach(el => el.classList.add('tri-missing'));
+  if (items[0]) items[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(() => items.forEach(el => el.classList.remove('tri-missing')), 3200);
+}
+/**
  * 상태 묶음 집계.
  *   answered : 응답한 항목 수 (해당없음 포함)   → 입력 진행률용
  *   target   : 준수율 분모 = 전체 − 해당없음    → 시트 집계와 동일
@@ -2750,9 +2759,18 @@ function sqr_saveRecord() {
   const date=document.getElementById('sqr-dateInput').value;
   if(!date){sqr_toast('날짜를 선택해주세요.');return;}
   if(!sqr_selBeds[sqr_shift].size){sqr_toast('침상을 하나 이상 선택해주세요.');return;}
+  const nOut=document.getElementById('sqr-nurseOut'), nIn=document.getElementById('sqr-nurseIn');
+  if(!nOut.value.trim()){sqr_toast('교대 전 근무자 이름을 입력해주세요.');nOut.focus();return;}
+  if(!nIn.value.trim()){sqr_toast('교대 후 근무자 이름을 입력해주세요.');nIn.focus();return;}
   const beds=[...sqr_selBeds[sqr_shift]].sort((a,b)=>a-b);
   let allVals=[]; beds.forEach(b=>{ allVals=allVals.concat(sqr_bedVals(sqr_shift,b)); });
   const tal=triTally(allVals);
+  const missing=tal.total-tal.answered;
+  if(missing){
+    sqr_toast('⚠️ 입력하지 않은 항목이 '+missing+'개 있습니다');
+    triFlagMissing([...document.querySelectorAll('#sqr-checkSection .rs-check-item[data-state=""]')]);
+    return;
+  }
   const rec={id:Date.now(),date,shift:sqr_shift,beds,
     nurseOut:document.getElementById('sqr-nurseOut').value.trim(),
     nurseIn:document.getElementById('sqr-nurseIn').value.trim(),
@@ -2942,6 +2960,13 @@ function cn_saveRecord() {
   const date=document.getElementById('cn-dateInput').value;
   if(!date){cn_toast('날짜를 선택해주세요.');return;}
   if(!cn_bed){cn_toast('침상을 선택해주세요.');return;}
+  const tal=triTally(cn_bedVals(cn_shift,cn_bed));
+  const missing=tal.total-tal.answered;
+  if(missing){
+    cn_toast('⚠️ 입력하지 않은 항목이 '+missing+'개 있습니다');
+    triFlagMissing([...document.querySelectorAll('#cn-checkSection .rs-check-item[data-state=""]')]);
+    return;
+  }
   const rec={id:Date.now(),date,shift:cn_shift,bed:cn_bed,vent:cn_ventState[cn_shift],
     checks:JSON.parse(JSON.stringify(cn_checks[cn_shift][cn_bed])),savedAt:new Date().toLocaleString('ko-KR')};
   const recs=JSON.parse(localStorage.getItem('cn_records')||'[]');

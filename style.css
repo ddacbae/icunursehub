@@ -1393,12 +1393,22 @@ html, body {
 .rs-check-item[data-state="NA"] .rs-check-item-text { color:#94a3b8; text-decoration:line-through; }
 
 /* 범례 */
-.tri-legend { display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:10.5px; color:#64748b; }
-.tri-legend span { display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
+.tri-legend { display:flex; align-items:center; gap:14px; flex-wrap:wrap; font-size:13px; font-weight:600; color:#334155; }
+.tri-legend span { display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
 .tri-legend i {
-  width:15px; height:15px; border-radius:4px; font-style:normal; color:#fff;
-  font-size:10px; font-weight:700; display:inline-flex; align-items:center; justify-content:center;
+  width:24px; height:24px; border-radius:7px; font-style:normal; color:#fff;
+  font-size:15px; font-weight:700; display:inline-flex; align-items:center; justify-content:center;
 }
 .tri-legend i.tri-y  { background:#16a34a; }
 .tri-legend i.tri-n  { background:#dc2626; }
 .tri-legend i.tri-na { background:#64748b; }
+
+/* 저장 시 입력하지 않은 항목을 잠깐 강조 */
+.qm-check-item.tri-missing, .rs-check-item.tri-missing {
+  box-shadow:inset 3px 0 0 #f59e0b;
+  animation:triMissingPulse 1.1s ease-in-out 3;
+}
+@keyframes triMissingPulse {
+  0%, 100% { background:#fffbeb; }
+  50%      { background:#fde68a; }
+}
