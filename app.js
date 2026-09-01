@@ -1764,14 +1764,15 @@ function qmRenderBedGrid() {
       if (raw) {
         const data = JSON.parse(raw);
         // N 근무가 아니면 N 전용 항목은 완료 판정에서 제외
+        // 완료 = 모든 항목이 응답됨 (수행/미수행/해당없음 중 하나)
         const skip = shift === 'N' ? [] : qmNightOnlyIndexes();
-        const checks = Object.entries(data.checks || {})
+        const vals = Object.entries(data.checks || {})
           .filter(([k]) => skip.indexOf(Number(k)) === -1)
-          .map(([, v]) => v);
-        const total = checks.length;
-        const checkedCount = checks.filter(Boolean).length;
-        if (total > 0 && checkedCount === total) status = 'done';
-        else if (checkedCount > 0) status = 'partial';
+          .map(([, v]) => triNorm(v));
+        const total = vals.length;
+        const answered = vals.filter(v => v !== '').length;
+        if (total > 0 && answered === total) status = 'done';
+        else if (answered > 0) status = 'partial';
       }
     } catch(e) {}
 
@@ -1829,11 +1830,34 @@ function qmHandleBack() {
 }
 
 // ── 체크리스트 데이터 ─────────────────────────────
+// ── 3단계 체크 상태 다루기 (수행 / 미수행 / 해당없음) ──────────────
+/** 체크리스트 패널의 항목 행 목록 (저장은 이 순서의 번호로 합니다) */
+function qmItems() {
+  return [...document.querySelectorAll('#qm-panel-checklist .qm-check-item')];
+}
+function qmItemState(item) {
+  return triNorm(item.dataset.state);
+}
+/** 행의 상태를 바꾸고 버튼 표시도 함께 맞춥니다 */
+function qmApplyItemState(item, st) {
+  item.dataset.state = st;
+  item.querySelectorAll('.tri-btn').forEach(b => b.classList.remove('on'));
+  if (st) {
+    const cls = st === 'Y' ? 'tri-y' : st === 'N' ? 'tri-n' : 'tri-na';
+    item.querySelector('.tri-btn.' + cls)?.classList.add('on');
+  }
+}
+/** 버튼 클릭 – 같은 버튼을 다시 누르면 미응답으로 되돌립니다 */
+function qmSetState(btn, val) {
+  const item = btn.closest('.qm-check-item');
+  if (!item || item.classList.contains('qm-locked')) return;
+  qmApplyItemState(item, qmItemState(item) === val ? '' : val);
+  qmUpdateProgress();
+  qmAutoSave();
+}
+
 function qmClearChecklist() {
-  document.querySelectorAll('#qm-panel-checklist input[type=checkbox]').forEach(cb => {
-    cb.checked = false;
-    cb.closest('.qm-check-item')?.classList.remove('qm-checked');
-  });
+  qmItems().forEach(item => qmApplyItemState(item, ''));
   const notes = document.getElementById('qm-handover-notes');
   if (notes) notes.value = '';
 }
@@ -1844,9 +1868,7 @@ function qmAutoSave() {
   if (!qmCurrentBed) return;
   const key = qmGetStorageKey(qmCurrentBed);
   const checks = {};
-  document.querySelectorAll('#qm-panel-checklist input[type=checkbox]').forEach((cb, i) => {
-    checks[i] = cb.checked;
-  });
+  qmItems().forEach((item, i) => { checks[i] = qmItemState(item); });
   const notes = document.getElementById('qm-handover-notes')?.value || '';
   localStorage.setItem(key, JSON.stringify({ checks, notes }));
 }
@@ -1856,11 +1878,9 @@ function qmLoadBedData(bed) {
   const raw = localStorage.getItem(key);
   if (!raw) return;
   const data = JSON.parse(raw);
-  document.querySelectorAll('#qm-panel-checklist input[type=checkbox]').forEach((cb, i) => {
-    if (data.checks && data.checks[i] !== undefined) {
-      cb.checked = data.checks[i];
-      if (cb.checked) cb.closest('.qm-check-item')?.classList.add('qm-checked');
-    }
+  // triNorm 이 예전 boolean 저장분(true/false)도 함께 읽어 줍니다
+  qmItems().forEach((item, i) => {
+    if (data.checks && data.checks[i] !== undefined) qmApplyItemState(item, triNorm(data.checks[i]));
   });
   const notes = document.getElementById('qm-handover-notes');
   if (notes && data.notes) notes.value = data.notes;
@@ -1877,30 +1897,23 @@ function qmApplyShiftLock() {
   const night = qmIsNight();
   document.querySelectorAll('#qm-panel-checklist .qm-night-only').forEach(item => {
     item.classList.toggle('qm-locked', !night);
-    const cb = item.querySelector('input[type=checkbox]');
-    if (!cb) return;
-    cb.disabled = !night;
-    if (!night && cb.checked) {          // N 이 아닌 근무로 바꾸면 체크를 해제
-      cb.checked = false;
-      item.classList.remove('qm-checked');
-    }
+    item.querySelectorAll('.tri-btn').forEach(b => { b.disabled = !night; });
+    if (!night && qmItemState(item)) qmApplyItemState(item, '');   // N 이 아니면 입력을 비움
   });
   qmUpdateProgress();
   qmAutoSave();
 }
 
-/** 현재 근무에서 실제로 체크할 수 있는 항목만 추림 */
-function qmActiveCheckboxes() {
+/** 현재 근무에서 실제로 입력할 수 있는 항목만 추림 */
+function qmActiveItems() {
   const night = qmIsNight();
-  return [...document.querySelectorAll('#qm-panel-checklist input[type=checkbox]')]
-    .filter(cb => night || !cb.closest('.qm-night-only'));
+  return qmItems().filter(item => night || !item.classList.contains('qm-night-only'));
 }
 
-/** N 전용 항목이 전체 체크박스 중 몇 번째인지 (저장 데이터가 순번으로 되어 있어 필요) */
+/** N 전용 항목이 전체 항목 중 몇 번째인지 (저장 데이터가 순번으로 되어 있어 필요) */
 function qmNightOnlyIndexes() {
   const out = [];
-  document.querySelectorAll('#qm-panel-checklist input[type=checkbox]')
-    .forEach((cb, i) => { if (cb.closest('.qm-night-only')) out.push(i); });
+  qmItems().forEach((item, i) => { if (item.classList.contains('qm-night-only')) out.push(i); });
   return out;
 }
 
@@ -1916,22 +1929,9 @@ function qmOnShiftChange() {
   qmRenderBedGrid();               // 침상별 완료 표시도 근무 기준으로 갱신
 }
 
-function qmToggle(item) {
-  if (item.classList.contains('qm-locked')) return;   // 잠긴 항목은 무시
-  const cb = item.querySelector('input[type=checkbox]');
-  if (!cb) return;
-  cb.checked = !cb.checked;
-  item.classList.toggle('qm-checked', cb.checked);
-  qmUpdateProgress();
-  qmAutoSave();
-}
-
 function qmUpdateProgress() {
-  const all = qmActiveCheckboxes();
-  const total = all.length;
-  let checked = 0;
-  all.forEach(cb => { if (cb.checked) checked++; });
-  const pct = total > 0 ? Math.round(checked / total * 100) : 0;
+  const t = triTally(qmActiveItems().map(qmItemState));
+  const pct = t.total > 0 ? Math.round(t.answered / t.total * 100) : 0;   // 입력 진행률
 
   const fill = document.getElementById('qm-prog-fill');
   const text = document.getElementById('qm-prog-text');
@@ -1940,7 +1940,7 @@ function qmUpdateProgress() {
 
   fill.style.width = pct + '%';
   fill.style.background = pct >= 100 ? '#38a169' : pct >= 50 ? '#1a56db' : '#e53e3e';
-  if (text) text.textContent = checked + ' / ' + total;
+  if (text) text.textContent = '응답 ' + t.answered + ' / ' + t.total + (t.pct === null ? '' : ' · 수행 ' + t.pct + '%');
   if (pctEl) pctEl.textContent = pct + '%';
 }
 
@@ -1961,24 +1961,31 @@ function qmSaveData() {
   const worker = document.getElementById('qm-worker')?.value || '미입력';
   const notes  = document.getElementById('qm-handover-notes')?.value || '';
 
-  // 시트 열 수를 유지하려면 모든 체크박스를 훑되,
+  // 시트 열 수를 유지하려면 모든 항목을 훑되,
   // 이번 근무에 해당 없는 항목(N 근무 전용)은 'N/A' 로 보내 준수율에서 빠지게 함
+  //   ✓  = 수행,  — = 미수행(미응답 포함),  N/A = 해당없음(시트에서 빈칸 → 집계 제외)
   const night = qmIsNight();
-  const all = document.querySelectorAll('#qm-panel-checklist input[type=checkbox]');
-  let total = 0, checked = 0;
   const cbStates = [];
-  all.forEach(cb => {
-    if (!night && cb.closest('.qm-night-only')) { cbStates.push('N/A'); return; }
-    total++;
-    if (cb.checked) checked++;
-    cbStates.push(cb.checked ? '✓' : '—');
+  const counted  = [];
+  qmItems().forEach(item => {
+    if (!night && item.classList.contains('qm-night-only')) { cbStates.push('N/A'); return; }
+    const st = qmItemState(item);
+    cbStates.push(triSheet(st));
+    counted.push(st);
   });
-  const pct = total > 0 ? Math.round(checked / total * 100) : 0;
+  const t       = triTally(counted);
+  const checked = t.y;
+  const total   = t.target;                            // 해당없음 제외 (시트 준수율과 같은 기준)
+  const pct     = t.pct === null ? 0 : t.pct;
+  const missing = t.total - t.answered;
 
   // 저장 즉시 버튼을 잠금 (전송 응답을 기다리지 않음 – 이 화면은 곧 침상 목록으로 바뀜)
   saveBtnDone('qm-saveBtn');
   saveBtnDone('qm-save-btn', '✅');
-  alert(`✅ 저장 완료\n\n📅 ${date}  근무: ${shift}\n🛏 ${qmCurrentBed}번 침상\n👤 ${worker}\n📊 ${checked}/${total} (${pct}%)`);
+  alert(`✅ 저장 완료\n\n📅 ${date}  근무: ${shift}\n🛏 ${qmCurrentBed}번 침상\n👤 ${worker}\n`
+      + `📊 수행 ${checked}/${total} (${pct}%)`
+      + (t.na ? `\n➖ 해당없음 ${t.na}개` : '')
+      + (missing ? `\n⚠️ 미응답 ${missing}개 (미수행으로 저장됨)` : ''));
 
   // Google Sheets 전송
   // 열 순서는 시트 헤더와 동일해야 함

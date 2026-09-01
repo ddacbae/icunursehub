@@ -1117,27 +1117,29 @@ html, body {
   background:#f8f9fa; border-bottom:1px solid #eee;
 }
 .qm-check-item {
-  display:flex; align-items:flex-start; gap:10px;
-  padding:9px 14px; border-bottom:1px solid #f0f0f0; cursor:pointer; transition:background 0.1s;
+  display:flex; align-items:center; gap:10px;
+  padding:9px 12px 9px 14px; border-bottom:1px solid #f0f0f0; transition:background 0.1s;
 }
 .qm-check-item:last-child { border-bottom:none; }
 .qm-check-item:hover { background:#f8f9fa; }
+/* ── 2단계 체크(퇴원 도우미)가 계속 쓰는 스타일 ──
+   QM 체크리스트는 3단계(.tri-btn)로 바뀌었지만 #dc-list 는 체크박스를 그대로 씁니다 */
+#dc-list .qm-check-item { cursor:pointer; }
 .qm-check-item.qm-checked { background:#f0fff4; }
 .qm-check-item.qm-checked .qm-check-text { color:#888; text-decoration:line-through; }
+/* pointer-events:none — 체크박스를 직접 눌러도 클릭은 부모(.qm-check-item)가 처리 */
+.qm-cb { width:18px; height:18px; flex-shrink:0; accent-color:#1a56db; cursor:pointer; pointer-events:none; }
 /* N(Night) 근무에서만 체크 가능한 항목 – 다른 근무에서는 잠금 */
 .qm-check-item.qm-locked { background:#fafafa; cursor:not-allowed; opacity:0.5; }
 .qm-check-item.qm-locked:hover { background:#fafafa; }
-.qm-check-item.qm-locked .qm-cb { cursor:not-allowed; }
+.qm-check-item.qm-locked .tri-btn { cursor:not-allowed; }
 .qm-check-item.qm-locked .qm-check-text::after {
   content:' — N 근무에서만 체크'; font-size:11px; color:#9ca3af; font-weight:600; white-space:nowrap;
 }
-/* pointer-events:none — 체크박스를 직접 눌러도 클릭은 부모(.qm-check-item)가 처리.
-   없으면 체크박스가 스스로 토글한 뒤 qmToggle 이 한 번 더 뒤집어 체크가 안 됨 */
-.qm-cb { width:18px; height:18px; margin-top:2px; flex-shrink:0; accent-color:#1a56db; cursor:pointer; pointer-events:none; }
 .qm-check-text { font-size:13px; color:#333; line-height:1.5; flex:1; }
 .qm-check-num {
   font-size:11px; color:#1a56db; font-weight:600;
-  background:#e8f0fe; padding:1px 5px; border-radius:4px; white-space:nowrap; margin-top:3px; flex-shrink:0;
+  background:#e8f0fe; padding:1px 5px; border-radius:4px; white-space:nowrap; flex-shrink:0; align-self:flex-start; margin-top:2px;
 }
 .qm-beds-section { padding:8px 14px 10px; border-top:1px solid #f0f0f0; }
 .qm-beds-label { font-size:12px; color:#555; margin-bottom:6px; font-weight:500; }
@@ -1362,3 +1364,41 @@ html, body {
 .fav-icon-dim {
   opacity: 0.45;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   3단계 체크 (수행 / 미수행 / 해당없음)
+   퀵라운딩 · 책임간호사 라운딩 · QM 업무체크리스트 공용 디자인
+   ═══════════════════════════════════════════════════════════════════ */
+.tri-group { display:flex; gap:5px; flex-shrink:0; align-self:center; }
+.tri-btn {
+  width:32px; height:32px; padding:0; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  border:1.5px solid #cbd5e1; border-radius:9px; background:#fff;
+  color:#94a3b8; font-family:inherit; font-size:15px; font-weight:700; line-height:1;
+  cursor:pointer; -webkit-tap-highlight-color:transparent;
+  transition:background .14s, border-color .14s, color .14s, transform .1s;
+}
+.tri-btn:active { transform:scale(0.9); }
+.tri-btn.on { color:#fff; }
+.tri-btn.tri-y.on  { background:#16a34a; border-color:#16a34a; }
+.tri-btn.tri-n.on  { background:#dc2626; border-color:#dc2626; }
+.tri-btn.tri-na.on { background:#64748b; border-color:#64748b; }
+.tri-btn:disabled { opacity:0.35; cursor:not-allowed; }
+
+/* 상태별 행 배경 – 세 화면 공통 */
+.qm-check-item[data-state="Y"],  .rs-check-item[data-state="Y"]  { background:#f0fdf4; }
+.qm-check-item[data-state="N"],  .rs-check-item[data-state="N"]  { background:#fef2f2; }
+.qm-check-item[data-state="NA"], .rs-check-item[data-state="NA"] { background:#f1f5f9; }
+.qm-check-item[data-state="NA"] .qm-check-text,
+.rs-check-item[data-state="NA"] .rs-check-item-text { color:#94a3b8; text-decoration:line-through; }
+
+/* 범례 */
+.tri-legend { display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:10.5px; color:#64748b; }
+.tri-legend span { display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
+.tri-legend i {
+  width:15px; height:15px; border-radius:4px; font-style:normal; color:#fff;
+  font-size:10px; font-weight:700; display:inline-flex; align-items:center; justify-content:center;
+}
+.tri-legend i.tri-y  { background:#16a34a; }
+.tri-legend i.tri-n  { background:#dc2626; }
+.tri-legend i.tri-na { background:#64748b; }

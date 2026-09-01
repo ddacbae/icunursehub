@@ -153,21 +153,13 @@
 #screen-sicu-quick-rounding .rs-group-count { margin-left:auto; font-size:10px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; }
 #screen-cn-rounding .rs-check-group-header { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); }
 #screen-sicu-quick-rounding .rs-check-item,
-#screen-cn-rounding .rs-check-item { display:flex; align-items:flex-start; padding:13px 14px; border-bottom:1px solid var(--border); gap:10px; cursor:pointer; transition:background .12s; }
+#screen-cn-rounding .rs-check-item { display:flex; align-items:center; padding:11px 12px 11px 14px; border-bottom:1px solid var(--border); gap:10px; transition:background .12s; }
 #screen-sicu-quick-rounding .rs-check-item:last-child,
 #screen-cn-rounding .rs-check-item:last-child { border-bottom:none; }
-#screen-sicu-quick-rounding .rs-check-item:active,
-#screen-cn-rounding .rs-check-item:active { background:rgba(0,0,0,.04); }
 #screen-sicu-quick-rounding .rs-note-item { background:#fffbeb; cursor:default; padding:10px 14px; }
 #screen-sicu-quick-rounding .rs-check-item-text,
 #screen-cn-rounding .rs-check-item-text { font-size:13px; line-height:1.55; color:var(--text); flex:1; }
-#screen-sicu-quick-rounding .rs-check-item.checked .rs-check-item-text,
-#screen-cn-rounding .rs-check-item.checked .rs-check-item-text { color:var(--text-muted); text-decoration:line-through; }
 #screen-sicu-quick-rounding .rs-note-text { font-size:11.5px; color:var(--gold); line-height:1.5; flex:1; font-weight:600; }
-#screen-sicu-quick-rounding .rs-checkbox,
-#screen-cn-rounding .rs-checkbox { width:24px; height:24px; border-radius:6px; border:2px solid var(--border); background:transparent; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s; font-size:14px; margin-top:1px; }
-#screen-sicu-quick-rounding .rs-check-item.checked .rs-checkbox,
-#screen-cn-rounding .rs-check-item.checked .rs-checkbox { background:var(--check-bg); border-color:var(--check-bg); color:#fff; }
 
 /* ─── CN: Ventilator card ─── */
 #screen-cn-rounding .rs-vent-card { margin:0 14px 12px; background:var(--surface); border:1px solid var(--border); border-radius:var(--rs-radius); overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.05); }
@@ -1910,12 +1902,17 @@
     <div id="qm-panel-checklist" style="display:none; padding:0 0 90px;">
 
       <!-- 진행률 -->
-      <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; background:#f8f9fa; border-bottom:1px solid #e2e8f0;">
-        <div style="flex:1; height:8px; background:#dee2e6; border-radius:4px; overflow:hidden;">
-          <div id="qm-prog-fill" style="height:100%; width:0%; background:#e53e3e; border-radius:4px; transition:width 0.3s;"></div>
+      <div style="padding:10px 14px; background:#f8f9fa; border-bottom:1px solid #e2e8f0;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="flex:1; height:8px; background:#dee2e6; border-radius:4px; overflow:hidden;">
+            <div id="qm-prog-fill" style="height:100%; width:0%; background:#e53e3e; border-radius:4px; transition:width 0.3s;"></div>
+          </div>
+          <span id="qm-prog-pct" style="font-size:13px; font-weight:700; color:#1a56db; white-space:nowrap;">0%</span>
         </div>
-        <span id="qm-prog-text" style="font-size:12px; color:#555; white-space:nowrap;">0 / 0</span>
-        <span id="qm-prog-pct" style="font-size:13px; font-weight:700; color:#1a56db; white-space:nowrap;">0%</span>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:7px; flex-wrap:wrap;">
+          <div class="tri-legend"><span><i class="tri-y">✓</i>수행</span><span><i class="tri-n">✗</i>미수행</span><span><i class="tri-na">／</i>해당없음</span></div>
+          <span id="qm-prog-text" style="font-size:11px; color:#555; white-space:nowrap;">0 / 0</span>
+        </div>
       </div>
 
       <div style="padding:0 10px 10px;">
@@ -1924,124 +1921,212 @@
         <div class="qm-category" style="margin-top:10px;">
           <div class="qm-cat-header" style="background:#e53e3e;">🦠 감염 관리</div>
           <div class="qm-subcat-header">VAP (Ventilator Associated Pneumonia)</div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
-            <span class="qm-check-text">Ventilator 및 suction 구역 환경위생</span>
+          <div class="qm-check-item" data-state="">
+            <span class="qm-check-text">Ventilator 및 suction 구역 환경소독</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
           <div class="qm-subcat-header">UTI (Urinary Tract Infection)</div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+          <div class="qm-check-item" data-state="">
             <span class="qm-check-num">①</span>
-            <span class="qm-check-text">Foley lock 고정, 연결부의 이음새부 부착 및 확인</span>
+            <span class="qm-check-text">Foley lock 고정, 연결부위 아이오반 부착 및 확인</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+          <div class="qm-check-item" data-state="">
             <span class="qm-check-num">②</span>
             <span class="qm-check-text">소변백 바닥에 닿지 않게 위치 조정 및 확인</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+          <div class="qm-check-item" data-state="">
             <span class="qm-check-num">③</span>
-            <span class="qm-check-text">소변배액검사 프로토콜 수행 확인</span>
+            <span class="qm-check-text">소변배양검사 프로토콜 준수 확인</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+          <div class="qm-check-item" data-state="">
             <span class="qm-check-num">④</span>
-            <span class="qm-check-text">Foley 삽입 일 2인 모니터링 체크</span>
+            <span class="qm-check-text">Foley 삽입 시 2인 모니터링 체크</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+          <div class="qm-check-item" data-state="">
             <span class="qm-check-num">⑤</span>
-            <span class="qm-check-text">무른변 확인 후 체위변경 시간 사이 기저귀 확인</span>
+            <span class="qm-check-text">무른변 환자 체위변경 시간 사이 기저귀 확인</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
         </div>
 
         <!-- 2. 안전 관리 -->
         <div class="qm-category">
           <div class="qm-cat-header" style="background:#dd6b20;">⚠️ 안전 관리</div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
-            <span class="qm-check-text">수혈 감내 후 24시간 이내인지 확인</span>
+          <div class="qm-check-item" data-state="">
+            <span class="qm-check-text">수액 개봉 후 24시간 이내인지 확인</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
-            <span class="qm-check-text">수혈라벨 더그라미 (아님 plus Action Plan), 약품 mix 기록 확인</span>
+          <div class="qm-check-item" data-state="">
+            <span class="qm-check-text">수액라벨 동그라미 (안전plus Action Plan), 약품 mix 기록 확인</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
-            <span class="qm-check-text">포켓팔일 다음라벨 QR코드 삭제 확인</span>
+          <div class="qm-check-item" data-state="">
+            <span class="qm-check-text">투약파일 네임라벨 QR코드 삭제 확인</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
-            <span class="qm-check-text">양쪽 하체피하 적용사부 확인</span>
+          <div class="qm-check-item" data-state="">
+            <span class="qm-check-text">양쪽 환자팔찌 적용여부 확인</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
         </div>
 
         <!-- 3. 욕창예방/상처관리 -->
         <div class="qm-category">
           <div class="qm-cat-header" style="background:#38a169;">🩹 욕창예방 / 상처관리</div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
-            <span class="qm-check-text">8A 침상목욕, 요인변경 3회 참여</span>
+          <div class="qm-check-item" data-state="">
+            <span class="qm-check-text">8A 침상목욕, 자세변경 3회 참여</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
-            <span class="qm-check-text">의료기기 압박예방 패드 (E-tube, NP, FM, HF, L-tube, ECMO, CVVHDF, Arctic sun)</span>
+          <div class="qm-check-item" data-state="">
+            <span class="qm-check-text">의료기기 (E-tube, NP, FM, HF, L-tube, ECMO, CVVHDF, Arctic sun) 예방드레싱</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
-            <span class="qm-check-text">다리 거상, 젤패드 (눈부위, 이마이, 발목) 적용 확인</span>
+          <div class="qm-check-item" data-state="">
+            <span class="qm-check-text">다리 거상, 젤패드 (두부, 엉덩이, 발목) 적용 확인</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
         </div>
 
         <!-- 4. 환경 관리 -->
         <div class="qm-category">
           <div class="qm-cat-header" style="background:#3182ce;">🧹 환경 관리</div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
-            <span class="qm-check-text">침상의 포켓소독비드, 차회테이블 (위/4면)</span>
+          <div class="qm-check-item" data-state="">
+            <span class="qm-check-text">침상의 투약준비대, 차팅테이블 (상판/4면)</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
-            <span class="qm-check-text">침대 (보조대가, 바퀴, 매트리스 하단 철 상 프레임), 침상벽면</span>
+          <div class="qm-check-item" data-state="">
+            <span class="qm-check-text">침대 (보조난간, 발치, 매트리스 하단 철제프레임), 침상벽면</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
-            <span class="qm-check-text">선반대 (위, 4면, 선반 내/외부), IV poles (기둥, 수액이, 바퀴)</span>
+          <div class="qm-check-item" data-state="">
+            <span class="qm-check-text">상두대 (상판, 4면, 서랍 내/외부), IV pole대 (기둥, 손잡이, 바퀴)</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
-            <span class="qm-check-text">Infusion pump (분리하여 6면, 제정), IPC pump (기계, line)</span>
+          <div class="qm-check-item" data-state="">
+            <span class="qm-check-text">Infusion pump (분리하여 6면, 전선), IPC pump (기계, line)</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
-          <div class="qm-check-item qm-night-only" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
-            <span class="qm-check-text">🌙 (N근무) 6A30 SICU 환경위생 알림 및 시행사부 확인</span>
+          <div class="qm-check-item qm-night-only" data-state="">
+            <span class="qm-check-text">🌙 (N근무) 6A30 SICU 환경소독 알림 및 시행여부 확인</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
         </div>
 
         <!-- 5. 업무 지원 -->
         <div class="qm-category">
           <div class="qm-cat-header" style="background:#805ad5;">🤝 업무 지원</div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
-            <span class="qm-check-text">전임간호사 - 의사 간 보고 절차 및 의사소통 참여</span>
+          <div class="qm-check-item" data-state="">
+            <span class="qm-check-text">신입간호사 - 의사 간 보고절차 및 의사소통에 참여</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
-            <span class="qm-check-text">전임 간호사 업무 지원 (2시간마다 백라이딩)</span>
+          <div class="qm-check-item" data-state="">
+            <span class="qm-check-text">신입 간호사 업무 지원 (2시간마다 백업라운딩)</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
-            <span class="qm-check-text">기본 및 숙련간호사, 이직상황 이 간호 업무 지원</span>
+          <div class="qm-check-item" data-state="">
+            <span class="qm-check-text">기본 및 중환자간호, 응급상황 시 간호 업무 지원</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
         </div>
 
         <!-- 6. 간호 기록 -->
         <div class="qm-category">
           <div class="qm-cat-header" style="background:#2b6cb0;">📝 간호 기록</div>
-          <div class="qm-check-item" onclick="qmToggle(this)">
-            <input type="checkbox" onchange="qmUpdateProgress()" class="qm-cb">
+          <div class="qm-check-item" data-state="">
             <span class="qm-check-text">리마인더 ①, ② 기록 분류 및 업데이트 확인</span>
+            <div class="tri-group">
+              <button type="button" class="tri-btn tri-y"  onclick="qmSetState(this,'Y')"  aria-label="수행">✓</button>
+              <button type="button" class="tri-btn tri-n"  onclick="qmSetState(this,'N')"  aria-label="미수행">✗</button>
+              <button type="button" class="tri-btn tri-na" onclick="qmSetState(this,'NA')" aria-label="해당없음">／</button>
+            </div>
           </div>
         </div>
 
@@ -2345,6 +2430,7 @@
           <span id="sqr-progressPct">0%</span>
         </div>
         <div class="rs-progress-bar"><div class="rs-progress-fill" id="sqr-progressFill" style="width:0%"></div></div>
+        <div class="tri-legend" style="margin-top:8px;"><span><i class="tri-y">✓</i>수행</span><span><i class="tri-n">✗</i>미수행</span><span><i class="tri-na">／</i>해당없음</span></div>
       </div>
     </div>
     <div class="rs-divider"></div>
@@ -2400,6 +2486,7 @@
           <span id="cn-progressPct">0%</span>
         </div>
         <div class="rs-progress-bar"><div class="rs-progress-fill" id="cn-progressFill" style="width:0%"></div></div>
+        <div class="tri-legend" style="margin-top:8px;"><span><i class="tri-y">✓</i>수행</span><span><i class="tri-n">✗</i>미수행</span><span><i class="tri-na">／</i>해당없음</span></div>
       </div>
     </div>
     <div class="rs-divider"></div>
@@ -2490,6 +2577,63 @@ function saveBtnReset(id) {
 }
 
 // ════════════════════════════════════════════════════════════════════════
+// 3단계 체크 공용 헬퍼  (수행 / 미수행 / 해당없음)
+//   상태값 : 'Y' 수행 · 'N' 미수행 · 'NA' 해당없음 · '' 미응답
+//   퀵라운딩 · 책임간호사 라운딩 · QM 업무체크리스트가 함께 씁니다.
+//   ※ 시트(GAS)는 ✓→1, —→0, N/A→빈칸 으로 받고 빈칸은 준수율 분모에서 빠집니다.
+// ════════════════════════════════════════════════════════════════════════
+const TRI_META = [
+  { v:'Y',  cls:'tri-y',  icon:'✓', label:'수행'     },
+  { v:'N',  cls:'tri-n',  icon:'✗', label:'미수행'   },
+  { v:'NA', cls:'tri-na', icon:'／', label:'해당없음' },
+];
+
+/** 저장값 정규화 – 예전 boolean 저장분도 그대로 읽을 수 있게 */
+function triNorm(v) {
+  if (v === true)  return 'Y';
+  if (v === false || v == null) return '';
+  return (v === 'Y' || v === 'N' || v === 'NA') ? v : '';
+}
+/** 응답한 항목인가 (해당없음 포함) */
+function triAnswered(v) { return triNorm(v) !== ''; }
+/** 시트 전송값 – 미응답은 기존과 같이 '—'(미수행)로 보냅니다 */
+function triSheet(v) {
+  const s = triNorm(v);
+  return s === 'Y' ? '✓' : s === 'NA' ? 'N/A' : '—';
+}
+/**
+ * 3분할 버튼 HTML.
+ * @param {string}   cur        현재 상태
+ * @param {Function} onclickFor 상태값 → onclick 속성 문자열
+ */
+function triButtons(cur, onclickFor) {
+  const s = triNorm(cur);
+  return '<div class="tri-group">' + TRI_META.map(function (m) {
+    return '<button type="button" class="tri-btn ' + m.cls + (s === m.v ? ' on' : '') +
+           '" onclick="' + onclickFor(m.v) + '" aria-label="' + m.label + '">' + m.icon + '</button>';
+  }).join('') + '</div>';
+}
+/**
+ * 상태 묶음 집계.
+ *   answered : 응답한 항목 수 (해당없음 포함)   → 입력 진행률용
+ *   target   : 준수율 분모 = 전체 − 해당없음    → 시트 집계와 동일
+ *   pct      : 수행률 = y / target
+ */
+function triTally(values) {
+  const t = { total: values.length, answered: 0, y: 0, n: 0, na: 0 };
+  values.forEach(function (v) {
+    const s = triNorm(v);
+    if (s === '') return;
+    t.answered++;
+    if (s === 'Y') t.y++; else if (s === 'N') t.n++; else t.na++;
+  });
+  t.target = t.total - t.na;
+  t.pct    = t.target ? Math.round(t.y / t.target * 100) : null;
+  return t;
+}
+
+
+// ════════════════════════════════════════════════════════════════════════
 // SICU Quick Rounding (sqr_*)
 // ════════════════════════════════════════════════════════════════════════
 const sqr_CATEGORIES = [
@@ -2516,7 +2660,7 @@ sqr_SHIFTS.forEach(s => {
   sqr_checks[s] = {};
   for (let b = 1; b <= 18; b++) {
     sqr_checks[s][b] = {};
-    sqr_CATEGORIES.forEach(c => { sqr_checks[s][b][c.id] = c.items.map(() => false); });
+    sqr_CATEGORIES.forEach(c => { sqr_checks[s][b][c.id] = c.items.map(() => ''); });
   }
 });
 document.getElementById('sqr-dateInput').value = new Date().toISOString().slice(0,10);
@@ -2548,8 +2692,15 @@ function sqr_clickBed(n) {
   else { sqr_selBeds[sqr_shift].clear(); sqr_selBeds[sqr_shift].add(n); sqr_bed=n; }
   sqr_buildGrid(); sqr_renderList(); sqr_updateProg(); sqr_updateBadges();
 }
+/** 침상의 모든 항목 상태를 한 줄로 펼쳐 돌려줍니다 */
+function sqr_bedVals(s, b) {
+  const out = [];
+  sqr_CATEGORIES.forEach(c => c.items.forEach((_, i) => out.push(sqr_checks[s][b][c.id][i])));
+  return out;
+}
+/** 완료 = 모든 항목이 응답됨 (해당없음도 응답으로 봅니다) */
 function sqr_isBedDone(s, b) {
-  return sqr_CATEGORIES.every(c => c.items.every((_,i) => sqr_checks[s][b][c.id][i]));
+  return sqr_bedVals(s, b).every(triAnswered);
 }
 function sqr_renderList() {
   const sec = document.getElementById('sqr-checkSection');
@@ -2557,37 +2708,27 @@ function sqr_renderList() {
     sec.innerHTML = '<div class="rs-empty"><div class="rs-icon">🏥</div><p>위에서 침상 번호를 선택하면<br>ABCDE 체크리스트가 표시됩니다.</p></div>'; return;
   }
   const tag = 'rs-tag-'+sqr_shift.toLowerCase();
-  const dc = sqr_bedDone(sqr_shift, sqr_bed);
-  let h = '<div class="rs-check-bed-header"><span class="rs-check-bed-title">침상</span><span class="rs-bed-tag '+tag+'">'+sqr_bed+'번</span><span style="margin-left:auto;font-size:11px;color:#94a3b8;font-family:\'JetBrains Mono\',monospace">'+dc+'/'+sqr_TOTAL+'</span></div><div class="rs-check-card">';
+  const bt = triTally(sqr_bedVals(sqr_shift, sqr_bed));
+  let h = '<div class="rs-check-bed-header"><span class="rs-check-bed-title">침상</span><span class="rs-bed-tag '+tag+'">'+sqr_bed+'번</span><span style="margin-left:auto;font-size:11px;color:#94a3b8;font-family:\'JetBrains Mono\',monospace">응답 '+bt.answered+'/'+bt.total+'</span></div><div class="rs-check-card">';
   sqr_CATEGORIES.forEach(cat => {
-    const d = cat.items.filter((_,i) => sqr_checks[sqr_shift][sqr_bed][cat.id][i]).length;
-    h += '<div class="rs-check-group-header"><span class="rs-cat-dot" style="background:'+cat.color+'"></span><span class="rs-check-group-label" style="color:'+cat.color+'">'+cat.emoji+' '+cat.id+' · '+cat.label+'</span><span class="rs-group-count">'+d+'/'+cat.items.length+'</span></div>';
+    const ct = triTally(sqr_checks[sqr_shift][sqr_bed][cat.id]);
+    h += '<div class="rs-check-group-header"><span class="rs-cat-dot" style="background:'+cat.color+'"></span><span class="rs-check-group-label" style="color:'+cat.color+'">'+cat.emoji+' '+cat.id+' · '+cat.label+'</span><span class="rs-group-count">'+ct.y+'/'+ct.target+'</span></div>';
     cat.items.forEach((item,idx) => {
-      const ck = sqr_checks[sqr_shift][sqr_bed][cat.id][idx];
-      h += '<div class="rs-check-item'+(ck?' checked':'')+'" onclick="sqr_toggle(\''+cat.id+'\','+idx+',this)"><div class="rs-check-item-text">'+item+'</div><div class="rs-checkbox">'+(ck?'✓':'')+'</div></div>';
+      const st = triNorm(sqr_checks[sqr_shift][sqr_bed][cat.id][idx]);
+      h += '<div class="rs-check-item" data-state="'+st+'"><div class="rs-check-item-text">'+item+'</div>'
+         + triButtons(st, v => 'sqr_setState(&#39;'+cat.id+'&#39;,'+idx+',&#39;'+v+'&#39;)') + '</div>';
     });
     cat.notes.forEach(n => { h += '<div class="rs-check-item rs-note-item"><div class="rs-note-text">'+n+'</div></div>'; });
   });
   h += '</div>'; sec.innerHTML = h;
 }
-function sqr_toggle(catId, idx, el) {
+/** 같은 버튼을 다시 누르면 미응답으로 되돌립니다 */
+function sqr_setState(catId, idx, val) {
   if (!sqr_bed) return;
   saveBtnReset('sqr-fabSave');
-  const cur = sqr_checks[sqr_shift][sqr_bed][catId][idx];
-  sqr_checks[sqr_shift][sqr_bed][catId][idx] = !cur;
-  el.classList.toggle('checked'); el.querySelector('.rs-checkbox').textContent = !cur?'✓':'';
-  const cat = sqr_CATEGORIES.find(c=>c.id===catId);
-  const d = cat.items.filter((_,i)=>sqr_checks[sqr_shift][sqr_bed][catId][i]).length;
-  document.querySelectorAll('#sqr-checkSection .rs-check-group-header').forEach(h=>{
-    if(h.querySelector('.rs-check-group-label').textContent.includes(catId+' ·'))
-      h.querySelector('.rs-group-count').textContent=d+'/'+cat.items.length;
-  });
-  const bh = document.querySelector('#sqr-checkSection .rs-check-bed-header span:last-child');
-  if(bh) bh.textContent=sqr_bedDone(sqr_shift,sqr_bed)+'/'+sqr_TOTAL;
-  sqr_buildGrid(); sqr_updateProg();
-}
-function sqr_bedDone(s,b) {
-  let d=0; sqr_CATEGORIES.forEach(c=>c.items.forEach((_,i)=>{ if(sqr_checks[s][b][c.id][i]) d++; })); return d;
+  const arr = sqr_checks[sqr_shift][sqr_bed][catId];
+  arr[idx] = (triNorm(arr[idx]) === val) ? '' : val;
+  sqr_renderList(); sqr_buildGrid(); sqr_updateProg();
 }
 function sqr_updateProg() {
   const beds=[...sqr_selBeds[sqr_shift]];
@@ -2595,9 +2736,12 @@ function sqr_updateProg() {
   const cols={DAY:'#d97706',EVE:'#16a34a',NIGHT:'#2563eb'};
   fill.style.background=cols[sqr_shift];
   if(!beds.length){fill.style.width='0%';lbl.textContent='침상을 선택하세요';pct.textContent='0%';return;}
-  let t=0,d=0; beds.forEach(b=>{t+=sqr_TOTAL;d+=sqr_bedDone(sqr_shift,b);});
-  const p=t?Math.round(d/t*100):0;
-  fill.style.width=p+'%'; lbl.textContent=beds.length+'개 침상 · '+d+'/'+t+' 항목'; pct.textContent=p+'%';
+  let vals=[]; beds.forEach(b=>{ vals=vals.concat(sqr_bedVals(sqr_shift,b)); });
+  const t=triTally(vals);
+  const p=t.total?Math.round(t.answered/t.total*100):0;
+  fill.style.width=p+'%';
+  lbl.textContent='침상 '+beds.length+'개 · 응답 '+t.answered+'/'+t.total+(t.pct===null?'':' · 수행 '+t.pct+'%');
+  pct.textContent=p+'%';
 }
 function sqr_updateBadges() {
   sqr_SHIFTS.forEach(s=>{ const n=sqr_selBeds[s].size, b=document.getElementById('sqr-badge-'+s); b.textContent=n; b.classList.toggle('show',n>0); });
@@ -2607,12 +2751,13 @@ function sqr_saveRecord() {
   if(!date){sqr_toast('날짜를 선택해주세요.');return;}
   if(!sqr_selBeds[sqr_shift].size){sqr_toast('침상을 하나 이상 선택해주세요.');return;}
   const beds=[...sqr_selBeds[sqr_shift]].sort((a,b)=>a-b);
-  const done=beds.reduce((s,b)=>s+sqr_bedDone(sqr_shift,b),0);
+  let allVals=[]; beds.forEach(b=>{ allVals=allVals.concat(sqr_bedVals(sqr_shift,b)); });
+  const tal=triTally(allVals);
   const rec={id:Date.now(),date,shift:sqr_shift,beds,
     nurseOut:document.getElementById('sqr-nurseOut').value.trim(),
     nurseIn:document.getElementById('sqr-nurseIn').value.trim(),
     checks:JSON.parse(JSON.stringify(Object.fromEntries(beds.map(b=>[b,sqr_checks[sqr_shift][b]])))),
-    done,total:beds.length*sqr_TOTAL,savedAt:new Date().toLocaleString('ko-KR')};
+    done:tal.y,total:tal.target,na:tal.na,savedAt:new Date().toLocaleString('ko-KR')};
   const recs=JSON.parse(localStorage.getItem('sicu_quick_records')||'[]');
   recs.unshift(rec); localStorage.setItem('sicu_quick_records',JSON.stringify(recs));
   saveBtnBusy('sqr-fabSave');
@@ -2621,22 +2766,21 @@ function sqr_saveRecord() {
 }
 
 function sqr_sendToSheets(rec) {
-  const ck = v => v ? '✓' : '—';
+  const ck = triSheet;   // 'Y'→✓  'N'/미응답→—  'NA'→N/A (시트에서 빈칸=집계 제외)
 
   const rows = rec.beds.map(bedNum => {
     const bc = rec.checks[bedNum];
 
-    // 침상별 완료 수 집계
-    let bedDone = 0;
-    sqr_CATEGORIES.forEach(cat =>
-      cat.items.forEach((_, i) => { if (bc[cat.id][i]) bedDone++; })
-    );
-    const pct = Math.round(bedDone / sqr_TOTAL * 100);
+    // 침상별 집계 (해당없음은 분모에서 제외 – 시트 준수율과 같은 기준)
+    const vals = [];
+    sqr_CATEGORIES.forEach(cat => cat.items.forEach((_, i) => vals.push(bc[cat.id][i])));
+    const t   = triTally(vals);
+    const pct = t.pct === null ? 0 : t.pct;
 
-    // 카테고리 요약: A:1/2 B:3/3 C:1/2 D:2/3 E:4/4
+    // 카테고리 요약: A:1/2 B:3/3 C:1/2 D:2/3 E:4/4  (해당없음 제외한 분모)
     const catSummary = sqr_CATEGORIES.map(cat => {
-      const d = cat.items.filter((_, i) => bc[cat.id][i]).length;
-      return `${cat.id}:${d}/${cat.items.length}`;
+      const ct = triTally(bc[cat.id]);
+      return `${cat.id}:${ct.y}/${ct.target}`;
     }).join(' ');
 
     // 세부 항목 (헤더 순서와 정확히 일치)
@@ -2654,8 +2798,8 @@ const detail = [
       bedNum + '번',         // 침상번호
       rec.nurseOut || '—',   // 교대전근무자
       rec.nurseIn  || '—',   // 교대후근무자
-      bedDone,               // 완료항목
-      sqr_TOTAL,             // 전체항목
+      t.y,                   // 완료항목 (수행)
+      t.target,              // 전체항목 (해당없음 제외)
       pct + '%',             // 달성률
       catSummary,            // 카테고리요약
       detail,                // 세부항목 (탭 구분)
@@ -2696,7 +2840,7 @@ let cn_shift='DAY', cn_bed=null;
 let cn_checks={}, cn_ventState={}, cn_selBeds={};
 cn_SHIFTS.forEach(s=>{
   cn_checks[s]={}; cn_ventState[s]=false; cn_selBeds[s]=new Set();
-  for(let b=1;b<=18;b++){ cn_checks[s][b]={}; Object.entries(cn_getGroups(s)).forEach(([g,items])=>{cn_checks[s][b][g]=items.map(()=>false);}); }
+  for(let b=1;b<=18;b++){ cn_checks[s][b]={}; Object.entries(cn_getGroups(s)).forEach(([g,items])=>{cn_checks[s][b][g]=items.map(()=>'');}); }
 });
 (function(){
   const t=new Date().toISOString().slice(0,10);
@@ -2736,12 +2880,19 @@ function cn_clickBed(n) {
   if(cn_bed===n){cn_selBeds[cn_shift].clear();cn_bed=null;}
   else{
     cn_selBeds[cn_shift].clear(); cn_selBeds[cn_shift].add(n); cn_bed=n;
-    if(!cn_checks[cn_shift][n]){cn_checks[cn_shift][n]={};Object.entries(cn_getGroups(cn_shift)).forEach(([g,items])=>{cn_checks[cn_shift][n][g]=items.map(()=>false);});}
+    if(!cn_checks[cn_shift][n]){cn_checks[cn_shift][n]={};Object.entries(cn_getGroups(cn_shift)).forEach(([g,items])=>{cn_checks[cn_shift][n][g]=items.map(()=>'');});}
   }
   cn_buildGrid(); cn_renderList(); cn_updateProg(); cn_updateBadges();
 }
+/** 침상의 모든 항목 상태를 한 줄로 펼쳐 돌려줍니다 */
+function cn_bedVals(s,b) {
+  const out=[];
+  Object.entries(cn_getGroups(s)).forEach(([g,items])=>items.forEach((_,i)=>out.push(cn_checks[s][b]?.[g]?.[i])));
+  return out;
+}
+/** 완료 = 모든 항목이 응답됨 (해당없음도 응답으로 봅니다) */
 function cn_isBedDone(s,b) {
-  return Object.entries(cn_getGroups(s)).every(([g,items])=>items.every((_,i)=>cn_checks[s][b]?.[g]?.[i]===true));
+  return cn_bedVals(s,b).every(triAnswered);
 }
 function cn_renderList() {
   const sec=document.getElementById('cn-checkSection');
@@ -2749,23 +2900,27 @@ function cn_renderList() {
     sec.innerHTML='<div class="rs-empty"><div class="rs-icon">🛏️</div><p>위에서 침상 번호를 선택하면<br>해당 침상의 체크리스트가 표시됩니다.</p></div>'; return;
   }
   const tag='rs-tag-'+cn_shift.toLowerCase();
-  let h='<div class="rs-check-bed-header">침상 <span class="rs-bed-tag '+tag+'">'+cn_bed+'번</span></div><div class="rs-check-card">';
-  Object.entries(cn_getGroups(cn_shift)).forEach(([grp,items])=>{
+  const bt=triTally(cn_bedVals(cn_shift,cn_bed));
+  let h='<div class="rs-check-bed-header">침상 <span class="rs-bed-tag '+tag+'">'+cn_bed+'번</span><span style="margin-left:auto;font-size:11px;color:#94a3b8;">응답 '+bt.answered+'/'+bt.total+'</span></div><div class="rs-check-card">';
+  Object.entries(cn_getGroups(cn_shift)).forEach(([grp,items],gi)=>{
     h+='<div class="rs-check-group-header">'+grp+'</div>';
     items.forEach((item,idx)=>{
-      const ck=cn_checks[cn_shift][cn_bed]?.[grp]?.[idx]||false;
-      h+='<div class="rs-check-item'+(ck?' checked':'')+'" onclick="cn_toggle(\''+grp.replace(/'/g,"\\'")+'\',' +idx+',this)"><div class="rs-check-item-text">'+item+'</div><div class="rs-checkbox">'+(ck?'✓':'')+'</div></div>';
+      const st=triNorm(cn_checks[cn_shift][cn_bed]?.[grp]?.[idx]);
+      h+='<div class="rs-check-item" data-state="'+st+'"><div class="rs-check-item-text">'+item+'</div>'
+        +triButtons(st, v => 'cn_setState('+gi+','+idx+',&#39;'+v+'&#39;)')+'</div>';
     });
   });
   h+='</div>'; sec.innerHTML=h;
 }
-function cn_toggle(grp,idx,el) {
+/** 같은 버튼을 다시 누르면 미응답으로 되돌립니다 (gi = 그룹 순번) */
+function cn_setState(gi,idx,val) {
   if(!cn_bed) return;
   saveBtnReset('cn-fabSave');
-  const cur=cn_checks[cn_shift][cn_bed][grp][idx];
-  cn_checks[cn_shift][cn_bed][grp][idx]=!cur;
-  el.classList.toggle('checked'); el.querySelector('.rs-checkbox').textContent=!cur?'✓':'';
-  cn_buildGrid(); cn_updateProg();
+  const grp=Object.keys(cn_getGroups(cn_shift))[gi];
+  if(!grp) return;
+  const arr=cn_checks[cn_shift][cn_bed][grp];
+  arr[idx]=(triNorm(arr[idx])===val)?'':val;
+  cn_renderList(); cn_buildGrid(); cn_updateProg();
 }
 function cn_updateProg() {
   const beds=[...cn_selBeds[cn_shift]];
@@ -2773,10 +2928,12 @@ function cn_updateProg() {
   const cols={DAY:'#d97706',EVE:'#16a34a',NIGHT:'#2563eb'};
   fill.style.background=cols[cn_shift];
   if(!beds.length){fill.style.width='0%';lbl.textContent='침상을 선택하세요';pct.textContent='0%';return;}
-  const groups=cn_getGroups(cn_shift); let t=0,d=0;
-  beds.forEach(b=>Object.entries(groups).forEach(([g,items])=>items.forEach((_,i)=>{t++;if(cn_checks[cn_shift][b]?.[g]?.[i])d++;})));
-  const p=t?Math.round(d/t*100):0;
-  fill.style.width=p+'%'; lbl.textContent=beds.length+'개 침상 · '+d+'/'+t+' 항목'; pct.textContent=p+'%';
+  let vals=[]; beds.forEach(b=>{ vals=vals.concat(cn_bedVals(cn_shift,b)); });
+  const t=triTally(vals);
+  const p=t.total?Math.round(t.answered/t.total*100):0;
+  fill.style.width=p+'%';
+  lbl.textContent='침상 '+beds.length+'개 · 응답 '+t.answered+'/'+t.total+(t.pct===null?'':' · 수행 '+t.pct+'%');
+  pct.textContent=p+'%';
 }
 function cn_updateBadges() {
   cn_SHIFTS.forEach(s=>{const n=cn_selBeds[s].size,b=document.getElementById('cn-badge-'+s);b.textContent=n;b.classList.toggle('show',n>0);});
@@ -2797,13 +2954,14 @@ function cn_saveRecord() {
 }
 
 function cn_sendToSheets(rec) {
-  const ck = v => v ? '✓' : '—';
+  const ck = triSheet;   // 'Y'→✓  'N'/미응답→—  'NA'→N/A (시트에서 빈칸=집계 제외)
   const groups = cn_getGroups(rec.shift);
-  let total = 0, done = 0;
+  const vals = [];
   Object.entries(groups).forEach(([grp, items]) =>
-    items.forEach((_, i) => { total++; if (rec.checks[grp]?.[i]) done++; })
+    items.forEach((_, i) => vals.push(rec.checks[grp]?.[i]))
   );
-  const pct = total ? Math.round(done / total * 100) : 0;
+  const t   = triTally(vals);          // target = 전체 − 해당없음 (시트 준수율과 같은 기준)
+  const pct = t.pct === null ? 0 : t.pct;
 
   // 고정 열 순서 (NIGHT 전용 항목은 해당 근무 외 N/A)
   const isNight = rec.shift === 'NIGHT';
@@ -2819,7 +2977,7 @@ function cn_sendToSheets(rec) {
   const row = [
     rec.savedAt, rec.date, rec.shift, rec.bed + '번',
     rec.vent ? '✓' : '—',
-    done, total, pct + '%',
+    t.y, t.target, pct + '%',
     detail,
   ];
 
